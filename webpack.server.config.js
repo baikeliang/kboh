@@ -11,8 +11,8 @@ module.exports = {
   devtool: 'source-map',
 
   entry: [
-    'webpack/hot/signal.js',
-     path.resolve(__dirname,'app/server.js'),
+    //'webpack/hot/signal.js',
+     path.resolve(__dirname,'app/server/server.js'),
   ],
   target: 'node',
   node: {
@@ -30,21 +30,32 @@ module.exports = {
   },
   externals: nodeModules,
   module: {
-    noParse: ['react', 'react-dom', 'moment'],
-    loaders: [
-      {
-        test: /\.js$/,
-        include: [path.resolve(__dirname, 'app')],
-        loaders: ['babel?cacheDirectory=true'],
-      },
-      { test: /\.less$/, loader: 'fake-style!css?modules&localIdentName=[name]__[local]!less' },
-      { test: /\.css$/, loader: 'fake-style!css?modules&localIdentName=[name]__[local]' },
-      { test: /\.(woff)$/, loader: 'fake-url?limit=100000' },
-      { test: /\.(png|jpg|jpeg|svg)$/, loader: 'fake-url?limit=25000' },
-    ],
+      noParse: ['react', 'react-dom', 'moment'],
+      loaders: [{
+              'loader': 'babel-loader',
+              exclude: [
+                  //在node_modules的文件不被babel理会
+                  path.resolve(__dirname, 'node_modules'),
+              ],
+              include: [
+                  //指定app这个文件里面的采用babel
+                  path.resolve(__dirname, 'app'),
+              ],
+              test: /\.jsx?$/,
+              query: {
+                  plugins: ['transform-runtime', "transform-decorators-legacy"],
+                  presets: ['es2015', 'stage-0', 'react']
+              }
+
+          },{ test: /\.less$/, loader: 'fake-style!css?modules&localIdentName=[name]__[local]!less' },
+          { test: /\.css$/, loader: 'fake-style!css?modules&localIdentName=[name]__[local]' },
+          { test: /\.(woff)$/, loader: 'fake-url?limit=100000' },
+          { test: /\.(png|jpg|jpeg|svg)$/, loader: 'fake-url?limit=25000' },
+      ],
   },
+
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
+    //new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin(),
     new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
     new webpack.BannerPlugin('require("source-map-support").install();', { raw: true }),

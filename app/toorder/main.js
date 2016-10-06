@@ -1,11 +1,9 @@
-import React from 'react';
+import React , { Component } from 'react'
 import Projects from './projectsRender.js'
 import ChooseForOther from './chooseForOther.js'
 import CancelChooseForOther from './cancelChooseForOther.js'
 
-import wxstyles from 'app/common/css/weui.min.css'
-import styles from 'app/common/css/style.css'
-
+/*
 const ToOrder = React.createClass({
 
   render() {
@@ -22,4 +20,31 @@ const ToOrder = React.createClass({
               </div>);
   }
 });
-module.exports = ToOrder;
+*/
+
+export default class ToOrder extends Component {
+  componentDidMount() {
+
+  }
+
+  componentWillUnmount() {
+
+  }
+  render(){
+    console.log("aaaaa!!!!!")
+    return (<div>
+              <Projects projectMetas ={[{
+        id: '1',
+        servicename: "洗牙",
+        logo_url: require('app/common/images/pro1.png')
+      }, {
+        id: '2',
+        servicename: "拔牙",
+        logo_url: require('app/common/images/pro2.png')
+      }]}> </Projects>
+              </div>);
+  }
+
+  // methods
+}
+//module.exports = ToOrder;

@@ -4,20 +4,22 @@ var HtmlwebpackPlugin = require('html-webpack-plugin');
 module.exports = {
     entry: [
         'babel-polyfill',
-        'webpack/hot/dev-server',
-        'webpack-dev-server/client?http://localhost:8080',
-        path.resolve(__dirname,'..','app/main.js'),
+        //'webpack/hot/dev-server',
+        //'webpack-dev-server/client?http://localhost:8080',
+        path.resolve(__dirname,'..','app/main.js')
     ],
     output: {
         path: path.resolve(__dirname,'..','build'),
         filename: 'bundle.js',
         publicPath: '/',
     },
-    plugins: [new HtmlwebpackPlugin({
+    plugins: [
+        new HtmlwebpackPlugin({
+        filename: 'index.html',
         title: '选择预约项目',
         template: path.resolve(__dirname,'..','app/index_template.html'),
         inject: 'body' // Inject all scripts into the body 
-    }),new webpack.HotModuleReplacementPlugin()],
+    })/*,new webpack.HotModuleReplacementPlugin()*/],
     module: {
         loaders: [{
             'loader': 'babel-loader',
@@ -31,7 +33,7 @@ module.exports = {
             ],
             test: /\.jsx?$/,
             query: {
-                plugins: ['transform-runtime'],
+                plugins: ['transform-runtime',"transform-decorators-legacy"],
                 presets: ['es2015', 'stage-0', 'react'],
                 "env": {
                     "development": {
@@ -51,6 +53,3 @@ module.exports = {
     }
 
 };
-console.log('ssss');
-console.log("HHHHHHHf");
-console.log(__dirname);

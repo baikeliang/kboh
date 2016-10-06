@@ -6,6 +6,13 @@ import { createDevTools } from 'redux-devtools'
 import LogMonitor from 'redux-devtools-log-monitor'
 import DockMonitor from 'redux-devtools-dock-monitor'
 
+
+import {reducer as reduxAsyncConnect } from 'redux-connect'
+
+import  auth from 'app/redux/reducers/auth'
+
+import  clientMiddleware from 'app/redux/middleware/clientMiddleware'
+
 import { routerReducer, routerMiddleware } from 'react-router-redux'
 
 export const DevTools = createDevTools(
@@ -14,9 +21,11 @@ export const DevTools = createDevTools(
   </DockMonitor>
 )
 
-export function configureStore(history, initialState) {
+export function configureStore(history,client,initialState={}) {
   const reducer = combineReducers({
-    routing: routerReducer
+    routing: routerReducer,
+    reduxAsyncConnect,
+    auth
   })
 
   let devTools = []
@@ -29,7 +38,7 @@ export function configureStore(history, initialState) {
     initialState,
     compose(
       applyMiddleware(
-        routerMiddleware(history),thunk
+        routerMiddleware(history),thunk,clientMiddleware(client)
       ),
       ...devTools
     )

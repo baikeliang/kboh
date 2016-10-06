@@ -91,14 +91,14 @@ ol li,ul li{
   width:20%;
   float: left;
   display: block;
-  font-size: 14px;
+  font-size: 16px;
   text-indent: 10px;
   line-height: 45px;
 }
 .weui_cell_bj input{
   width:80%;
-  height:44px;
-  line-height: 44px;
+  height:45px;
+  line-height: 45px;
   float: left;
   border:none;
   outline:none;
@@ -134,7 +134,7 @@ ol li,ul li{
   line-height: 45px;
   float: left;
   display: block;
-  font-size: 14px;
+  font-size: 15px;
   text-indent: 0;
 }
 .weui_cell_zc input{
@@ -181,15 +181,14 @@ ol li,ul li{
   vertical-align:middle;
 }
 .yzm span{
-  width:28%;
+  width:30%;
 }
 .yzm input{
-  width:72%;
+  width:70%;
 }
 
 /* 个人信息页面 */
 .p_top{
-  height:80px;
   background: #fff;
   border-bottom: solid 1px #e5e5e5;
   margin-bottom: 10px;
@@ -199,18 +198,107 @@ ol li,ul li{
   height: 50px;
   border-radius: 50%;
   overflow: hidden;
-  float: left;
   margin: 15px 5% 0 5%;
 }
 .p_top dl dt img{
   width:100%;
   height:100%;
+  transform: scale(1.1);
+  -webkit-transform: scale(1.1);
+  -moz-transform: scale(1.1);
 }
 .p_top dl dd{
   width:70%;
   float: left;
   line-height: 80px;
-  font-size:16px; 
+  font-size:16px;
+}
+
+/*zdh*/
+.p_top{
+  width: 100%;
+  background:url(../images/bg.jpg) no-repeat;
+  background-size: 100% 100%;
+  position: relative;
+}
+.p_top dl{
+  width: 100%;
+  height:100%;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+.p_top dl::after{
+  content: "";
+  display: block;
+  clear: both;
+}
+.p_top dl dt{
+  border:3px solid #fff;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin:0 auto;
+}
+.p_top dl dd{
+  width: 100%;
+  height: 25px;
+  text-align: center;
+  line-height: 25px;
+  font-size: 16px;
+  color: #fff;
+  padding-top: 5px;
+}
+.p_top .shezhi{
+  position: absolute;
+  display: block;
+  width: 20px;
+  height: 20px;
+  right: 17px;
+  bottom: 14px;
+}
+.chuzhen{
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  background-color: #fff;
+  border-top:1px solid #e5e5e5;
+  border-bottom:1px solid #e5e5e5;
+}
+.chuzhenson{
+  width: 84%;
+  height:100%;
+  margin: 0 auto;
+  position: relative;
+}
+.chuzhenson::after{
+  display: block;
+  clear: both;
+}
+.chuzhen .chuzhenson img{
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  top: 20px;
+  left: 0;
+}
+.rtop_r{
+  padding:15px 0 15px 38px;
+  font-size: 14px;
+  color:#000;
+}
+.rtop_r h6{
+  font-size: 16px;
+  font-weight: normal;
+  color:#000;
+}
+.chuzhen .chuzhenson .spancon{
+  width:110%;
+  display: block;
+  min-height: 20px;
+  font-size: 12px;
+  color:#afafaf;
+  overflow: hidden;
 }
 .Mtop10{
   margin-top: 10px;
@@ -221,17 +309,21 @@ ol li,ul li{
 .weui_cell_hd{
   width:100%;
 }
-.weui_panel .weui_cell_hd img{
-  width:20px;
-  height:20px;
+.weui_panel .weui_cell_hd img,.weui_cells .weui_cell_hd img{
+  width:22px;
+  height:22px;
   float: left;
 }
 
-.weui_panel .weui_cell_hd p{
-  font-size: 15px;
+.weui_panel .weui_cell_hd p,.weui_cells .weui_cell_hd p{
+  font-size: 16px;
   text-indent:5px;
   float: left;
   white-space:nowrap;
+}
+.setPage p{
+  float: left;
+  width:100px;
 }
 .weui_panel .weui_cell_hd span{
   width:60%;
@@ -240,7 +332,7 @@ ol li,ul li{
   top:0;
   right:25px;
   font-size: 15px;
-  line-height: 40px;
+  line-height: 42px;
   text-align: right;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -248,7 +340,7 @@ ol li,ul li{
   word-wrap: normal;
   word-wrap: break-word;
   word-break: break-all;
-  color:#777;
+  color:#8e8e8e;
 }
 .weui_panel .weui_cell_hd input[name="text"]{
   width:60%;
@@ -256,18 +348,18 @@ ol li,ul li{
   position: absolute;
   top:0;
   right:25px;
-  font-size: 15px;
+  font-size: 16px;
   padding-top: 6px;
   padding-bottom: 5px;
   text-align: right;
   border: none;
   margin-top: 7px;
-  color:#777;
+  color:#8e8e8e;
   outline: none;
   border-radius: 0;
 }
 .weui_panel .weui_cell_hd input.date{
-  font-size: 15px;
+  font-size: 16px;
   text-align: right;
   position: absolute;
   top:0;
@@ -613,6 +705,14 @@ body.orderbody{
   .weui_panel a.weui_media_box:active{
     background: #fff;
   }
+  .p_top dl dt{
+    border:3px solid #fff;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin:0 auto;
+  }
 
 }
 .opcitybox{
@@ -705,7 +805,7 @@ body.whitebj{
   text-align: center;
   line-height: 25px;
   color: #888;
-  font-size: 13px;
+  font-size: 16px;
   padding-top: 20px;
 }
 .logobtom{
@@ -765,7 +865,7 @@ body.whitebj{
   width:100%;
   height:20px;
   font-size: 12px;
-  color: #999;
+  color: #8e8e8e;
 }
 
 .myOrdermainbox p b{
@@ -874,8 +974,8 @@ body.whitebj{
   padding-bottom: 5px;
 }
 .myOrderdescbox p span{
-  font-size: 13px; 
-  color: #999;
+  font-size: 13px;
+  color: #8e8e8e;
 }
 .myOrdermainbox p span.colornozhifu{
   color: #ff7803;
@@ -886,7 +986,7 @@ body.whitebj{
   font-size:15px;
 }
 .myOrderdescbox p font{
-  font-size: 14px; 
+  font-size: 14px;
   color: #000;
 }
 .myOrderdescbox .weui_cells:before{
@@ -984,7 +1084,7 @@ body.whitebj{
   display: block;
   font-weight: normal;
   font-size: 13px;
-  color: #999;
+  color: #8e8e8e;
   text-indent: 15px;
 }
 .orderDescContain p span{
@@ -1004,10 +1104,10 @@ body.whitebj{
   overflow: hidden;
 }
 .editPwdbox .weui_cell_bj span{
-  width:25%;
+  width:28%;
 }
 .editPwdbox .weui_cell_bj input{
-  width:75%;
+  width:70%;
 }
 @media only screen and (max-width: 330px) {
   .orderDescContain p b{
@@ -1020,11 +1120,12 @@ body.whitebj{
     width:70%;
   }
   .editPwdbox .weui_cell_bj span{
-    width:30%;
+    width:35%;
   }
   .editPwdbox .weui_cell_bj input{
-    width:70%;
+    width:65%;
   }
+
 }
 .orderDescContain p em{
   display: block;
@@ -1065,7 +1166,7 @@ body.whitebj{
 .myCaseList .weui_cell_hd p b{
   font-weight: normal;
   font-size: 13px;
-  color: #999;
+  color: #8e8e8e;
   line-height: 24px;
 }
 .makebillboxmain{
@@ -1111,7 +1212,7 @@ body.whitebj{
 .makebillboxmain p small font{
   font-weight: normal;
   float: right;
-  color: #999;
+  color: #8e8e8e;
   font-size: 12px;
 }
 .CaseContentbox{
@@ -1141,7 +1242,7 @@ body.whitebj{
   overflow: hidden;
 }
 .caseText span{
-  color: #999;
+  color: #8e8e8e;
 }
 .noborder,.noborder:after,.noborder:before{
   border:none;
@@ -1162,7 +1263,7 @@ body.whitebj{
   border-bottom: 1px #d9d9d9 solid;
   background: #fff;
 }
-.caseFileList p a{ 
+.caseFileList p a{
   padding-left: 10px;
   display: block;
   overflow: hidden;
@@ -1207,7 +1308,7 @@ body.whitebj{
 .doctorList .weui_cell_hd p,.caseFiletab .weui_cell_hd p{
   font-size: 15px;
 }
-/* 
+/*
 .weui_panel .weui_cell_hd input{
   width:50%;
   height:44px;
@@ -1461,23 +1562,23 @@ table.billtable tr td{
 }
 
 /* 账单菜单导航 */
-.main{ 
-  position:absolute; 
-  background:#Fff; 
-  left:0px; top:0; 
-  z-index:1; 
+.main{
+  position:absolute;
+  background:#Fff;
+  left:0px; top:0;
+  z-index:1;
   bottom:90px;
-  width:100%; 
+  width:100%;
   overflow:hidden;
 }
 
-.main_left{ 
-  background:#f0eff5; 
-  width:25%; 
-  overflow:auto; 
-  position:absolute; 
-  left:0px; top:0px; 
-  z-index:1; bottom:0px; 
+.main_left{
+  background:#f0eff5;
+  width:25%;
+  overflow:auto;
+  position:absolute;
+  left:0px; top:0px;
+  z-index:1; bottom:0px;
 }
 
 .main_left ul{
@@ -1486,10 +1587,10 @@ table.billtable tr td{
 }
 .main_left ul li{
   width:100%;
-  height:50px; 
-  line-height:50px; 
+  height:50px;
+  line-height:50px;
   text-align: center;
-  
+
 }
 .main_left ul li a{
   height:49px;
@@ -1498,7 +1599,7 @@ table.billtable tr td{
   border-top:1px #cfcfcf solid;
   font-size:14px;
   color: #666;
-  
+
 }
 .main_left ul li a.cur{
   color:#000;
@@ -1506,13 +1607,13 @@ table.billtable tr td{
   background: #fff;
   border-right:none;
 }
-.main_right{ 
-  width:75%; 
+.main_right{
+  width:75%;
   height:100%;
-  overflow:auto; 
-  position:absolute; 
-  right:0px; top:0; 
-  z-index:1; bottom:0; 
+  overflow:auto;
+  position:absolute;
+  right:0px; top:0;
+  z-index:1; bottom:0;
 }
 .main_right_scroll ol {
   display:none;
@@ -1674,7 +1775,7 @@ table.billtable tr td{
   margin-top: 7px;
   font-size: 16px;
   position: relative;
-  
+
 }
 .price_confirm:after{
   content: " ";
@@ -1869,7 +1970,6 @@ table.billtable tr td{
   display: block;
   width:12%;
   margin:0 auto;
-  opacity: 0.6;
 }
 .fotIcon p{
   width:100%;
@@ -1933,7 +2033,7 @@ table.billtable tr td{
   font-size: 12px;
   position: absolute;
   left:-5px;
-  bottom:-25px; 
+  bottom:-25px;
   color: #888;
 }
 .centerLinebox ul li.step1{
@@ -1991,7 +2091,7 @@ table.billtable tr td{
   position: relative;
 }
 .weui_media_box .weui_media_interest span{
-  color: #999;
+  color: #8e8e8e;
   position: absolute;
   left:0;
 }
@@ -2019,7 +2119,7 @@ table.billtable tr td{
 }
 .chooseTimeboxmain p{
   padding-left:15px;
-  color: #999;
+  color: #8e8e8e;
   font-size: 14px;
 }
 .chooseTimeboxmain p span{
@@ -2065,12 +2165,12 @@ table.billtable tr td{
   background: #4DCFE2;
   border:solid 1px #4DCFE2;
   color: #fff;
-} 
+}
 .chooseTimeboxmain ul li.gray span,.reFutimebox ul li.gray span{
   cursor: not-allowed;
   border:solid 1px #ccc;
   color: #ccc;
-} 
+}
 .boxmainTips{
   width:100%;
   background: #fff;
@@ -2496,3 +2596,100 @@ cursor: pointer;
 .colorPay{
   color: #ff7803;
 }
+
+.block{
+  height: 140px;
+  width: 100%;
+  background-color: #fff;
+  border-top:1px solid #e5e5e5;
+  /*border-bottom:1px solid #d1d1d1;*/
+}
+.block .a1,.block .a2{
+  background: #fff;
+  display: block;
+  height: 70px;
+  float: left;
+  border-bottom: 1px solid #e5e5e5;
+  border-right: 1px solid #e5e5e5;
+  position: relative;
+}
+.block .a1{
+  width: 49%;
+}
+.block .a2{
+  width: 50%;
+  float: left;
+  border-right: none;
+}
+.blockson{
+  width: 68%;
+  margin: 0 auto;
+  position: relative;
+}
+.blockson img{
+  width: 34px;
+  position: absolute;
+  left: 0;
+  top:20px;
+}
+.blockson span{
+  position: absolute;
+  left: 40px;
+  line-height: 70px;
+  font-size: 16px;
+  color:#000;
+}
+.logobottom{
+  width: 100%;
+  height: 80px;
+  position: absolute;
+  bottom: 0;
+}
+.logobottom span{
+  display: block;
+  width: 100%;
+  font-size: 12px;
+  color: #d1d1d1;
+  text-align: center;
+}
+.huanzhebg{
+  width: 100%;
+  background:url(../images/huanzhebg.jpg) no-repeat;
+  background-size: 100% 100%;
+  position: relative;
+}
+.huanzhebg a,.p_top a{
+  font-size: 16px;
+  color: #fff;
+}
+.newlogo{
+  width: 30px;
+  display: block;
+  margin: 0 auto 8px;
+}
+.myinputPad{
+  border-top: 1px solid #e5e5e5;
+}
+.myinputPad input, .myinputPad span.spanMargr15{
+  margin-right: 15px;
+  font-size: 14px;
+}
+.weui_panel.myinputPad input[name="text"]{
+  margin-top: 4px;
+}
+.myinputPad .clear_num{
+  width: 30px;
+  height:40px;
+}
+.border_top{
+  border-top: 1px solid #e5e5e5;
+}
+input.savebtn_pri{
+  margin-top:20px;
+  border: 1px solid rgba(0,0,0,.1);
+}
+input.savebtn_pri.addgray{
+  background: #dedede;
+  color: #888;
+}
+

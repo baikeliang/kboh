@@ -1,4 +1,6 @@
 import React from 'react';
+import styles from 'app/common/css/style.css'
+
 const Project = React.createClass({
     propTypes: {
         id: React.PropTypes.string.isRequired,
@@ -13,7 +15,7 @@ const Project = React.createClass({
 
     },
     render() {
-        return (<div key={key}> <dl onClick={this.handleProClick}> <dt> <img src = { this.props.logo_url } alt = "" /> </dt>  <dd> { this.props.servicename } </dd>  </dl> <div className = "clear" > </div> </div>
+        return (<div key={key}> <dl onClick={this.handleProClick}> <dt> <img src = { this.props.logo_url } alt = "" /> </dt>  <dd> { this.props.servicename } </dd>  </dl> <div className={styles.clear}> </div> </div>
         );
     }
 });

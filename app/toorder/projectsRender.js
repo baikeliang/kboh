@@ -14,6 +14,7 @@ const Projects = React.createClass({
   handleProClick(projectInfo) {},
   renderProjects() {
     return this.props.projectMetas.map(function(projectMeta, i) {
+      console.log('project')
       assign(projectMeta, {
         handleProClick: this.handleProClick
       }, {
@@ -24,26 +25,27 @@ const Projects = React.createClass({
     }.bind(this));
   },
   render() {
+    console.log('TTTTTTTTTTTTTT')
     return (
                 <div>
-                 <h3  className="chooseTitle">选择预约项目</h3>
-                 <div className="chooseProjbox">
-                  <div className="chooseProjboxdl" id="chooseProjboxdl">
+                 <h3  className={styles.chooseTitle}>选择预约项目</h3>
+                 <div className={styles.chooseProjbox}>
+                  <div className={styles.chooseProjboxdl} id="chooseProjboxdl">
                   {this.renderProjects()}
                   </div>
                  </div>
-                 <div className="opcitybox" style={{
+                 <div className={styles.opcitybox} style={{
                  display: "none"
                  }}><span></span></div>
-                 <div className="opacityTipbox" style={{
+                 <div className={styles.opacityTipbox} style={{
                  display: "none"
                  }}>
                  <h3>
                  <label>您是否要复诊？</label>
-                 <p className="fuzhentip"><span className="reOrderCancel">以后再说</span><span className="wantReorder">我要复诊</span></p>
+                 <p className={styles.fuzhentip}><span className={styles.reOrderCancel}>以后再说</span><span className={styles.wantReorder}>我要复诊</span></p>
                  </h3>
                  </div>
-                 <div className ="fotIcon">
+                 <div className={styles.fotIcon}>
                  <img src={require('app/common/images/logo2.png')} alt="" />
                  <p>轻快预约   从“齿”简单</p>
                  </div>

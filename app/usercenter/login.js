@@ -1,53 +1,113 @@
 import React from 'react';
-import Swiper from 'react-id-swiper';
+import ReactSwipe from 'react-swipe';
 
 import wxstyles from 'app/common/css/weui.min.css'
-import styles from 'app/common/css/style.css'
+import loginstyles from 'app/common/css/login.css'
+import Hammer from 'react-hammerjs'
+
+const swipeOptions = {
+    startSlide: 0,
+    auto:  0,
+    speed:  300,
+    disableScroll: false,
+    continuous: false,
+    callback() {
+        console.log('slide changed');
+    },
+    transitionEnd() {
+        console.log('ended transition');
+    }
+};
+
 
 const Login = React.createClass({
-    
-    render() {
-							return (<div>
-							<div className={wxstyles.weui_cells_form}>
-							<div className={wxstyles.weui_panel_bd} style={{marginTop:"10px"}}>
-							<div className={wxstyles.weui_media_box+' '+wxstyles.weui_media_small_appmsg}>
-							<div className={wxstyles.weui_cells+' '+wxstyles.weui_cells_access}>
-							<a className={wxstyles.weui_cell+' '+wxstyles.weui_cell_bj} href="javascript:;" style={{margin:0}}>
-							<span>手机号</span>
-							<input type="tel" id="account"  maxLength="11" placeholder="请输入手机号"/>
-							</a>
-							<div className={styles.clear_num}></div>
+	next() {
+        this.refs.reactSwipe.prev();
+    },
+
+    prev() {
+        this.refs.reactSwipe.next();
+    },
+    handleSwipe(ev) {
+
+       	if(ev.direction ==4){
+        		  console.log("right");
+                  this.next();
+        	}else{
+        		  console.log("left");
+                  this.prev();
+        	}
+    },
+	render(){
+		var bodystyle = {
+			position: "relative",
+			height: "100%",	
+			fontFamily: "Helvetica Neue, Helvetica, Arial, sans-serif",
+			fontSize: "14px",
+			color:"#000",
+			margin: 0,
+			padding: 0,		
+            WebkitTapHighlightColor: "transparent",
+            FontFamily: "微软雅黑,Arial,sans-serif",
+            background: "#fff",
+            margin:0,
+            padding:0
+           }
+
+        return (
+            <div style={bodystyle}>
+            	<div className={loginstyles.wrapper}>
+					<img src={require('app/common/images/font_logo.png')} alt="" style={{width:"40%",maxWidth: "200px",display: "block", margin:"0 auto", paddingTop: "39px", paddingBottom: "44px"}}/>
+				</div>
+				<Hammer onSwipe={this.handleSwipe}>
+				<div className={loginstyles.container}>
+			    <div className={loginstyles.nav}>
+                   <a href="#" className={{color: "#1b7c86"}} >验证码登录</a>
+                   <a href="#">密码登录</a>
+                   <div className={loginstyles.clear}></div>
+                </div>
+                <ReactSwipe ref="reactSwipe" className={loginstyles.mySwipe} swipeOptions={swipeOptions}>
+					<div>
+                        <div className={loginstyles.wrapper}>
+							<div className={loginstyles['text-input-box']+' '+loginstyles.Mtop40}>
+								<input type="tel" className={loginstyles['input-text']+' '+'tel'+' '+'phone'} maxLength="11" id="phone" placeholder="手机号"/>
+								<div className={loginstyles.clear_num}></div>
 							</div>
+							<div className={loginstyles['text-input-box']+' '+loginstyles.Mtop20}>
+								<input type="text" className={loginstyles['input-text']} maxLength="6" id="code" placeholder="验证码"/>
+								<input type="button" className={loginstyles['btn-code']} id="sendYzm" value="发送验证码"/>
 							</div>
+							<div className={loginstyles.Mtop60}>
+								<input type="button" className={loginstyles['btn-default']} value="登录" id="loginBut"/>
+								<p className={loginstyles.btomjump}>没有账号？<a href="javascript:;" id="go_register">立即注册</a></p>
 							</div>
-							<div className={wxstyles.weui_panel_bd} style={{marginTop:"10px"}}>
-							<div className={wxstyles.weui_media_box+' '+wxstyles.weui_media_small_appmsg}>
-							<div className={wxstyles.weui_cells+' '+wxstyles.weui_cells_access}>
-							<div className={wxstyles.weui_cell+' '+wxstyles.weui_cell_bj} href="javascript:;" style={{margin:0}}>
-							<span>密 &nbsp;&nbsp;码</span>
-							<input type="password" id="password" maxLength="20" placeholder="请输入密码"/>
-							<p className={styles.registerA}><a href="html/findMa.html">忘记密码?</a></p>
+						</div>
+				    </div>
+                    <div>
+                        <div className={loginstyles.wrapper}>                    
+							<div className={loginstyles['text-input-box']+' '+loginstyles.Mtop40}>
+								<input type="tel" className={loginstyles['input-text']} id="phone2" maxLength="11" placeholder="手机号"/>
+								<div className={loginstyles.clear_num}></div>
 							</div>
+							<div className={loginstyles['text-input-box']+' '+loginstyles.Mtop20}>
+								<input type="password" className={loginstyles['input-text']} maxLength="20" id="pwd" placeholder="6～20位密码"/>
+								<a href="javascript:;" className={loginstyles['pwd-show']}></a>
+								<a href="javascript:;" className={loginstyles['pwd-hide']}></a>
+								<i className="forget">忘记密码?</i>
 							</div>
+								<div className={loginstyles['btn-input-box']+' '+loginstyles.Mtop60}>
+								<input type="button" className={loginstyles['btn-default']} value="登录" id="loginBut2"/>
+								<p className={loginstyles.btomjump}>没有账号？<a href="javascript:;" id="go_register">立即注册</a></p>
 							</div>
-							</div>
-							</div>
-							<div className={styles.demosContentPadded} style={{padding:"5px"}}>
-							<a href="javascript:'" className={styles.price_confirm} id="loginBut" style={{marginTop:"20px"}}>登录</a>
-							</div>
-							<div className={styles.clear}></div>
-							<div className={styles.goregisterbox}>
-							<a href="javascript:void(0)"  id="go_register">注册新用户</a>
-							</div>
-							<div className={styles.opcitybox} style={{display:"none"}}><span>请输入手机号</span></div>
-							<div id="toast" style={{display:"none"}}>
-							<div className={wxstyles.weui_mask_transparent}></div>
-							<div className={wxstyles.weui_toast}>
-							<i className={wxstyles.weui_icon_toast}></i>
-							<p className={wxstyles.weui_toast_content}>登录成功</p>
-							</div>
-							</div>
-							</div>);
-							
-}});
+						</div>
+					</div>                  
+                </ReactSwipe>
+               </div>
+               </Hammer>
+            </div>
+        );
+
+	}
+})
+
 module.exports = Login;
