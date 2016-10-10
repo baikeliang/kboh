@@ -11,6 +11,8 @@ import {reducer as reduxAsyncConnect } from 'redux-connect'
 
 import  auth from 'app/redux/reducers/auth'
 
+import  order_patient from 'app/redux/reducers/order_patient'
+
 import  clientMiddleware from 'app/redux/middleware/clientMiddleware'
 
 import { routerReducer, routerMiddleware } from 'react-router-redux'
@@ -25,7 +27,8 @@ export function configureStore(history,client,initialState={}) {
   const reducer = combineReducers({
     routing: routerReducer,
     reduxAsyncConnect,
-    auth
+    auth,
+    order_patient
   })
 
   let devTools = []

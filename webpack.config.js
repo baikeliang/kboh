@@ -1,21 +1,35 @@
+require('babel-polyfill');
 var path = require('path');
+var webpack = require('webpack');
 var HtmlwebpackPlugin = require('html-webpack-plugin');
+
 module.exports = {
+    devtool: 'source-map',
     entry: [
-        'babel-polyfill',
+        //'babel-polyfill',
         //'webpack/hot/dev-server',
         //'webpack-dev-server/client?http://localhost:8080',
         path.resolve(__dirname, 'app/main.js'),
     ],
     output: {
         path: path.resolve(__dirname, 'build'),
-        filename: 'bundle.js'
+        filename: 'bundle.js',
+        publicPath: '/',
     },
-    plugins: [new HtmlwebpackPlugin({
+    plugins: [
+        new webpack.DefinePlugin({
+            "process.env": {
+                NODE_ENV: JSON.stringify("production")
+            }
+        })
+        /*
+        new HtmlwebpackPlugin({
         title: '选择预约项目',
         template: path.resolve(__dirname, 'app/index_template.html'),
         inject: 'body' // Inject all scripts into the body 
-    })],
+    })*/
+    ],
+
     module: {
         loaders: [{
             'loader': 'babel-loader',
@@ -29,18 +43,18 @@ module.exports = {
             ],
             test: /\.jsx?$/,
             query: {
-                plugins: ['transform-runtime'],
-                presets: ['es2015', 'stage-0', 'react'],
-                "env": {
-                    "development": {
-                        "presets": ["react-hmre"]
-                    }
-                }
+                plugins: ['transform-runtime',"transform-decorators-legacy"],
+                presets: ['es2015', 'stage-0', 'react']
+                //"env": {
+                //    "development": {
+                //        "presets": ["react-hmre"]
+                //    }
+                //}
             }
-        },{ test: /\.less$/, loader: 'fake-style!css?modules&localIdentName=[name]__[local]!less' },
-          { test: /\.css$/, loader: 'fake-style!css?modules&localIdentName=[name]__[local]' },
-          { test: /\.(woff)$/, loader: 'fake-url?limit=100000' },
-          { test: /\.(png|jpg|jpeg|svg)$/, loader: 'fake-url?limit=25000' }]
+        },{ test: /\.less$/, loader: 'style!css?modules&localIdentName=[name]__[local]!less' },
+        { test: /\.css$/, loader: 'style!css?modules&localIdentName=[name]__[local]' },
+        { test: /\.(woff)$/, loader: 'url?limit=100000' },
+        { test: /\.(png|jpg|jpeg|svg)$/, loader: 'url?limit=25000' }]
     },
     resolve: {
         alias: {

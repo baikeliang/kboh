@@ -4,7 +4,7 @@ import React from 'react'
 import { render } from 'react-dom'
 
 import { Provider } from 'react-redux'
-import { Router, browserHistory,hashHistory } from 'react-router'
+import { Router,match,browserHistory,hashHistory } from 'react-router'
 import { syncHistoryWithStore } from 'react-router-redux'
 
 import { configureStore, DevTools } from './configure-store'
@@ -21,9 +21,9 @@ window.__CLIENT__=true
 
 const client = new ApiClient()
 
-const store = configureStore(hashHistory, client, window.__initialState__)
+const store = configureStore(browserHistory, client, window.__initialState__)
 
-const history = syncHistoryWithStore(hashHistory, store)
+const history = syncHistoryWithStore(browserHistory, store)
 
 
 /*
@@ -33,7 +33,47 @@ render(
   </Provider>,
   document.getElementById('root')
 )*/
+var url = window.location.pathname;
 
+if(url.indexOf('#')==-1){
+   console.log('aaaaaa')
+   url = '/#'+ url
+}
+
+console.log(url)
+
+
+const component = (
+  <Router routes={routes} render={(props) =>
+        <ReduxAsyncConnect {...props} helpers={{client}} filter={item => !item.deferred} />
+      } history={history}>
+  </Router>
+);
+
+render(
+  <Provider store={store} key="provider">
+    {component}
+  </Provider>,
+  document.getElementById('root')
+);
+
+
+
+/*
+match({history,routes}, (error, redirectLocation, renderProps) => {
+  console.log(renderProps)
+  render(
+   <Provider store={store} key="provider">
+    <Router routes={routes} history={history} {...renderProps} render={(props) => <ReduxAsyncConnect {...props}/>}>
+    </Router>
+   </Provider>,
+  document.getElementById('root')
+)
+})
+*/
+
+
+/*
 render(
   <Provider store={store} key="provider">
     <Router routes={routes} render={(props) => <ReduxAsyncConnect {...props}/>} history={history}>
@@ -41,11 +81,28 @@ render(
   </Provider>,
   document.getElementById('root')
 )
+*/
 
 
+//if (__DEVTOOLS__ && !window.devToolsExtension) {
+ /* 
+render(
+    <Provider store={store} key="provider">
+      <div>
+        {component}
+        <DevTools />
+      </div>
+    </Provider>,
+    document.getElementById('devtools')
+  );
+*/
+//}
+/*
 render(
   <Provider store={store}>
     <DevTools/>
   </Provider>,
   document.getElementById('devtools')
 )
+*/
+

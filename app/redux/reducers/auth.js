@@ -18,11 +18,13 @@ const initialState =Immutable.Map({
 export default function reducer(state = initialState, action = {}) {
     switch (action.type) {
         case LOAD:
-            return state.set('loaded', true)
+            return state.merge({ loading: true })
         case LOAD_SUCCESS:
+            console.log("LOAD_SUCCESS!!!!!!!!!!")
+            console.log(action.result)
             return state.merge({ loading: false, loaded: true, user: action.result })
         case LOAD_FAIL:
-            return state.merge({ loading: false, loaded: false, user: action.error })
+            return state.merge({ loading: false, loaded: false, error: action.error })
         case LOGIN:
             return state.merge({ loggingIn: true })
         case LOGIN_SUCCESS:
@@ -53,18 +55,31 @@ export function isLoaded(globalState) {
   return globalState.auth && globalState.auth.loaded;
 }
 
-export function load({ openid }) {
+export function load({ openid,token }) {
     var params = {}
     console.log('YYYYYY '+openid)
+    if (typeof window === 'undefined') { ///server side
+        console.log("server side ")
+        if (openid) ///  微信的鉴权要素是openid
+        {
+            console.log("server has openid")
+            params.openid = openid;
 
-    if (__SERVER__ && openid) {
+        } else if (token) { /// 浏览器访问的鉴权要素是 cookie token
 
-        params.openid = openid
+            params.token = token;
 
-    } else if (localStorage && localStorage.jwtToken) {
+        } else { // server side none key to login
 
-        params.jwtToken = localStorage.jwtToken
-    }
+            return {
+                type: LOAD_FAIL,
+                promise: () => Promise.reject({ info: 'auth' })
+            }
+
+        }
+    }/// client side use cookie token to auth
+    console.log("HHHHTT")
+
     return {
         types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
         promise: (client) => client.GET('http://192.168.10.10/userinfo/rest?', { params }, {
@@ -81,11 +96,12 @@ export function load({ openid }) {
                 console.log(user)
                 console.log('>>>>>>')
                 if (user.valid == 1) {
-
+                    console.log("succed")
                     return Promise.resolve(user)
+
                 } else {
-                    var err = { info: 'auth' }
-                    return Promise.reject(err)
+                    //var err = { info: 'auth' }
+                    return Promise.reject(user.err)
                 }
             },
             error: function(err) {

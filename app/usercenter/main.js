@@ -6,11 +6,15 @@ import styles from 'app/common/css/style.css'
 
 import Promise from 'bluebird'
 
-import {asyncConnect} from 'redux-connect'
+import { asyncConnect } from 'redux-connect'
 
 import { isLoaded as isAuthLoaded, load as loadAuth, logout } from 'app/redux/reducers/auth';
 
+import { Link } from 'react-router'
 
+import { push } from 'react-router-redux';
+
+import { connect } from 'react-redux';
 
 @asyncConnect([{
   promise: ({store: {dispatch, getState},params}) => {
@@ -19,26 +23,33 @@ import { isLoaded as isAuthLoaded, load as loadAuth, logout } from 'app/redux/re
     if (!isAuthLoaded(getState())) {
     	console.log('JJJJJJJJJJJJJJJJJJHH')
     	console.log(params)
-      promises.push(dispatch(loadAuth(params)));
+        promises.push(dispatch(loadAuth(params)));
     }
-
+    console.log('asyncConnect!!!!!!!')
     return Promise.all(promises);
   }
 }])
+@connect(
+  state => {console.log("connectconnectconnect ");console.log(state.auth); console.log("KKKK");return {user: state.auth.user}},
+  {logout, pushState: push})
 export default class UserCenter extends Component {
+    
     render() {
+    	console.log(this.props)
+    	//var photo = this.props.user.photo;
+    	var username = this.props.user.username;
 							return (<div>
 							<header className={styles.p_top + ' '+ styles.huanzhebg}>
 							<dl>
-							<dt id="userImg"><img src={this.props.photo?this.props.photo:require('app/common/images/userPic.png')} alt="" /></dt>
-							<dd id="userName">{this.props.username?this.props.username:'完善个人信息'}</dd>
+							<dt id="userImg"><img src={photo?photo:require('app/common/images/userPic.png')} alt="" /></dt>
+							<dd id="userName">{username?username:'完善个人信息'}</dd>
 							</dl>
 							<a href="set.html" className={styles.anniu}>
 							<img className={styles.shezhi} src={require('app/common/images/shezhi.png')} alt="" />
 							</a>
 							</header>
 							
-							<a className={styles.chuzhen} href="/#/usercenter/toOrder" id="IwantOrdertab">
+							<Link to="/usercenter/toOrder" className={styles.chuzhen}>
 							<div className={styles.chuzhenson}>
 							<img src={require('app/common/images/huanzhe1.png')} alt="" />
 							<div className={styles.rtop_r}>
@@ -47,15 +58,15 @@ export default class UserCenter extends Component {
 							</div>
 							<div className={styles.clear}></div>
 							</div>
-							</a>
+							</Link>
 							
 							<div className={styles.block}>
-							<a href="myOrder.html" className={styles.a1}>
+							<Link to="/usercenter/myOrder" className={styles.a1}>
 							<div className={styles.blockson}>
 							<img src={require('app/common/images/huanzhe2.png')} alt="" />
 							<span>我的预约</span>
 							</div>
-							</a>
+							</Link>
 							<a href="myCase.html" className={styles.a2}>
 							<div className={styles.blockson}>
 							<img src={require('app/common/images/huanzhe3.png')} alt="" />

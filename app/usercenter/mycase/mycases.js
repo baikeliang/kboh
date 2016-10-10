@@ -15,7 +15,7 @@ const MyCases = React.createClass({
 				}.bind(this));
 				},
 				render(){
-					return renderProjects()
+					return (renderProjects())
 				}
 
 

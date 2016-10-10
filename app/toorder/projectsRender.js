@@ -15,12 +15,12 @@ const Projects = React.createClass({
   renderProjects() {
     return this.props.projectMetas.map(function(projectMeta, i) {
       console.log('project')
-      assign(projectMeta, {
+      assign(projectMeta, projectMeta,{
         handleProClick: this.handleProClick
       }, {
         key: i
       });
-
+      console.log(projectMeta)
       return <Project {...projectMeta}></Project>;
     }.bind(this));
   },

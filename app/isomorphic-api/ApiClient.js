@@ -1,7 +1,14 @@
+import 'babel-polyfill'
 import Promise from 'bluebird'
 import fetch from 'isomorphic-fetch'
-//import { URLSearchParams } from 'url-search-params-polyfill'
-import { URLSearchParams } from 'urlsearchparams'
+import 'url-search-params-polyfill'
+
+console.log('ssaVVVVVVVVVVV!!!!!!!')
+if(typeof window !=="undefined")
+console.log(window.URLSearchParams)
+
+var URLSearchParams = (typeof window !=="undefined")?window.URLSearchParams:require('urlsearchparams').URLSearchParams;
+//import { URLSearchParams } from 'urlsearchparams'
 
 const methods = ['GET', 'POST'];
 export default class ApiClient {

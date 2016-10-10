@@ -1,7 +1,8 @@
 /*eslint-disable no-console */
 import express from 'express'
 import serialize from 'serialize-javascript'
-
+import path from 'path'
+import compression from 'compression'
 import webpack from 'webpack'
 import webpackDevMiddleware from 'webpack-dev-middleware'
 import webpackConfig from '../../webpack.client.config.js'
@@ -30,13 +31,26 @@ import ajax from './interface/interface.js'
 
 import Promise from 'bluebird'
 
+var cookieParser = require('cookie-parser')
+
 //var URLSearchParams = URLSearchParams || require('../urlsearchparams').URLSearchParams;
 
 global.__CLIENT__ = false;
 global.__SERVER__ = true;
 
+
+Promise.all([]).then(function(){console.log('999999999999')},function(){console.log('GGGGGE$')})
+
+
 const app = express()
 
+app.use(compression())
+
+app.use(cookieParser())
+
+app.use(express.static(path.join(__dirname, '..', 'build')));
+
+/*
 app.use(webpackDevMiddleware(webpack(webpackConfig), {
   publicPath: webpackConfig.output.publicPath,
   stats: {
@@ -48,6 +62,7 @@ app.use(webpackDevMiddleware(webpack(webpackConfig), {
         }
     }
 }))
+*/
 
 const HTML = ({ content, store }) => (
   <html lang="en">
@@ -65,7 +80,7 @@ const HTML = ({ content, store }) => (
   </html>
 )
 
-app.get('/wxcallback/auth',function(req,res){
+app.get('/wxcallback/auth',function(req,res){  //wx interface type to decide which to route
 
     console.log('enter /wxcallback/auth !!!!!')
     /*
@@ -87,8 +102,8 @@ app.get('/wxcallback/auth',function(req,res){
         
         console.log('KKKKKKKK'+u)
 
-        u.append('openid', openid);
-        res.redirect('/usercenter?'+u)
+        u.append('openid', openid);   
+        res.redirect('/usercenter?'+u)//just sample use type to switch
 
     }
 
@@ -101,13 +116,13 @@ app.use(function (req, res, next) {
   const store = configureStore(memoryHistory,client)
   const history = syncHistoryWithStore(memoryHistory, store)
 
-  if(req.url.indexOf('/wxcallback')==0){
+  if(req.url.indexOf('/wxcallback')==0){ //wx just jump
       next();
       return;
   }
-  else if(req.url.indexOf('/usercenter?')==0){
-      var openid = req.query.openid
-      console.log('openid!!!!!!!   '+openid)
+  else if(req.url.indexOf('/usercenter?')==0){// any interface can call here
+  var openid = req.query.openid
+  console.log('openid!!!!!!!   '+openid)
 
   }
   console.log(req.url);
@@ -118,7 +133,7 @@ app.use(function (req, res, next) {
       res.redirect(302, redirectLocation.pathname + redirectLocation.search)
     } else if (renderProps) {
       console.log('to match2')
-      loadOnServer({ ...renderProps, store, params:{openid}}).then(() => {
+      loadOnServer({ ...renderProps, store, params:{openid,token:req.cookies.tokenbohe}}).then(() => {
       console.log('AAAAAAAAA   '+req.url)
       // 2. use `ReduxAsyncConnect` instead of `RoutingContext` and pass it `renderProps` 
       const content = renderToString(
@@ -126,11 +141,14 @@ app.use(function (req, res, next) {
           <ReduxAsyncConnect {...renderProps} />
         </Provider>
       )
-
+      //console.log("~~~~~~~~"+store.getState().auth.token)
+      //res.setHeader("Set-Cookie", ['tokenbohe='+store.getState().auth.token]);
       res.send('<!doctype html>\n' + renderToString(<HTML content={content} store={store}/>))
+    
     },(err)=>{
-      if(err.info == 'auth')
-        res.redirect('/login')
+      console.log(err)
+      //if(err.info == 'auth')
+      //  res.redirect('/login')
     })
     }
   })
