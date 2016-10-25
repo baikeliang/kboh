@@ -79,7 +79,6 @@ describe('top', function suite() {
       expect(state.auth.error.info).toBe('auth')
       expect(!!state.auth.user).toBe(false)
       endGlobalLoadSpy.reset();
-      console.log("WWWWWWWWWWW")
       proto.loadAsyncData.restore();
       proto.componentDidMount.restore();
       resetMock();
@@ -130,7 +129,6 @@ describe('top', function suite() {
     return proto.loadAsyncData.returnValues[0].then(() => {
       expect(endGlobalLoadSpy.called).toBe(true);
       endGlobalLoadSpy.reset();
-      console.log("WWWWWWWWWWW")
       proto.loadAsyncData.restore();
       proto.componentDidMount.restore();
       resetMock();     
