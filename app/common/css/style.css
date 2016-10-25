@@ -845,7 +845,7 @@ body.whitebj{
 
 .myOrdermainbox .weui_cells{
   background: #fff;
-  margin-top:-1px;
+  margin-top: 0px;
 }
 .myOrdermainbox .weui_cell{
   padding:7px 15px;

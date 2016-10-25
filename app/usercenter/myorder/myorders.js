@@ -1,13 +1,18 @@
 import React, { Component } from 'react';
+import ReactDOM  from 'react-dom'
 import MyOrder from './myorder.js'
-import wxstyles from 'app/common/css/weui.min.css'
-import jqwstyles from 'app/common/css/jquery-weui.css'
-import styles from 'app/common/css/style.css'
 import ReactList from 'react-list';
+import Hammer from 'react-hammerjs'
+import Promise from 'bluebird'
+import Immutable from 'immutable'
+
+import { FrontPage } from './view/frontpage.js'
+
+import { isElementVisible } from 'app/util/utils.js'
 
 import { asyncConnect } from 'redux-connect'
 
-import { load as loadOrders } from 'app/redux/reducers/order_patient';
+import { LoadedorLoading as successorLoading ,  load as loadOrders } from 'app/redux/reducers/order_patient';
 
 import { push } from 'react-router-redux';
 
@@ -17,51 +22,74 @@ import { connect } from 'react-redux';
   promise: ({store: {dispatch, getState},params}) => {
     const promises = [];
     console.log("myorders!!!!!!!!")
-    promises.push(dispatch(loadOrders(params)));
+    console.log(this)
+    if(!successorLoading(getState()))
+      promises.push(dispatch(loadOrders({num:15,begin:0})));
     return Promise.all(promises);
   }
 }])
 @connect(
-  state => ({orderMetas: state.order_patient.orders}),
-  {pushState: push})
+    state => {
+        return {
+            loading: state.getIn(['order_patient', 'loading']),
+            orderMetas: state.hasIn(['order_patient', 'orders']) ? state.getIn(['order_patient', 'orders']) : Immutable.List([])
+        }
+    }, { pushState: push, load: loadOrders })
 export default class MyOrders extends Component {
 	// methods
 	static propTypes = {
-		orderMetas:React.PropTypes.array.isRequired,
+		orderMetas:React.PropTypes.object.isRequired,
 	}
-	handleProClick(orderInfo){
-				
-	}
+
 	renderOrder(index, key) {
-		var orderMeta = this.props.orderMetas[index];
-		return <div key={key}> <MyOrder {...orderMeta}></MyOrder></div>;
+		console.log("renderOrder")
+		console.log(this)
+        console.log(index)
+        console.log(this.props.orderMetas.size)
+		var orderMeta = this.props.orderMetas.get(index).toJS();
+		orderMeta.idx = index;
+        if(this.props.orderMetas.size == (index+1)){
+        	orderMeta.loading = this.props.loading;
+        	return <MyOrder ref={(c) => this._last = c} key={key} {...orderMeta}></MyOrder>;
+        }
+		return <MyOrder key={key} {...orderMeta}></MyOrder>;
 	}
-	render(){
-		var nodata = (this.props.orderMetas.length == 0) ? true:false;
-		return (<div>
-					<div className={styles.myorderNodatabox} style={nodata?{display:"none"}:{display:"block"}}>
-                        <dl>
-                        <dt><img src={require('app/common/images/pro12.png')} alt=""/></dt>
-						<dd>您目前还没有进行任何预约</dd>
-						</dl>
-						<div className={styles.fotIcon}>
-						<img src={require('app/common/images/logo2.png')} alt=""/>
-						<p>轻快预约&nbsp;&nbsp;&nbsp;从“齿”简单</p>
-						</div>
-					</div>
-					<div className={styles.myOrdermainbox}>
-						<ReactList
-							itemRenderer={::this.renderOrder}
-							length={this.props.orderMetas.length}
-							type='uniform'
-						/>
-					</div>
-					<div className="nodata" style="height:50px;line-height:50px;text-align:center;font-size:14px;display:none">没有更多数据了</div>
-					    <div className={jqwstyles.weuiInfiniteScroll} id="loading" style="display:none">
-					    <div className={jqwstyles.infinitePreloader}></div>
-							     正在加载
-					</div>
-		      </div>)
-				}
+
+	handlePan(ev) {
+	    console.log("handlePan!!!!!!")
+	    var toLoad = isElementVisible(ReactDOM.findDOMNode(this._last))
+        
+        console.log(toLoad)
+	    console.log("pan!!!!!!!!!!!!")
+	    console.log(ev.isFinal)
+	    if (ev.direction == 8) {
+	        console.log("up!!!!!!!!!!!!")
+            console.log(this.props.orderMetas.size)
+	        if(toLoad){
+	        	console.log("loading!!!!!!!!!!!!!!!!!")
+	        	if(!this.props.loading)
+	        	   this.props.load({ num: 15, begin: 0 })
+	        }
+	    } else if (ev.direction == 16) {
+	        console.log("down")
+	    }
+
+	}
+    componentDidMount() {
+
+    }
+	render() {
+		var size = this.props.orderMetas.size;
+	    var nodata = (size == 0) ? true : false;
+	    
+	    console.log(nodata)
+	    console.log("JJJJJ11111111111111111")
+	    var options = {
+	        touchAction: 'pan-y'
+	    };
+
+	    return FrontPage({ nodata, options, length: size, handlePan: (::this.handlePan), renderItem: (::this.renderOrder) })
+	}
+
 
 }

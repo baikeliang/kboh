@@ -7,6 +7,8 @@ import webpack from 'webpack'
 import webpackDevMiddleware from 'webpack-dev-middleware'
 import webpackConfig from '../../webpack.client.config.js'
 
+import Immutable from 'immutable'
+
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { Provider } from 'react-redux'
@@ -75,7 +77,9 @@ const HTML = ({ content, store }) => (
       <div id="root" dangerouslySetInnerHTML={{ __html: content }}/>
       <div id="devtools"/>
       <script dangerouslySetInnerHTML={{ __html: `window.__initialState__=${serialize(store.getState())};` }}/>
+      <script src="/vendor.js"/>
       <script src="/bundle.js"/>
+      <script src="/require.js"/>
     </body>
   </html>
 )
@@ -111,10 +115,15 @@ app.get('/wxcallback/auth',function(req,res){  //wx interface type to decide whi
 });
 
 app.use(function (req, res, next) {
+  const initialState = Immutable.Map();
   const memoryHistory = createMemoryHistory(req.url)
   const client = new ApiClient(req)
-  const store = configureStore(memoryHistory,client)
-  const history = syncHistoryWithStore(memoryHistory, store)
+  const store = configureStore(memoryHistory,client,initialState)
+  const history = syncHistoryWithStore(memoryHistory, store,{
+  selectLocationState (state) {
+    return state.get('routing').toJS();
+  }
+})
 
   if(req.url.indexOf('/wxcallback')==0){ //wx just jump
       next();

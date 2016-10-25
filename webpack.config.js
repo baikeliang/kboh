@@ -4,13 +4,14 @@ var webpack = require('webpack');
 var HtmlwebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-    devtool: 'source-map',
-    entry: [
+    //devtool: 'cheap-source-map',
+    entry: {
         //'babel-polyfill',
         //'webpack/hot/dev-server',
         //'webpack-dev-server/client?http://localhost:8080',
-        path.resolve(__dirname, 'app/main.js'),
-    ],
+        app:[ path.resolve(__dirname,'app/main.js') ],
+        vendor: ['babel-polyfill','react','react-dom']
+    },
     output: {
         path: path.resolve(__dirname, 'build'),
         filename: 'bundle.js',
@@ -21,7 +22,8 @@ module.exports = {
             "process.env": {
                 NODE_ENV: JSON.stringify("production")
             }
-        })
+        }),
+        new webpack.optimize.CommonsChunkPlugin('vendor',  'vendor.js')
         /*
         new HtmlwebpackPlugin({
         title: '选择预约项目',

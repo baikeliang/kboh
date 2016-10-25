@@ -1,5 +1,5 @@
 import 'babel-polyfill'
-
+import Immutable from 'immutable'
 import React from 'react'
 import { render } from 'react-dom'
 
@@ -21,9 +21,17 @@ window.__CLIENT__=true
 
 const client = new ApiClient()
 
-const store = configureStore(browserHistory, client, window.__initialState__)
+console.log(window.__initialState__)
 
-const history = syncHistoryWithStore(browserHistory, store)
+var preloadstate = Immutable.fromJS(window.__initialState__)
+
+const store = configureStore(browserHistory, client, preloadstate)
+
+const history = syncHistoryWithStore(browserHistory, store,{
+  selectLocationState (state) {
+    return state.get('routing').toJS();
+  }
+})
 
 
 /*
@@ -35,6 +43,9 @@ render(
 )*/
 var url = window.location.pathname;
 
+console.log("location!!!!?????")
+console.log(location)
+
 if(url.indexOf('#')==-1){
    console.log('aaaaaa')
    url = '/#'+ url
@@ -43,21 +54,39 @@ if(url.indexOf('#')==-1){
 console.log(url)
 
 
+const reloadOnPropsChange = (props, nextProps) => {
+  // reload only when path/route has changed
+  return props.location.pathname !== nextProps.location.pathname;
+};
+
+
 const component = (
   <Router routes={routes} render={(props) =>
-        <ReduxAsyncConnect {...props} helpers={{client}} filter={item => !item.deferred} />
+        <ReduxAsyncConnect {...props} helpers={{client}} filter={item => !item.deferred} reloadOnPropsChange={reloadOnPropsChange}/>
       } history={history}>
   </Router>
 );
-
+match({ routes: routes, location }, () => {
+console.log("client render!!!!!!!")
 render(
   <Provider store={store} key="provider">
     {component}
   </Provider>,
   document.getElementById('root')
 );
+})
 
-
+/*
+render(
+    <Provider store={store} key="provider">
+      <div>
+        {component}
+        <DevTools />
+      </div>
+    </Provider>,
+    document.getElementById('devtools')
+  );
+*/
 
 /*
 match({history,routes}, (error, redirectLocation, renderProps) => {

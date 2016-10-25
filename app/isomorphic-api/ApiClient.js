@@ -1,11 +1,8 @@
 import 'babel-polyfill'
 import Promise from 'bluebird'
-import fetch from 'isomorphic-fetch'
+//import fetch from 'isomorphic-fetch'
+import 'isomorphic-fetch'
 import 'url-search-params-polyfill'
-
-console.log('ssaVVVVVVVVVVV!!!!!!!')
-if(typeof window !=="undefined")
-console.log(window.URLSearchParams)
 
 var URLSearchParams = (typeof window !=="undefined")?window.URLSearchParams:require('urlsearchparams').URLSearchParams;
 //import { URLSearchParams } from 'urlsearchparams'
@@ -24,6 +21,8 @@ export default class ApiClient {
                     mode: 'cors',
                     cache: 'default'
                 }
+                console.log("ApiClient!!!!!!!!!!!!!!!")
+                console.log(params)
                 if ((method == 'GET') && params) {
                     for (var key of Object.keys(params)) {
                       u.append(key, params[key])

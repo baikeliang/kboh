@@ -52,7 +52,7 @@ export default function reducer(state = initialState, action = {}) {
 
 export function isLoaded(globalState) {
   console.log('LLLLLLLLL'+globalState)
-  return globalState.auth && globalState.auth.loaded;
+  return globalState.has('auth') && globalState.getIn(['auth','loaded']);
 }
 
 export function load({ openid,token }) {
@@ -101,7 +101,7 @@ export function load({ openid,token }) {
 
                 } else {
                     //var err = { info: 'auth' }
-                    return Promise.reject(user.err)
+                    return Promise.reject({ info: 'auth'})
                 }
             },
             error: function(err) {

@@ -20,7 +20,8 @@ module.exports = function(config) {
 
         // list of files to exclude
         exclude: [
-            'karma.conf.js'
+            'karma.conf.js',
+            'utest/mocker/*.js'
         ],
 
 
@@ -58,7 +59,7 @@ module.exports = function(config) {
                     ],
                     test: /\.jsx?$/,
                     query: {
-                        plugins: ['transform-runtime'],
+                        plugins: ['transform-runtime',"transform-decorators-legacy"],
                         presets: ['es2015', 'stage-0', 'react']
                     }
                 }, {
@@ -68,7 +69,10 @@ module.exports = function(config) {
                         path.resolve(__dirname, 'config'),
                     ],
                     test: /\.js$/,
-                }]
+                },{ test: /\.less$/, loader: 'style!css?modules&localIdentName=[name]__[local]!less' },
+                 { test: /\.css$/, loader: 'style!css?modules&localIdentName=[name]__[local]' },
+                 { test: /\.(woff)$/, loader: 'url?limit=100000' },
+                 { test: /\.(png|jpg|jpeg|svg)$/, loader: 'url?limit=25000' }]
             },
             resolve: {
                 alias: {
@@ -104,7 +108,6 @@ module.exports = function(config) {
         // start these browsers
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
         browsers: ['Chrome'],
-
 
         // Continuous Integration mode
         // if true, Karma captures browsers, runs the tests and exits
