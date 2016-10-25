@@ -21,7 +21,7 @@ export default class ApiClient {
                     mode: 'cors',
                     cache: 'default'
                 }
-                console.log("ApiClient!!!!!!!!!!!!!!!")
+                //console.log("ApiClient!!!!!!!!!!!!!!!")
                 console.log(params)
                 if ((method == 'GET') && params) {
                     for (var key of Object.keys(params)) {
