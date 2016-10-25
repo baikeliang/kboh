@@ -12,7 +12,6 @@ import { asyncConnect } from 'redux-connect'
 @asyncConnect([{
   promise: ({store: {dispatch, getState},params}) => {
     const promises = [];
-    console.log("mybills!!!!!!!!")
     var state = getState();
     var id = state.getIn(['bill_patient','frontbill','id']);
     promises.push(dispatch(load({id})))

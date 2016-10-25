@@ -35,7 +35,6 @@ export function wxJdkLoad({ user, url }) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
                 }
-                console.log('>>>>>>>>>>>>>>>>')
                 return response.json();
             },
             done: function(res) {
@@ -52,8 +51,6 @@ export function wxJdkLoad({ user, url }) {
                 }
             },
             error: function(err) {
-                console.log(err)
-                console.log('GGGGGGGGGGGGGG')
                 return Promise.reject({ info: 'wire' })
             }
         })

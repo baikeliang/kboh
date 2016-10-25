@@ -41,9 +41,6 @@ global.__CLIENT__ = false;
 global.__SERVER__ = true;
 
 
-Promise.all([]).then(function(){console.log('999999999999')},function(){console.log('GGGGGE$')})
-
-
 const app = express()
 
 app.use(compression())
@@ -52,19 +49,6 @@ app.use(cookieParser())
 
 app.use(express.static(path.join(__dirname, '..', 'build')));
 
-/*
-app.use(webpackDevMiddleware(webpack(webpackConfig), {
-  publicPath: webpackConfig.output.publicPath,
-  stats: {
-    colors: true
-  },
-  resolve: {
-        alias: {
-            app: webpackConfig.resolve.alias.app
-        }
-    }
-}))
-*/
 
 const HTML = ({ content, store }) => (
   <html lang="en">
@@ -131,19 +115,15 @@ app.use(function (req, res, next) {
   }
   else if(req.url.indexOf('/usercenter?')==0){// any interface can call here
   var openid = req.query.openid
-  console.log('openid!!!!!!!   '+openid)
 
   }
-  console.log(req.url);
   match({ history, routes, location: req.url }, (error, redirectLocation, renderProps) => {
     if (error) {
       res.status(500).send(error.message)
     } else if (redirectLocation) {
       res.redirect(302, redirectLocation.pathname + redirectLocation.search)
     } else if (renderProps) {
-      console.log('to match2')
       loadOnServer({ ...renderProps, store, params:{openid,token:req.cookies.tokenbohe}}).then(() => {
-      console.log('AAAAAAAAA   '+req.url)
       // 2. use `ReduxAsyncConnect` instead of `RoutingContext` and pass it `renderProps` 
       const content = renderToString(
         <Provider store={store} key="provider">
@@ -155,9 +135,7 @@ app.use(function (req, res, next) {
       res.send('<!doctype html>\n' + renderToString(<HTML content={content} store={store}/>))
     
     },(err)=>{
-      console.log(err)
-      //if(err.info == 'auth')
-      //  res.redirect('/login')
+      
     })
     }
   })

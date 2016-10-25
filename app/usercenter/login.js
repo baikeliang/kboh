@@ -12,10 +12,8 @@ const swipeOptions = {
     disableScroll: false,
     continuous: false,
     callback() {
-        console.log('slide changed');
     },
     transitionEnd() {
-        console.log('ended transition');
     }
 };
 

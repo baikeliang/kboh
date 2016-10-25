@@ -15,14 +15,11 @@ export default class ApiClient {
             this[method] = (path, { params, data } = {} ,{format,done,error}) => {
                 ///////////////////////////////
                 var u = new URLSearchParams();
-                console.log(method)
                 var req = {
                     method: method,
                     mode: 'cors',
                     cache: 'default'
                 }
-                //console.log("ApiClient!!!!!!!!!!!!!!!")
-                console.log(params)
                 if ((method == 'GET') && params) {
                     for (var key of Object.keys(params)) {
                       u.append(key, params[key])
@@ -35,7 +32,6 @@ export default class ApiClient {
                     }
 
                 }
-                console.log('8888888888'+path+u)
                 return fetch(path + u, req).then(format).then(done,error)
             }
         )

@@ -21,8 +21,6 @@ import { connect } from 'react-redux';
 @asyncConnect([{
   promise: ({store: {dispatch, getState},params}) => {
     const promises = [];
-    console.log("myorders!!!!!!!!")
-    console.log(this)
     if(!successorLoading(getState()))
       promises.push(dispatch(loadOrders({num:15,begin:0})));
     return Promise.all(promises);
@@ -42,10 +40,7 @@ export default class MyOrders extends Component {
 	}
 
 	renderOrder(index, key) {
-		console.log("renderOrder")
-		console.log(this)
-        console.log(index)
-        console.log(this.props.orderMetas.size)
+
 		var orderMeta = this.props.orderMetas.get(index).toJS();
 		orderMeta.idx = index;
         if(this.props.orderMetas.size == (index+1)){
@@ -56,22 +51,15 @@ export default class MyOrders extends Component {
 	}
 
 	handlePan(ev) {
-	    console.log("handlePan!!!!!!")
+
 	    var toLoad = isElementVisible(ReactDOM.findDOMNode(this._last))
         
-        console.log(toLoad)
-	    console.log("pan!!!!!!!!!!!!")
-	    console.log(ev.isFinal)
 	    if (ev.direction == 8) {
-	        console.log("up!!!!!!!!!!!!")
-            console.log(this.props.orderMetas.size)
 	        if(toLoad){
-	        	console.log("loading!!!!!!!!!!!!!!!!!")
 	        	if(!this.props.loading)
 	        	   this.props.load({ num: 15, begin: 0 })
 	        }
 	    } else if (ev.direction == 16) {
-	        console.log("down")
 	    }
 
 	}
@@ -82,8 +70,6 @@ export default class MyOrders extends Component {
 		var size = this.props.orderMetas.size;
 	    var nodata = (size == 0) ? true : false;
 	    
-	    console.log(nodata)
-	    console.log("JJJJJ11111111111111111")
 	    var options = {
 	        touchAction: 'pan-y'
 	    };

@@ -26,7 +26,6 @@ export default function reducer(state = initialState, action = {}) {
             return state.merge({ loading: true })
         case LOAD_SUCCESS:
             var allres;
-            console.log('LOAD_SUCCESS!11111111')
             if(Immutable.List.isList(state.get('cases'))){
 
                 allres = state.get('cases').pop().toJS().concat(action.result)
@@ -43,18 +42,14 @@ export default function reducer(state = initialState, action = {}) {
             return state.merge({ loading: false, loaded: false, error: action.error })
         case LOAD_CONTENT:
             return state.updateIn(['cases'], list => list.map(acase => {
-                    console.log(acase)
                     if(acase.get('id') == action.id){
-                    console.log("begin load content")
                     return acase.merge({loading: true})
                     }
                     return acase
             }))
         case LOAD_CONTENT_SUCCESS:
             return state.updateIn(['cases'], list => list.map(acase => {
-                    console.log(acase)
                     if(acase.get('id') == action.result.id){
-                    console.log("success load content")
                     return acase.merge({loading:false,loaded:true, ...action.result})
                     }
                     return acase
@@ -63,36 +58,28 @@ export default function reducer(state = initialState, action = {}) {
 
         case LOAD_CONTENT_FAIL:  
             return state.updateIn(['cases'], list => list.map(acase => {
-                    console.log(acase)
                     if(acase.get('id') == action.result.id){
-                    console.log("sadsada")
                     return acase.merge({loading:false,loaded:false, error: action.error})
                     }
                     return acase
             }))
         case LOAD_DESC:
             return state.updateIn(['cases'], list => list.map(acase => {
-                    console.log(acase)
                     if(acase.get('id') == action.id){
-                    console.log("sadsada")
                     return acase.merge({loading: true})
                     }
                     return acase
             }))
         case LOAD_DESC_SUCCESS:
             return state.updateIn(['cases'], list => list.map(acase => {
-                    console.log(acase)
                     if(acase.get('id') == action.result.id){
-                    console.log("sadsada")
                     return acase.merge({loading:false,loaded:true, ...action.result})
                     }
                     return acase
             }))
         case LOAD_DESC_FAIL:  
             return state.updateIn(['cases'], list => list.map(acase => {
-                    console.log(acase)
                     if(acase.get('id') == action.result.id){
-                    console.log("sadsada")
                     return acase.merge({loading:false,loaded:false, error: action.error})
                     }
                     return acase
@@ -115,8 +102,6 @@ export function frontCase({ idx,id }){
 export function LoadedorLoading(state){
     var loaded = false
     var loading = false
-    console.log("LoadedorLoading!!!!!!!!!")
-    console.log(state)
     if(state.hasIn(['case_patient','loaded'])){
         loaded = state.getIn(['case_patient','loaded'])
     }
@@ -140,12 +125,10 @@ export function load({ user, num ,begin}) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
                 }
-                console.log('>>>>>>>>>>>>>>>>')
                 return response.json();
             },
             done: function(res) {
 
-                console.log(res);
 
                 if (res.valid == 1) {
 
@@ -157,8 +140,6 @@ export function load({ user, num ,begin}) {
                 }
             },
             error: function(err) {
-                console.log(err)
-                console.log('GGGGGGGGGGGGGG')
                 return Promise.reject({ info: 'wire' })
             }
         })

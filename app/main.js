@@ -43,8 +43,6 @@ render(
 )*/
 var url = window.location.pathname;
 
-console.log("location!!!!?????")
-console.log(location)
 
 if(url.indexOf('#')==-1){
    console.log('aaaaaa')
@@ -67,7 +65,6 @@ const component = (
   </Router>
 );
 match({ routes: routes, location }, () => {
-console.log("client render!!!!!!!")
 render(
   <Provider store={store} key="provider">
     {component}

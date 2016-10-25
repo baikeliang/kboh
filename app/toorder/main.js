@@ -28,4 +28,3 @@ export default class ToOrder extends Component {
 
   // methods
 }
-//module.exports = ToOrder;

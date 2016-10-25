@@ -20,8 +20,6 @@ export default function reducer(state = initialState, action = {}) {
         case LOAD:
             return state.merge({ loading: true })
         case LOAD_SUCCESS:
-            console.log("LOAD_SUCCESS!!!!!!!!!!")
-            console.log(action.result)
             return state.merge({ loading: false, loaded: true, user: action.result })
         case LOAD_FAIL:
             return state.merge({ loading: false, loaded: false, error: action.error })
@@ -51,18 +49,14 @@ export default function reducer(state = initialState, action = {}) {
 
 
 export function isLoaded(globalState) {
-  console.log('LLLLLLLLL'+globalState)
   return globalState.has('auth') && globalState.getIn(['auth','loaded']);
 }
 
 export function load({ openid,token }) {
     var params = {}
-    console.log('YYYYYY '+openid)
     if (typeof window === 'undefined') { ///server side
-        console.log("server side ")
         if (openid) ///  微信的鉴权要素是openid
         {
-            console.log("server has openid")
             params.openid = openid;
 
         } else if (token) { /// 浏览器访问的鉴权要素是 cookie token
@@ -78,7 +72,6 @@ export function load({ openid,token }) {
 
         }
     }/// client side use cookie token to auth
-    console.log("HHHHTT")
 
     return {
         types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
@@ -87,26 +80,17 @@ export function load({ openid,token }) {
                     if (response.status >= 400) {
                         throw new Error("Bad response from server");
                     }
-                    console.log('>>>>>>>>>>>>>>>>')
                     return response.json();
             },
             done: function(user) {
-                console.log('MMMMMM'+user);
-                console.log('<>>>>')
-                console.log(user)
-                console.log('>>>>>>')
                 if (user.valid == 1) {
-                    console.log("succed")
                     return Promise.resolve(user)
 
                 } else {
-                    //var err = { info: 'auth' }
                     return Promise.reject({ info: 'auth'})
                 }
             },
-            error: function(err) {
-                console.log(err)
-                console.log('GGGGGGGGGGGGGG')     
+            error: function(err) {     
                 return  Promise.reject({ info: 'wire' })
             }
         })

@@ -15,10 +15,6 @@ import { configureStore, DevTools } from 'app/configure-store'
 
 import ApiClient from 'app/isomorphic-api/ApiClient'
 
-//import { AsyncConnect, endGlobalLoad, beginGlobalLoad } from 'redux-connect'
-
-//import AsyncConnect from '../modules/components/AsyncConnect';
-
 import { auth_success,auth_not_valid,error500,resetMock} from '../__mocks__/server_mocker.js'
 
 import { endGlobalLoad, beginGlobalLoad } from '../node_modules/redux-connect/lib/store';
@@ -188,7 +184,6 @@ describe('top', function suite() {
     return proto.loadAsyncData.returnValues[0].then(() => {
       expect(endGlobalLoadSpy.called).toBe(true);
       endGlobalLoadSpy.reset();
-      console.log("WWWWWWWWWWW")
       proto.loadAsyncData.restore();
       proto.componentDidMount.restore();
     });

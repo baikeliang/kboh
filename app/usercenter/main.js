@@ -21,13 +21,9 @@ import { UCenter } from './view/mainpage.js'
 @asyncConnect([{
   promise: ({store: {dispatch, getState},params}) => {
     const promises = [];
-    console.log('HHHHHHHHHHHHHHHHHHHH')
     if (!isAuthLoaded(getState())) {
-    	console.log('JJJJJJJJJJJJJJJJJJHH')
-    	console.log(params)
         promises.push(dispatch(loadAuth(params)));
     }
-    console.log('asyncConnect!!!!!!!')
     return Promise.all(promises);
   }
 }])
@@ -37,13 +33,11 @@ import { UCenter } from './view/mainpage.js'
 export default class UserCenter extends Component {
     
     toOrder(event){
-        console.log(event)
     	event.preventDefault();
     	this.props.pushState('/login')
     }
     
     toOrders(event){
-        console.log(event)
     	event.preventDefault();
     	this.props.pushState('/usercenter/myOrders')
     }
@@ -57,25 +51,19 @@ export default class UserCenter extends Component {
     	this.props.pushState('/usercenter/myBills') 	
     }
     componentWillMount(){
-       console.log("componentWillMount@@@@@@@@@@@@@@@")
        if(this.props.auth.has('user')){
        	  return;
        }else{
-       	console.log("componentWillMount@@@@@@@@@@@@@@@1")
-       	  console.log(this.props.auth.getIn(['error','info']))
        	  if(this.props.auth.getIn(['error','info']) == 'auth'){
-       	  	 console.log("componentWillMount@@@@@@@@@@@@@@@2")
              this.props.pushState('/login');
        	  }
        }
           return;
     }
     componentDidMount(){
-          console.log("aaaaaaa!!!!!!!!!!!!!!!!!!!!")
     }
     render() {
     	//console.log(this.props)
-    	console.log("bbbbbbb!!!!!!!!!!!!!!!!!!!!")
         
         if(this.props.auth.has('user')){
         

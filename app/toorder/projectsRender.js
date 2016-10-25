@@ -14,7 +14,6 @@ const Projects = React.createClass({
   handleProClick(projectInfo) {},
   renderProjects() {
     return this.props.projectMetas.map(function(projectMeta, i) {
-      console.log('project')
       assign(projectMeta, projectMeta,{
         handleProClick: this.handleProClick
       }, {
@@ -25,7 +24,6 @@ const Projects = React.createClass({
     }.bind(this));
   },
   render() {
-    console.log('TTTTTTTTTTTTTT')
     return (
                 <div>
                  <h3  className={styles.chooseTitle}>选择预约项目</h3>

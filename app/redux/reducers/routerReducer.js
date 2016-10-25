@@ -8,7 +8,6 @@ const initialState = Immutable.fromJS({
 });
 
 export default (state = initialState, action) => {
-  console.log("333333333")	
   console.log(action)
   if (action.type === LOCATION_CHANGE) {
   	console.log(action)

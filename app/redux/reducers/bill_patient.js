@@ -23,7 +23,6 @@ export default function reducer(state = initialState, action = {}) {
             return state.merge({ loading: true })
         case LOAD_SUCCESS:
             var allres;
-            console.log('LOAD_SUCCESS!11111111')
             if(Immutable.List.isList(state.get('bills'))){
 
                 allres = state.get('bills').pop().toJS().concat(action.result)
@@ -40,18 +39,14 @@ export default function reducer(state = initialState, action = {}) {
             return state.merge({ loading: false, loaded: false, error: action.error })
         case LOAD_DETAIL:
             return state.updateIn(['bills'], list => list.map(bill => {
-                    console.log(bill)
                     if(bill.get('id') == action.id){
-                    console.log("sadsada")
                     return bill.merge({loading: true})
                     }
                     return bill
             }))
         case LOAD_DETAIL_SUCCESS:
             return state.updateIn(['bills'], list => list.map(bill => {
-                    console.log(bill)
                     if(bill.get('id') == action.result.id){
-                    console.log("sadsadabillsbillsbills")
                     return bill.merge({loading:false,loaded:true, ...action.result})
                     }
                     return bill
@@ -60,9 +55,7 @@ export default function reducer(state = initialState, action = {}) {
 
         case LOAD_DETAIL_FAIL:  
             return state.updateIn(['bills'], list => list.map(bill => {
-                    console.log(bill)
                     if(bill.get('id') == action.result.id){
-                    console.log("sadsada")
                     return bill.merge({loading:false,loaded:false, error: action.error})
                     }
                     return bill
@@ -85,8 +78,6 @@ export function frontBill({ idx,id }){
 export function LoadedorLoading(state){
     var loaded = false
     var loading = false
-    console.log("LoadedorLoading!!!!!!!!!")
-    console.log(state)
     if(state.hasIn(['bill_patient','loaded'])){
         loaded = state.getIn(['bill_patient','loaded'])
     }
@@ -110,7 +101,6 @@ export function load({ user, num ,begin}) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
                 }
-                console.log('>>>>>>>>>>>>>>>>')
                 return response.json();
             },
             done: function(res) {
@@ -127,8 +117,6 @@ export function load({ user, num ,begin}) {
                 }
             },
             error: function(err) {
-                console.log(err)
-                console.log('GGGGGGGGGGGGGG')
                 return Promise.reject({ info: 'wire' })
             }
         })
@@ -141,8 +129,6 @@ export function load_detail({ id }) {
     var params = {}
     params.id = id
 
-    console.log('load_detail!!!!!!!!!!!')
-    console.log(id)
     return {
         types: [LOAD_DETAIL, LOAD_DETAIL_SUCCESS, LOAD_DETAIL_FAIL],
         promise: (client) => client.GET('http://192.168.10.10/patient/billInfo/rest?', { params }, {
@@ -150,12 +136,10 @@ export function load_detail({ id }) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
                 }
-                console.log('>>>>>>>>>>>>>>>>')
                 return response.json();
             },
             done: function(res) {
 
-                console.log(res);
 
                 if (res.valid == 1) {
 
@@ -167,8 +151,6 @@ export function load_detail({ id }) {
                 }
             },
             error: function(err) {
-                console.log(err)
-                console.log('GGGGGGGGGGGGGG1')
                 return Promise.reject({ info: 'wire' })
             }
         }),

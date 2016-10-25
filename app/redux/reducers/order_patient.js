@@ -21,7 +21,6 @@ export default function reducer(state = initialState, action = {}) {
             return state.merge({ loading: true })
         case LOAD_SUCCESS:
             var allres;
-            console.log('LOAD_SUCCESS!11111111')
             if(Immutable.List.isList(state.get('orders'))){
 
                 allres = state.get('orders').pop().toJS().concat(action.result)
@@ -38,18 +37,14 @@ export default function reducer(state = initialState, action = {}) {
             return state.merge({ loading: false, loaded: false, error: action.error })
         case LOAD_DETAIL:
             return state.updateIn(['orders'], list => list.map(order => {
-                    console.log(order)
                     if(order.get('id') == action.id){
-                    console.log("sadsada")
                     return order.merge({loading: true})
                     }
                     return order
             }))
         case LOAD_DETAIL_SUCCESS:
             return state.updateIn(['orders'], list => list.map(order => {
-                    console.log(order)
                     if(order.get('id') == action.result.id){
-                    console.log("sadsada")
                     return order.merge({loading:false,loaded:true, ...action.result})
                     }
                     return order
@@ -58,9 +53,7 @@ export default function reducer(state = initialState, action = {}) {
 
         case LOAD_DETAIL_FAIL:  
             return state.updateIn(['orders'], list => list.map(order => {
-                    console.log(order)
                     if(order.get('id') == action.result.id){
-                    console.log("sadsada")
                     return order.merge({loading:false,loaded:false, error: action.error})
                     }
                     return order
@@ -73,8 +66,6 @@ export default function reducer(state = initialState, action = {}) {
 export function LoadedorLoading(state){
     var loaded = false
     var loading = false
-    console.log("LoadedorLoading!!!!!!!!!")
-    console.log(state)
     if(state.hasIn(['order_patient','loaded'])){
         loaded = state.getIn(['order_patient','loaded'])
     }
@@ -98,7 +89,6 @@ export function load({ user, num ,begin}) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
                 }
-                console.log('>>>>>>>>>>>>>>>>')
                 return response.json();
             },
             done: function(res) {
@@ -115,8 +105,6 @@ export function load({ user, num ,begin}) {
                 }
             },
             error: function(err) {
-                console.log(err)
-                console.log('GGGGGGGGGGGGGG')
                 return Promise.reject({ info: 'wire' })
             }
         })

@@ -37,15 +37,12 @@ export default class MyOrder extends Component {
     }
     
     handleInview(){
-      console.log("handleInview!!!!!")
     }
 
     componentDidMount(){
-        console.log("MYcomponentDidMount!!!!")
     }
     componentDidUpdate(){
 
-        console.log("FFFFFFFFFFFFFF!!!!")
     }
     render() {
         if (this.props.flag) {
