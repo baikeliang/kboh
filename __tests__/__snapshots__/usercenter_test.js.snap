@@ -1,0 +1,223 @@
+exports[`top user not valid 1`] = `
+<div
+  style={
+    Object {
+      "FontFamily": "微软雅黑,Arial,sans-serif",
+      "WebkitTapHighlightColor": "transparent",
+      "background": "#fff",
+      "color": "#000",
+      "fontFamily": "Helvetica Neue, Helvetica, Arial, sans-serif",
+      "fontSize": "14px",
+      "height": "100%",
+      "margin": 0,
+      "padding": 0,
+      "position": "relative",
+    }
+  }>
+  <div
+    className={undefined}>
+    <img
+      alt=""
+      src=""
+      style={
+        Object {
+          "display": "block",
+          "margin": "0 auto",
+          "maxWidth": "200px",
+          "paddingBottom": "44px",
+          "paddingTop": "39px",
+          "width": "40%",
+        }
+      } />
+  </div>
+  <Hammer
+    onSwipe={[Function]}>
+    <div
+      className={undefined}>
+      <div
+        className={undefined}>
+        <a
+          className={
+            Object {
+              "color": "#1b7c86",
+            }
+          }
+          href="#">
+          验证码登录
+        </a>
+        <a
+          href="#">
+          密码登录
+        </a>
+        <div
+          className={undefined} />
+      </div>
+      <ReactSwipe
+        className=""
+        style={
+          Object {
+            "child": Object {
+              "float": "left",
+              "position": "relative",
+              "transitionProperty": "transform",
+              "width": "100%",
+            },
+            "container": Object {
+              "overflow": "hidden",
+              "position": "relative",
+              "visibility": "hidden",
+            },
+            "wrapper": Object {
+              "overflow": "hidden",
+              "position": "relative",
+            },
+          }
+        }
+        swipeOptions={
+          Object {
+            "auto": 0,
+            "callback": [Function],
+            "continuous": false,
+            "disableScroll": false,
+            "speed": 300,
+            "startSlide": 0,
+            "transitionEnd": [Function],
+          }
+        }>
+        <div
+          className="react-swipe-container "
+          id={undefined}
+          style={
+            Object {
+              "overflow": "hidden",
+              "position": "relative",
+              "visibility": "hidden",
+            }
+          }>
+          <div
+            style={
+              Object {
+                "overflow": "hidden",
+                "position": "relative",
+              }
+            }>
+            <div
+              style={
+                Object {
+                  "float": "left",
+                  "position": "relative",
+                  "transitionProperty": "transform",
+                  "width": "100%",
+                }
+              }>
+              <div
+                className={undefined}>
+                <div
+                  className="undefined undefined">
+                  <input
+                    className="undefined tel phone"
+                    id="phone"
+                    maxLength="11"
+                    placeholder="手机号"
+                    type="tel" />
+                  <div
+                    className={undefined} />
+                </div>
+                <div
+                  className="undefined undefined">
+                  <input
+                    className={undefined}
+                    id="code"
+                    maxLength="6"
+                    placeholder="验证码"
+                    type="text" />
+                  <input
+                    className={undefined}
+                    id="sendYzm"
+                    type="button"
+                    value="发送验证码" />
+                </div>
+                <div
+                  className={undefined}>
+                  <input
+                    className={undefined}
+                    id="loginBut"
+                    type="button"
+                    value="登录" />
+                  <p
+                    className={undefined}>
+                    <a
+                      href="javascript:;"
+                      id="go_register">
+                      立即注册
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div
+              style={
+                Object {
+                  "float": "left",
+                  "position": "relative",
+                  "transitionProperty": "transform",
+                  "width": "100%",
+                }
+              }>
+              <div
+                className={undefined}>
+                <div
+                  className="undefined undefined">
+                  <input
+                    className={undefined}
+                    id="phone2"
+                    maxLength="11"
+                    placeholder="手机号"
+                    type="tel" />
+                  <div
+                    className={undefined} />
+                </div>
+                <div
+                  className="undefined undefined">
+                  <input
+                    className={undefined}
+                    id="pwd"
+                    maxLength="20"
+                    placeholder="6～20位密码"
+                    type="password" />
+                  <a
+                    className={undefined}
+                    href="javascript:;" />
+                  <a
+                    className={undefined}
+                    href="javascript:;" />
+                  <i
+                    className="forget">
+                    忘记密码?
+                  </i>
+                </div>
+                <div
+                  className="undefined undefined">
+                  <input
+                    className={undefined}
+                    id="loginBut2"
+                    type="button"
+                    value="登录" />
+                  <p
+                    className={undefined}>
+                    <a
+                      href="javascript:;"
+                      id="go_register">
+                      立即注册
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ReactSwipe>
+    </div>
+  </Hammer>
+</div>
+`;

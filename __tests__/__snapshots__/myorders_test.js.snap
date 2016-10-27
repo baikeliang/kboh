@@ -1,0 +1,775 @@
+exports[`top auth not valid 1`] = `
+<div
+  style={
+    Object {
+      "FontFamily": "微软雅黑,Arial,sans-serif",
+      "WebkitTapHighlightColor": "transparent",
+      "background": "#fff",
+      "color": "#000",
+      "fontFamily": "Helvetica Neue, Helvetica, Arial, sans-serif",
+      "fontSize": "14px",
+      "height": "100%",
+      "margin": 0,
+      "padding": 0,
+      "position": "relative",
+    }
+  }>
+  <div
+    className={undefined}>
+    <img
+      alt=""
+      src=""
+      style={
+        Object {
+          "display": "block",
+          "margin": "0 auto",
+          "maxWidth": "200px",
+          "paddingBottom": "44px",
+          "paddingTop": "39px",
+          "width": "40%",
+        }
+      } />
+  </div>
+  <Hammer
+    onSwipe={[Function]}>
+    <div
+      className={undefined}>
+      <div
+        className={undefined}>
+        <a
+          className={
+            Object {
+              "color": "#1b7c86",
+            }
+          }
+          href="#">
+          验证码登录
+        </a>
+        <a
+          href="#">
+          密码登录
+        </a>
+        <div
+          className={undefined} />
+      </div>
+      <ReactSwipe
+        className=""
+        style={
+          Object {
+            "child": Object {
+              "float": "left",
+              "position": "relative",
+              "transitionProperty": "transform",
+              "width": "100%",
+            },
+            "container": Object {
+              "overflow": "hidden",
+              "position": "relative",
+              "visibility": "hidden",
+            },
+            "wrapper": Object {
+              "overflow": "hidden",
+              "position": "relative",
+            },
+          }
+        }
+        swipeOptions={
+          Object {
+            "auto": 0,
+            "callback": [Function],
+            "continuous": false,
+            "disableScroll": false,
+            "speed": 300,
+            "startSlide": 0,
+            "transitionEnd": [Function],
+          }
+        }>
+        <div
+          className="react-swipe-container "
+          id={undefined}
+          style={
+            Object {
+              "overflow": "hidden",
+              "position": "relative",
+              "visibility": "hidden",
+            }
+          }>
+          <div
+            style={
+              Object {
+                "overflow": "hidden",
+                "position": "relative",
+              }
+            }>
+            <div
+              style={
+                Object {
+                  "float": "left",
+                  "position": "relative",
+                  "transitionProperty": "transform",
+                  "width": "100%",
+                }
+              }>
+              <div
+                className={undefined}>
+                <div
+                  className="undefined undefined">
+                  <input
+                    className="undefined tel phone"
+                    id="phone"
+                    maxLength="11"
+                    placeholder="手机号"
+                    type="tel" />
+                  <div
+                    className={undefined} />
+                </div>
+                <div
+                  className="undefined undefined">
+                  <input
+                    className={undefined}
+                    id="code"
+                    maxLength="6"
+                    placeholder="验证码"
+                    type="text" />
+                  <input
+                    className={undefined}
+                    id="sendYzm"
+                    type="button"
+                    value="发送验证码" />
+                </div>
+                <div
+                  className={undefined}>
+                  <input
+                    className={undefined}
+                    id="loginBut"
+                    type="button"
+                    value="登录" />
+                  <p
+                    className={undefined}>
+                    <a
+                      href="javascript:;"
+                      id="go_register">
+                      立即注册
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div
+              style={
+                Object {
+                  "float": "left",
+                  "position": "relative",
+                  "transitionProperty": "transform",
+                  "width": "100%",
+                }
+              }>
+              <div
+                className={undefined}>
+                <div
+                  className="undefined undefined">
+                  <input
+                    className={undefined}
+                    id="phone2"
+                    maxLength="11"
+                    placeholder="手机号"
+                    type="tel" />
+                  <div
+                    className={undefined} />
+                </div>
+                <div
+                  className="undefined undefined">
+                  <input
+                    className={undefined}
+                    id="pwd"
+                    maxLength="20"
+                    placeholder="6～20位密码"
+                    type="password" />
+                  <a
+                    className={undefined}
+                    href="javascript:;" />
+                  <a
+                    className={undefined}
+                    href="javascript:;" />
+                  <i
+                    className="forget">
+                    忘记密码?
+                  </i>
+                </div>
+                <div
+                  className="undefined undefined">
+                  <input
+                    className={undefined}
+                    id="loginBut2"
+                    type="button"
+                    value="登录" />
+                  <p
+                    className={undefined}>
+                    <a
+                      href="javascript:;"
+                      id="go_register">
+                      立即注册
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ReactSwipe>
+    </div>
+  </Hammer>
+</div>
+`;
+
+exports[`top auth response 500 1`] = `""`;
+
+exports[`top auth valid : not loading: orders not empty  1`] = `
+<div>
+  <div
+    className={undefined}
+    style={
+      Object {
+        "display": "none",
+      }
+    }>
+    <dl>
+      <dt>
+        <img
+          alt=""
+          src="" />
+      </dt>
+      <dd>
+        您目前还没有进行任何预约
+      </dd>
+    </dl>
+    <div
+      className={undefined}>
+      <img
+        alt=""
+        src="" />
+      <p>
+        轻快预约   从“齿”简单
+      </p>
+    </div>
+  </div>
+  <Hammer
+    direction="DIRECTION_VERTICAL"
+    onPan={[Function]}
+    options={
+      Object {
+        "touchAction": "pan-y",
+      }
+    }>
+    <div>
+      <div
+        className={undefined}
+        style={
+          Object {
+            "marginTop": "10px",
+          }
+        }>
+        <ReactList
+          axis="y"
+          itemRenderer={[Function]}
+          itemsRenderer={[Function]}
+          length={11}
+          pageSize={10}
+          threshold={100}
+          type="uniform"
+          useStaticSize={false}
+          useTranslate3d={false}>
+          <div
+            style={
+              Object {
+                "position": "relative",
+              }
+            }>
+            <div
+              style={
+                Object {
+                  "WebkitTransform": "translate(0px, 0px)",
+                  "msTransform": "translate(0px, 0px)",
+                  "transform": "translate(0px, 0px)",
+                }
+              }>
+              <div>
+                <Connect(MyOrder)
+                  id={90}
+                  idx={0}
+                  is_return={0}
+                  patient_name="tangxin"
+                  reserve_number="cool"
+                  service_name="baya"
+                  status={88}
+                  visit_time="23212">
+                  <MyOrder
+                    id={90}
+                    idx={0}
+                    is_return={0}
+                    load={[Function]}
+                    patient_name="tangxin"
+                    pushState={[Function]}
+                    reserve_number="cool"
+                    service_name="baya"
+                    status={88}
+                    visit_time="23212">
+                    <div
+                      onClick={[Function]}>
+                      <div
+                        className="undefined undefined undefined">
+                        <a
+                          className={undefined}>
+                          <div
+                            className={undefined}>
+                            <p>
+                              <b>
+                                <em />
+                              </b>
+                              <label />
+                              <label>
+                                <span>
+                                  23212
+                                </span>
+                              </label>
+                            </p>
+                          </div>
+                          <span
+                            className={undefined} />
+                        </a>
+                      </div>
+                    </div>
+                  </MyOrder>
+                </Connect(MyOrder)>
+                <Connect(MyOrder)
+                  id={90}
+                  idx={1}
+                  is_return={0}
+                  patient_name="tangxin"
+                  reserve_number="cool"
+                  service_name="baya"
+                  status={88}
+                  visit_time="23212">
+                  <MyOrder
+                    id={90}
+                    idx={1}
+                    is_return={0}
+                    load={[Function]}
+                    patient_name="tangxin"
+                    pushState={[Function]}
+                    reserve_number="cool"
+                    service_name="baya"
+                    status={88}
+                    visit_time="23212">
+                    <div
+                      onClick={[Function]}>
+                      <div
+                        className="undefined undefined undefined">
+                        <a
+                          className={undefined}>
+                          <div
+                            className={undefined}>
+                            <p>
+                              <b>
+                                <em />
+                              </b>
+                              <label />
+                              <label>
+                                <span>
+                                  23212
+                                </span>
+                              </label>
+                            </p>
+                          </div>
+                          <span
+                            className={undefined} />
+                        </a>
+                      </div>
+                    </div>
+                  </MyOrder>
+                </Connect(MyOrder)>
+                <Connect(MyOrder)
+                  id={90}
+                  idx={2}
+                  is_return={0}
+                  patient_name="tangxin"
+                  reserve_number="cool"
+                  service_name="baya"
+                  status={88}
+                  visit_time="23212">
+                  <MyOrder
+                    id={90}
+                    idx={2}
+                    is_return={0}
+                    load={[Function]}
+                    patient_name="tangxin"
+                    pushState={[Function]}
+                    reserve_number="cool"
+                    service_name="baya"
+                    status={88}
+                    visit_time="23212">
+                    <div
+                      onClick={[Function]}>
+                      <div
+                        className="undefined undefined undefined">
+                        <a
+                          className={undefined}>
+                          <div
+                            className={undefined}>
+                            <p>
+                              <b>
+                                <em />
+                              </b>
+                              <label />
+                              <label>
+                                <span>
+                                  23212
+                                </span>
+                              </label>
+                            </p>
+                          </div>
+                          <span
+                            className={undefined} />
+                        </a>
+                      </div>
+                    </div>
+                  </MyOrder>
+                </Connect(MyOrder)>
+                <Connect(MyOrder)
+                  id={90}
+                  idx={3}
+                  is_return={0}
+                  patient_name="tangxin"
+                  reserve_number="cool"
+                  service_name="baya"
+                  status={88}
+                  visit_time="23212">
+                  <MyOrder
+                    id={90}
+                    idx={3}
+                    is_return={0}
+                    load={[Function]}
+                    patient_name="tangxin"
+                    pushState={[Function]}
+                    reserve_number="cool"
+                    service_name="baya"
+                    status={88}
+                    visit_time="23212">
+                    <div
+                      onClick={[Function]}>
+                      <div
+                        className="undefined undefined undefined">
+                        <a
+                          className={undefined}>
+                          <div
+                            className={undefined}>
+                            <p>
+                              <b>
+                                <em />
+                              </b>
+                              <label />
+                              <label>
+                                <span>
+                                  23212
+                                </span>
+                              </label>
+                            </p>
+                          </div>
+                          <span
+                            className={undefined} />
+                        </a>
+                      </div>
+                    </div>
+                  </MyOrder>
+                </Connect(MyOrder)>
+                <Connect(MyOrder)
+                  id={90}
+                  idx={4}
+                  is_return={0}
+                  patient_name="tangxin"
+                  reserve_number="cool"
+                  service_name="baya"
+                  status={88}
+                  visit_time="23212">
+                  <MyOrder
+                    id={90}
+                    idx={4}
+                    is_return={0}
+                    load={[Function]}
+                    patient_name="tangxin"
+                    pushState={[Function]}
+                    reserve_number="cool"
+                    service_name="baya"
+                    status={88}
+                    visit_time="23212">
+                    <div
+                      onClick={[Function]}>
+                      <div
+                        className="undefined undefined undefined">
+                        <a
+                          className={undefined}>
+                          <div
+                            className={undefined}>
+                            <p>
+                              <b>
+                                <em />
+                              </b>
+                              <label />
+                              <label>
+                                <span>
+                                  23212
+                                </span>
+                              </label>
+                            </p>
+                          </div>
+                          <span
+                            className={undefined} />
+                        </a>
+                      </div>
+                    </div>
+                  </MyOrder>
+                </Connect(MyOrder)>
+                <Connect(MyOrder)
+                  id={90}
+                  idx={5}
+                  is_return={0}
+                  patient_name="tangxin"
+                  reserve_number="cool"
+                  service_name="baya"
+                  status={88}
+                  visit_time="23212">
+                  <MyOrder
+                    id={90}
+                    idx={5}
+                    is_return={0}
+                    load={[Function]}
+                    patient_name="tangxin"
+                    pushState={[Function]}
+                    reserve_number="cool"
+                    service_name="baya"
+                    status={88}
+                    visit_time="23212">
+                    <div
+                      onClick={[Function]}>
+                      <div
+                        className="undefined undefined undefined">
+                        <a
+                          className={undefined}>
+                          <div
+                            className={undefined}>
+                            <p>
+                              <b>
+                                <em />
+                              </b>
+                              <label />
+                              <label>
+                                <span>
+                                  23212
+                                </span>
+                              </label>
+                            </p>
+                          </div>
+                          <span
+                            className={undefined} />
+                        </a>
+                      </div>
+                    </div>
+                  </MyOrder>
+                </Connect(MyOrder)>
+                <Connect(MyOrder)
+                  id={90}
+                  idx={6}
+                  is_return={0}
+                  patient_name="tangxin"
+                  reserve_number="cool"
+                  service_name="baya"
+                  status={88}
+                  visit_time="23212">
+                  <MyOrder
+                    id={90}
+                    idx={6}
+                    is_return={0}
+                    load={[Function]}
+                    patient_name="tangxin"
+                    pushState={[Function]}
+                    reserve_number="cool"
+                    service_name="baya"
+                    status={88}
+                    visit_time="23212">
+                    <div
+                      onClick={[Function]}>
+                      <div
+                        className="undefined undefined undefined">
+                        <a
+                          className={undefined}>
+                          <div
+                            className={undefined}>
+                            <p>
+                              <b>
+                                <em />
+                              </b>
+                              <label />
+                              <label>
+                                <span>
+                                  23212
+                                </span>
+                              </label>
+                            </p>
+                          </div>
+                          <span
+                            className={undefined} />
+                        </a>
+                      </div>
+                    </div>
+                  </MyOrder>
+                </Connect(MyOrder)>
+                <Connect(MyOrder)
+                  id={90}
+                  idx={7}
+                  is_return={0}
+                  patient_name="tangxin"
+                  reserve_number="cool"
+                  service_name="baya"
+                  status={88}
+                  visit_time="23212">
+                  <MyOrder
+                    id={90}
+                    idx={7}
+                    is_return={0}
+                    load={[Function]}
+                    patient_name="tangxin"
+                    pushState={[Function]}
+                    reserve_number="cool"
+                    service_name="baya"
+                    status={88}
+                    visit_time="23212">
+                    <div
+                      onClick={[Function]}>
+                      <div
+                        className="undefined undefined undefined">
+                        <a
+                          className={undefined}>
+                          <div
+                            className={undefined}>
+                            <p>
+                              <b>
+                                <em />
+                              </b>
+                              <label />
+                              <label>
+                                <span>
+                                  23212
+                                </span>
+                              </label>
+                            </p>
+                          </div>
+                          <span
+                            className={undefined} />
+                        </a>
+                      </div>
+                    </div>
+                  </MyOrder>
+                </Connect(MyOrder)>
+                <Connect(MyOrder)
+                  id={90}
+                  idx={8}
+                  is_return={0}
+                  patient_name="tangxin"
+                  reserve_number="cool"
+                  service_name="baya"
+                  status={88}
+                  visit_time="23212">
+                  <MyOrder
+                    id={90}
+                    idx={8}
+                    is_return={0}
+                    load={[Function]}
+                    patient_name="tangxin"
+                    pushState={[Function]}
+                    reserve_number="cool"
+                    service_name="baya"
+                    status={88}
+                    visit_time="23212">
+                    <div
+                      onClick={[Function]}>
+                      <div
+                        className="undefined undefined undefined">
+                        <a
+                          className={undefined}>
+                          <div
+                            className={undefined}>
+                            <p>
+                              <b>
+                                <em />
+                              </b>
+                              <label />
+                              <label>
+                                <span>
+                                  23212
+                                </span>
+                              </label>
+                            </p>
+                          </div>
+                          <span
+                            className={undefined} />
+                        </a>
+                      </div>
+                    </div>
+                  </MyOrder>
+                </Connect(MyOrder)>
+                <Connect(MyOrder)
+                  id={90}
+                  idx={9}
+                  is_return={0}
+                  patient_name="tangxin"
+                  reserve_number="cool"
+                  service_name="baya"
+                  status={88}
+                  visit_time="23212">
+                  <MyOrder
+                    id={90}
+                    idx={9}
+                    is_return={0}
+                    load={[Function]}
+                    patient_name="tangxin"
+                    pushState={[Function]}
+                    reserve_number="cool"
+                    service_name="baya"
+                    status={88}
+                    visit_time="23212">
+                    <div
+                      onClick={[Function]}>
+                      <div
+                        className="undefined undefined undefined">
+                        <a
+                          className={undefined}>
+                          <div
+                            className={undefined}>
+                            <p>
+                              <b>
+                                <em />
+                              </b>
+                              <label />
+                              <label>
+                                <span>
+                                  23212
+                                </span>
+                              </label>
+                            </p>
+                          </div>
+                          <span
+                            className={undefined} />
+                        </a>
+                      </div>
+                    </div>
+                  </MyOrder>
+                </Connect(MyOrder)>
+              </div>
+            </div>
+          </div>
+        </ReactList>
+      </div>
+    </div>
+  </Hammer>
+</div>
+`;

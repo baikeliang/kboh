@@ -12,39 +12,61 @@ import { isElementVisible } from 'app/util/utils.js'
 
 import { asyncConnect } from 'redux-connect'
 
-import { LoadedorLoading as successorLoading ,  load as loadOrders } from 'app/redux/reducers/order_patient';
+import { 
+	isLoaded as isAuthLoaded, 
+	load as loadAuth, 
+	logout 
+} from 'app/redux/reducers/auth';
+
+import { 
+	LoadedorLoading as successorLoading ,  
+	load as loadOrders 
+} from 'app/redux/reducers/order_patient';
 
 import { push } from 'react-router-redux';
 
 import { connect } from 'react-redux';
 
 @asyncConnect([{
-  promise: ({store: {dispatch, getState},params}) => {
-    const promises = [];
-    if(!successorLoading(getState()))
-      promises.push(dispatch(loadOrders({num:15,begin:0})));
-    return Promise.all(promises);
-  }
+    promise: ({ store: { dispatch, getState }, params }) => {
+
+        if (!isAuthLoaded(getState())) {
+            return dispatch(loadAuth(params)).then(function() {
+                if (!successorLoading(getState()))
+                    return dispatch(loadOrders({ num: 15, begin: 0 }));
+                else 
+                    return Promise.resolve();
+            })
+        }else{
+             if (!successorLoading(getState()))
+                   return dispatch(loadOrders({ num: 15, begin: 0 })); 
+             else
+                   return Promise.resolve();         
+        }
+    }
 }])
+
 @connect(
     state => {
         return {
-            loading: state.getIn(['order_patient', 'loading']),
-            orderMetas: state.hasIn(['order_patient', 'orders']) ? state.getIn(['order_patient', 'orders']) : Immutable.List([])
+        	auth : state.get('auth'),
+            orderRepo: state.get('order_patient')
         }
     }, { pushState: push, load: loadOrders })
 export default class MyOrders extends Component {
 	// methods
 	static propTypes = {
-		orderMetas:React.PropTypes.object.isRequired,
+		orderRepo:React.PropTypes.object.isRequired,
 	}
 
 	renderOrder(index, key) {
 
-		var orderMeta = this.props.orderMetas.get(index).toJS();
+        var orderMeta = this.props.orderRepo.get('orders').get(index).toJS()
+        
 		orderMeta.idx = index;
-        if(this.props.orderMetas.size == (index+1)){
-        	orderMeta.loading = this.props.loading;
+
+        if(this.props.orderRepo.get('orders').size == (index+1)){
+        	orderMeta.loading = this.props.orderRepo.get('loading');
         	return <MyOrder ref={(c) => this._last = c} key={key} {...orderMeta}></MyOrder>;
         }
 		return <MyOrder key={key} {...orderMeta}></MyOrder>;
@@ -63,18 +85,37 @@ export default class MyOrders extends Component {
 	    }
 
 	}
+
+    componentWillMount() {
+        if (this.props.auth.has('user')) {
+            return;
+        } else {
+            if (this.props.auth.getIn(['error', 'info']) == 'auth') {
+                this.props.pushState('/login');
+            }
+        }
+        return;
+
+    }
+
     componentDidMount() {
 
     }
 	render() {
-		var size = this.props.orderMetas.size;
-	    var nodata = (size == 0) ? true : false;
+
+        if(this.props.auth.has('user')){
+
+		 var size = this.props.orderRepo.get('orders').size;
+	     var nodata = (size == 0) ? true : false;
 	    
-	    var options = {
+	     var options = {
 	        touchAction: 'pan-y'
-	    };
+	     };
 
 	    return FrontPage({ nodata, options, length: size, handlePan: (::this.handlePan), renderItem: (::this.renderOrder) })
+	    }else{
+	    return <div/>;
+	    }
 	}
 
 

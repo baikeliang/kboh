@@ -20,7 +20,7 @@ export function auth_success() {
 
 }
 
-export function auth_not_valid(){
+export function auth_is_not_valid(){
 
     var token = "kjhuih";
     var ret$ = {
@@ -34,7 +34,7 @@ export function auth_not_valid(){
 
 }
 
-export function error500(){
+export function auth_response_error_500(){
 
 	fetchMock.get('http://192.168.10.10/userinfo/rest?', 500);
 }
