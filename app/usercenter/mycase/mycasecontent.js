@@ -24,8 +24,6 @@ import { push } from 'react-router-redux';
 }])
 @connect(
   state => {
-
-    var cases = state.getIn(['case_patient','cases'])
     var idx = state.getIn(['case_patient','frontcase','idx'])
     var acase = state.getIn(['case_patient','cases']).get(idx)
     return { acase ,idx }

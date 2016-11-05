@@ -20,6 +20,33 @@ export function auth_success() {
 
 }
 
+export function auth_success_serverrender_openid(){
+    var token = "kjhuih";
+    
+    var ret$ = {
+        username: "king",
+        valid: 1,
+        token
+    };
+
+    //backdate a jwt 30 seconds
+    fetchMock.get('http://192.168.10.10/userinfo/rest?openid=openidfortest', ret$);
+}
+
+export function auth_failed_serverrender_openid(){
+    var token = "kjhuih";
+    
+    var ret$ = {
+        username: "king",
+        valid: 0,
+        token
+    };
+
+    //backdate a jwt 30 seconds
+    fetchMock.get('http://192.168.10.10/userinfo/rest?openid=openidfortest', ret$);
+}
+
+
 export function auth_is_not_valid(){
 
     var token = "kjhuih";

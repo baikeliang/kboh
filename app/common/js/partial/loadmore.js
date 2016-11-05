@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import loadingStyle from 'app/common/css/loadingStyle.css'
+import loadingStyle from 'app/common/css/pullup_Loadmore.css'
 
 export const LoadMore = ({
    loading

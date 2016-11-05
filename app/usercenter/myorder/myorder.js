@@ -10,9 +10,13 @@ import { LoadedorLoading as successorLoading ,  load as loadOrders } from 'app/r
 
 import { Order } from './view/order.js'
 
+import { 
+    frontOrder
+} from 'app/redux/reducers/order_patient.js'
+
 @connect(
   state => ({}),
-  { pushState: push, load: loadOrders })
+  { pushState: push, load: loadOrders ,toShow: frontOrder})
 export default class MyOrder extends Component {
     static propTypes = {
         is_return: React.PropTypes.number,
@@ -27,10 +31,14 @@ export default class MyOrder extends Component {
     };
 
     toDetail() {
-
+            var idx = this.props.idx;
+            var id = this.props.id;
+            console.log(id)
+            console.log(idx)
+            this.props.toShow({ idx, id });
             this.props.pushState({
                 pathname: '/usercenter/myOrderInfo',
-                query: { id: this.props.id, idx: this.props.idx }
+                query: { id, idx }
             })
         
 

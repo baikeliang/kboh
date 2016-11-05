@@ -2692,4 +2692,22 @@ input.savebtn_pri.addgray{
   background: #dedede;
   color: #888;
 }
+.cancelorder-enter {
+    opacity: 0.01;
+    transition: opacity.5s ease-in;
+}
+
+.cancelorder-enter.cancelorder-enter-active {
+    opacity: 1;
+}
+
+.cancelorder-leave {
+    opacity: 1;
+    transition: opacity.5s ease-in;
+}
+
+.cancelorder-leave.cancelorder-leave-active {
+    opacity: 0.01;
+}
+
 

@@ -52,16 +52,16 @@ export function isLoaded(globalState) {
   return globalState.has('auth') && globalState.getIn(['auth','loaded']);
 }
 
-export function load({ openid,token }) {
+export function load({ req }) {
     var params = {}
-    if (typeof window === 'undefined') { ///server side
-        if (openid) ///  微信的鉴权要素是openid
+    if ((typeof window === 'undefined')||(window.__SERVER__ == true)) { ///server side
+        if (req.openid) ///  微信的鉴权要素是openid
         {
-            params.openid = openid;
+            params.openid = req.openid;
 
-        } else if (token) { /// 浏览器访问的鉴权要素是 cookie token
+        } else if (req.cookies.tokenbohe) { /// 浏览器访问的鉴权要素是 cookie token
 
-            params.token = token;
+            params.token = req.cookies.tokenbohe;
 
         } else { // server side none key to login
 

@@ -37,6 +37,8 @@ import {
   auth_success,
   auth_is_not_valid,
   auth_response_error_500,
+  auth_success_serverrender_openid,
+  auth_failed_serverrender_openid,
   resetMock as resetMockAuth
 } from '../__mocks__/server_auth_mocker.js'
 
@@ -51,6 +53,9 @@ import {
   renderToJson 
 } from 'enzyme-to-json';
 
+import { loadOnServer } from 'redux-connect'
+
+import { renderToString } from 'react-dom/server'
 
 describe('top', function suite() {
 
@@ -64,7 +69,8 @@ describe('top', function suite() {
 
   pit('user not valid', function test(){
      
-
+    window.__SERVER__ = false;
+        
     var preloadstate = Immutable.fromJS({})
 
     var client = new ApiClient()
@@ -74,9 +80,12 @@ describe('top', function suite() {
     var store = configureStore(history, client, preloadstate)
  
     const proto = ReduxAsyncConnect.WrappedComponent.prototype;
+   
+
 
     spy(proto, 'loadAsyncData');
     spy(proto, 'componentDidMount');
+
     var reloadOnPropsChange = (props, nextProps) => {
         // reload only when path/route has changed
         return props.location.pathname !== nextProps.location.pathname;
@@ -109,9 +118,9 @@ describe('top', function suite() {
       var state = store.getState().toJS();
       expect(state.auth.error.info).toBe('auth')
       expect(!!state.auth.user).toBe(false)
-      console.log(wrapper.html())
+      //console.log(wrapper.html())
       expect(mountToJson(wrapper.find('Login div'))).toMatchSnapshot();
-      console.log("auth failed !!!!!!")
+      //console.log("auth failed !!!!!!")
       endGlobalLoadSpy.reset();
       proto.loadAsyncData.restore();
       proto.componentDidMount.restore();
@@ -122,6 +131,8 @@ describe('top', function suite() {
 
   pit('auth succed', function test() {
 
+    window.__SERVER__ = false;
+
     var preloadstate = Immutable.fromJS({})
 
     var client = new ApiClient()
@@ -131,6 +142,7 @@ describe('top', function suite() {
     var store = configureStore(history, client, preloadstate)
  
     const proto = ReduxAsyncConnect.WrappedComponent.prototype;
+    
 
     spy(proto, 'loadAsyncData');
     spy(proto, 'componentDidMount');
@@ -176,6 +188,7 @@ describe('top', function suite() {
   pit('auth err 500',function test(){
 
      
+    window.__SERVER__ = false;
 
     var preloadstate = Immutable.fromJS({})
 
@@ -224,6 +237,119 @@ describe('top', function suite() {
     });
   
   
+
+  })
+
+  pit("server render auth succed with openid",function test(){
+
+      window.__SERVER__ = true;
+      
+      var preloadstate = Immutable.fromJS({})
+
+      var client = new ApiClient()
+
+      const history = createMemoryHistory();
+
+      var store = configureStore(history, client, preloadstate)
+ 
+      const proto = ReduxAsyncConnect.WrappedComponent.prototype;
+   
+      spy(proto, 'loadAsyncData');
+
+      auth_success_serverrender_openid();
+
+    return new Promise((resolve, reject) => {
+
+      match({ history, routes, location: '/usercenter?' }, (error, redirectLocation, renderProps) => {
+         
+         if (error) {
+           return reject(error);
+         }
+         if (redirectLocation) {
+           return reject(new Error('redirected'));
+         }
+         if (!renderProps) {
+           return reject(new Error('404'));
+         }
+
+         var req = {
+            openid:'openidfortest',
+            cookies:{
+              tokenbohe:'dummy'
+            }
+         }
+
+        return loadOnServer({ ...renderProps, store, params:{ req }}).then(() => {
+            const content = render(
+              <Provider store={store} key="provider">
+                <ReduxAsyncConnect {...renderProps} />
+              </Provider>
+            )
+            var state = store.getState().toJS();
+            expect(!!state.auth.user).toBe(true);
+            expect(renderToJson(content)).toMatchSnapshot();
+            endGlobalLoadSpy.reset();
+            proto.loadAsyncData.restore();
+            resetMockAuth();
+            resolve();
+          },(err)=>{
+           
+       }).catch(reject);
+
+    })
+   })
+  })
+  
+  pit('server render auth fail with openid',function test(){
+
+      window.__SERVER__ = true;
+      
+      var preloadstate = Immutable.fromJS({})
+
+      var client = new ApiClient()
+
+      const history = createMemoryHistory();
+
+      var store = configureStore(history, client, preloadstate)
+ 
+      const proto = ReduxAsyncConnect.WrappedComponent.prototype;
+      spy(proto, 'loadAsyncData');
+
+      auth_failed_serverrender_openid()
+
+      return new Promise((resolve, reject) => {
+
+       match({ history, routes, location: '/usercenter?' }, (error, redirectLocation, renderProps) => {
+         
+         if (error) {
+           return reject(error);
+         }
+         if (redirectLocation) {
+           return reject(new Error('redirected'));
+         }
+         if (!renderProps) {
+           return reject(new Error('404'));
+         }
+
+         var req = {
+            openid:'openidfortest',
+            cookies:{
+              tokenbohe:'dummy'
+            }
+         }
+
+        return loadOnServer({ ...renderProps, store, params:{ req }}).then(() => {
+            reject();
+          },(err)=>{
+            endGlobalLoadSpy.reset();
+            proto.loadAsyncData.restore();
+            resetMockAuth();
+           resolve()
+       }).catch(reject);
+
+    })
+   })
+
 
   })
   

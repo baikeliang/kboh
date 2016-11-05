@@ -1,3 +1,116 @@
+exports[`top server render auth succed with openid 1`] = `
+<div>
+  <div>
+    <div>
+      <header
+        class="p_top huanzhebg">
+        <dl>
+          <dt
+            id="userImg">
+            <img
+              alt=""
+              src="test-file-stub" />
+          </dt>
+          <dd
+            id="userName">
+            king
+          </dd>
+        </dl>
+        <a
+          class="anniu"
+          href="set.html">
+          <img
+            alt=""
+            class="shezhi"
+            src="test-file-stub" />
+        </a>
+      </header>
+      <div
+        class="chuzhen">
+        <div
+          class="chuzhenson">
+          <img
+            alt=""
+            src="test-file-stub" />
+          <div
+            class="rtop_r">
+            <h6
+              class="spantitle">
+              我要预约
+            </h6>
+            <span
+              class="spancon" />
+          </div>
+          <div
+            class="clear" />
+        </div>
+      </div>
+      <div
+        class="block">
+        <div
+          class="a1">
+          <div
+            class="blockson">
+            <img
+              alt=""
+              src="test-file-stub" />
+            <span>
+              我的预约
+            </span>
+          </div>
+        </div>
+        <div
+          class="a2">
+          <div
+            class="blockson">
+            <img
+              alt=""
+              src="test-file-stub" />
+            <span>
+              我的病历
+            </span>
+          </div>
+        </div>
+        <div
+          class="a1">
+          <div
+            class="blockson">
+            <img
+              alt=""
+              src="test-file-stub" />
+            <span>
+              我的账单
+            </span>
+          </div>
+        </div>
+        <a
+          class="a2"
+          href="personmsg.html">
+          <div
+            class="blockson">
+            <img
+              alt=""
+              src="test-file-stub" />
+            <span>
+              个人信息
+            </span>
+          </div>
+        </a>
+      </div>
+      <div
+        class="fotIcon">
+        <img
+          alt=""
+          src="test-file-stub" />
+        <p>
+          轻快预约   从“齿”简单
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`top user not valid 1`] = `
 <div
   style={
@@ -15,10 +128,10 @@ exports[`top user not valid 1`] = `
     }
   }>
   <div
-    className={undefined}>
+    className="wrapper">
     <img
       alt=""
-      src=""
+      src="test-file-stub"
       style={
         Object {
           "display": "block",
@@ -33,27 +146,34 @@ exports[`top user not valid 1`] = `
   <Hammer
     onSwipe={[Function]}>
     <div
-      className={undefined}>
+      className="container">
       <div
-        className={undefined}>
+        className="nav">
         <a
-          className={
+          href="#"
+          style={
             Object {
-              "color": "#1b7c86",
+              "borderBottom": "4px solid #9b9b9b",
+              "color": "#9b9b9b",
             }
-          }
-          href="#">
+          }>
           验证码登录
         </a>
         <a
-          href="#">
+          href="#"
+          style={
+            Object {
+              "borderBottom": "4px solid #1b7c86",
+              "color": "#1b7c86",
+            }
+          }>
           密码登录
         </a>
         <div
-          className={undefined} />
+          className="clear" />
       </div>
       <ReactSwipe
-        className=""
+        className="mySwipe"
         style={
           Object {
             "child": Object {
@@ -85,7 +205,7 @@ exports[`top user not valid 1`] = `
           }
         }>
         <div
-          className="react-swipe-container "
+          className="react-swipe-container mySwipe"
           id={undefined}
           style={
             Object {
@@ -111,41 +231,46 @@ exports[`top user not valid 1`] = `
                 }
               }>
               <div
-                className={undefined}>
+                className="wrapper">
                 <div
-                  className="undefined undefined">
+                  className="text-input-box Mtop40">
                   <input
-                    className="undefined tel phone"
+                    className="input-text tel phone"
                     id="phone"
                     maxLength="11"
                     placeholder="手机号"
                     type="tel" />
                   <div
-                    className={undefined} />
+                    className="clear_num" />
                 </div>
                 <div
-                  className="undefined undefined">
+                  className="text-input-box Mtop20">
                   <input
-                    className={undefined}
+                    className="input-text"
                     id="code"
                     maxLength="6"
                     placeholder="验证码"
+                    style={
+                      Object {
+                        "fontSize": "16px",
+                      }
+                    }
                     type="text" />
                   <input
-                    className={undefined}
+                    className="btn-code"
                     id="sendYzm"
                     type="button"
                     value="发送验证码" />
                 </div>
                 <div
-                  className={undefined}>
+                  className="Mtop60">
                   <input
-                    className={undefined}
+                    className="btn-default"
                     id="loginBut"
                     type="button"
                     value="登录" />
                   <p
-                    className={undefined}>
+                    className="btomjump">
                     <a
                       href="javascript:;"
                       id="go_register">
@@ -165,31 +290,31 @@ exports[`top user not valid 1`] = `
                 }
               }>
               <div
-                className={undefined}>
+                className="wrapper">
                 <div
-                  className="undefined undefined">
+                  className="text-input-box Mtop40">
                   <input
-                    className={undefined}
+                    className="input-text"
                     id="phone2"
                     maxLength="11"
                     placeholder="手机号"
                     type="tel" />
                   <div
-                    className={undefined} />
+                    className="clear_num" />
                 </div>
                 <div
-                  className="undefined undefined">
+                  className="text-input-box Mtop20">
                   <input
-                    className={undefined}
+                    className="input-text"
                     id="pwd"
                     maxLength="20"
                     placeholder="6～20位密码"
                     type="password" />
                   <a
-                    className={undefined}
+                    className="pwd-show"
                     href="javascript:;" />
                   <a
-                    className={undefined}
+                    className="pwd-hide"
                     href="javascript:;" />
                   <i
                     className="forget">
@@ -197,14 +322,14 @@ exports[`top user not valid 1`] = `
                   </i>
                 </div>
                 <div
-                  className="undefined undefined">
+                  className="btn-input-box Mtop60">
                   <input
-                    className={undefined}
+                    className="btn-default"
                     id="loginBut2"
                     type="button"
                     value="登录" />
                   <p
-                    className={undefined}>
+                    className="btomjump">
                     <a
                       href="javascript:;"
                       id="go_register">

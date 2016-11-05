@@ -1,5 +1,6 @@
 import Promise from 'bluebird';
 import React from 'react';
+import TestUtils from 'react/lib/ReactTestUtils';
 import { 
   Provider, 
   connect 
@@ -78,6 +79,8 @@ describe('top', function suite() {
   })(AsyncConnect);
 
     pit("info is not valid",function test(){
+    
+    window.__SERVER__ = false;
 
     var preloadstate = Immutable.fromJS({})
 
@@ -101,8 +104,8 @@ describe('top', function suite() {
 
     auth_success();
     orders_is_not_empty();
-    orderinfo_is_not_valid();
-    
+    orderinfo_is_not_valid(0);
+
     var wrapper = mount(
                   <Provider store={store} key="provider">
                       <Router routes={routes} location={location} render={(props) => {
@@ -111,26 +114,31 @@ describe('top', function suite() {
                       </Router>
                   </Provider>
                  );
-    
 
     expect(proto.loadAsyncData.calledOnce).toBe(true);
     expect(proto.componentDidMount.calledOnce).toBe(true);
 
-
-
     expect(beginGlobalLoadSpy.called).toBe(true);
     beginGlobalLoadSpy.reset();
-
+    
     return proto.loadAsyncData.returnValues[0].then(() => {
+      expect(endGlobalLoadSpy.called).toBe(true);
+      var state = store.getState().toJS();
+      expect(!!state.auth.user).toBe(true)
+      //expect(mountToJson(wrapper.find('MyOrder div'))).toMatchSnapshot();
+      var p = wrapper.find('MyOrder div').first();
+      p.simulate('click');
+      return proto.loadAsyncData.returnValues[1];
+    }).then(()=>{
       expect(endGlobalLoadSpy.called).toBe(true);
       var state = store.getState().toJS();
       expect(!!state.auth.user).toBe(true)
       endGlobalLoadSpy.reset();
       proto.loadAsyncData.restore();
       proto.componentDidMount.restore();
-      resetMockOrder();
-      resetMockAuth();
+      console.log(wrapper.html())
     });
+
 
 
   

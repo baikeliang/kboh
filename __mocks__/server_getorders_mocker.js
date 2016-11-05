@@ -9,19 +9,19 @@ export function resetMock(){
 export function orders_is_not_empty() {
     //var token = jwt.sign({ foo: 'bar' }, 'shhhhh');
 
-    var order = {
-        is_return:0 ,
-        patient_name:'tangxin', 
-        service_name:'baya',
-        reserve_number:'cool', 
-        visit_time:'23212' ,
-        status:88, 
-        id:90
-    }
-
     var orders = [];
 
     for(var i=0;i<10;i++){
+        let order = {
+        is_return:0,
+        patient_name:'tangxin', 
+        service_name:'baya',
+        reserve_number:'cool', 
+        visit_time:'23212',
+        status:88, 
+        id:0
+        }
+        order.id = i;
         orders.push(order)
     }
 

@@ -1,7 +1,5 @@
 import React from 'react';
 import Project from './projectRender.js'
-import wxstyles from 'app/common/css/weui.min.css'
-import styles from 'app/common/css/style.css'
 
 
 
@@ -26,24 +24,24 @@ const Projects = React.createClass({
   render() {
     return (
                 <div>
-                 <h3  className={styles.chooseTitle}>选择预约项目</h3>
-                 <div className={styles.chooseProjbox}>
-                  <div className={styles.chooseProjboxdl} id="chooseProjboxdl">
+                 <h3  className="chooseTitle">选择预约项目</h3>
+                 <div className="chooseProjbox">
+                  <div className="chooseProjboxdl" id="chooseProjboxdl">
                   {this.renderProjects()}
                   </div>
                  </div>
-                 <div className={styles.opcitybox} style={{
+                 <div className="opcitybox" style={{
                  display: "none"
                  }}><span></span></div>
-                 <div className={styles.opacityTipbox} style={{
+                 <div className="opacityTipbox" style={{
                  display: "none"
                  }}>
                  <h3>
                  <label>您是否要复诊？</label>
-                 <p className={styles.fuzhentip}><span className={styles.reOrderCancel}>以后再说</span><span className={styles.wantReorder}>我要复诊</span></p>
+                 <p className="fuzhentip"><span className="reOrderCancel">以后再说</span><span className="wantReorder">我要复诊</span></p>
                  </h3>
                  </div>
-                 <div className={styles.fotIcon}>
+                 <div className="fotIcon">
                  <img src={require('app/common/images/logo2.png')} alt="" />
                  <p>轻快预约   从“齿”简单</p>
                  </div>

@@ -4,7 +4,6 @@ import ReactList from 'react-list';
 import Promise from 'bluebird'
 import MyBill from './mybill.js'
 import { isElementVisible } from 'app/util/utils.js'
-import styles from 'app/common/css/style.css'
 import { connect } from 'react-redux';
 import { asyncConnect } from 'redux-connect'
 

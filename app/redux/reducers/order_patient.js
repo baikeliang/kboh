@@ -9,6 +9,7 @@ const LOAD_DETAIL = 'bohe/order_patient/LOAD_DETAIL';
 const LOAD_DETAIL_SUCCESS = 'bohe/order_patient/LOAD_DETAIL_SUCCESS';
 const LOAD_DETAIL_FAIL = 'bohe/order_patient/LOAD_DETAIL_FAIL';
 
+const SET_ORDER_TOSHOW = 'bohe/order_patient/SHOW'
 
 const initialState = Immutable.Map({
     loaded: false,
@@ -37,8 +38,11 @@ export default function reducer(state = initialState, action = {}) {
             return state.merge({ loading: false, loaded: false, error: action.error })
         case LOAD_DETAIL:
             return state.updateIn(['orders'], list => list.map(order => {
+                    //console.log("MMMMMMMMNNNNNNNNNMMMMMMMMMMM")
+                    //console.log(action.id)
+                    //console.log("MMMMMMMMNNNNNNNNNMMMMMMMMMMM")
                     if(order.get('id') == action.id){
-                    return order.merge({loading: true})
+                      return order.merge({loading: true})
                     }
                     return order
             }))
@@ -53,14 +57,24 @@ export default function reducer(state = initialState, action = {}) {
 
         case LOAD_DETAIL_FAIL:  
             return state.updateIn(['orders'], list => list.map(order => {
-                    if(order.get('id') == action.result.id){
-                    return order.merge({loading:false,loaded:false, error: action.error})
+                    if(order.get('id') == action.error.id){
+                    return order.merge({loading:false,loaded:false, error: action.error.info})
                     }
                     return order
-            }))                    
+            }))
+        case SET_ORDER_TOSHOW:
+            return state.merge({ frontorder: action.result } )                                 
         default:
             return state
     }
+}
+
+export function frontOrder({ idx,id }){
+     return {
+        type: SET_ORDER_TOSHOW,
+        result:{ idx,id }
+     }
+
 }
 
 export function LoadedorLoading(state){
@@ -79,8 +93,23 @@ export function LoadedorLoading(state){
    当采用 微信公众号直接跳转时 鉴权阶段使用openid 通过鉴权，签发新的token到state的user中
    所以本地token最大的作用是在进入usercenter时 快捷判断是否登录过
 */
-export function load({ user, num ,begin}) {
+export function load({ user, num ,begin }) {
     var params = { num,begin }
+
+    if ((typeof window === 'undefined')||(window.__SERVER__ == true)) { ///server side
+        if (user.token) ///  微信的鉴权要素是openid
+        {
+            params.token = user.token;
+
+        } else { // server side none key to login
+
+            return {
+                type: LOAD_FAIL,
+                promise: () => Promise.reject({ info: 'auth' })
+            }
+
+        }
+    }
 
     return {
         types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
@@ -101,7 +130,7 @@ export function load({ user, num ,begin}) {
 
                 } else {
                     //var err = { info: 'auth' }
-                    return Promise.reject(res.err)
+                    return Promise.reject({ info: 'notvalid' })
                 }
             },
             error: function(err) {
@@ -139,13 +168,13 @@ export function load_detail({ id }) {
 
                 } else {
                     //var err = { info: 'auth' }
-                    return Promise.reject(res.err)
+                    return Promise.reject({id, info:'notvalid'})
                 }
             },
             error: function(err) {
                 console.log(err)
                 console.log('GGGGGGGGGGGGGG1')
-                return Promise.reject({ info: 'wire' })
+                return Promise.reject({id, info: 'wire' })
             }
         }),
         id

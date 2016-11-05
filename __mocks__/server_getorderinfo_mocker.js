@@ -5,7 +5,7 @@ export function resetMock(){
       fetchMock.restore();
 }
 
-export function orderinfo_is_valid() {
+export function orderinfo_is_valid(id) {
     var response$ = {
         order:{
             relations : 'hghghghgh', 
@@ -21,15 +21,15 @@ export function orderinfo_is_valid() {
             reserve_number : 'cool', 
             visit_time : '23212', 
             status: 1, 
-            id : 90
+            id
         },
         "valid":1
-    };
+    }
 
-   fetchMock.get('http://192.168.10.10/patient/orderInfo/rest?', response$);
+   fetchMock.get('http://192.168.10.10/patient/orderInfo/rest?id='+id, response$);
 }
 
-export function orderinfo_is_not_valid() {
+export function orderinfo_is_not_valid(id) {
     var response$ = {
         order:{
             relations : 'hghghghgh', 
@@ -45,12 +45,12 @@ export function orderinfo_is_not_valid() {
             reserve_number : 'cool', 
             visit_time : '23212', 
             status: 1, 
-            id : 90
+            id
         },
         valid:0
     };
 
-   fetchMock.get('http://192.168.10.10/patient/orderInfo/rest?', response$);
+   fetchMock.get('http://192.168.10.10/patient/orderInfo/rest?id='+id, response$);
 }
 
 export function orderinfo_response_error_500(){

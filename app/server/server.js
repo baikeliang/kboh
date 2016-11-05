@@ -29,8 +29,6 @@ import ApiClient from 'app/isomorphic-api/ApiClient'
 
 import { URLSearchParams } from 'urlsearchparams'
 
-import ajax from './interface/interface.js'
-
 import Promise from 'bluebird'
 
 var cookieParser = require('cookie-parser')
@@ -55,7 +53,8 @@ const HTML = ({ content, store }) => (
     <head>
         <meta charSet="utf-8"/>
         <title>登陆</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1"/>       
+        <link rel="stylesheet" href="/app.css"/>                
     </head>
     <body>
       <div id="root" dangerouslySetInnerHTML={{ __html: content }}/>
@@ -113,17 +112,14 @@ app.use(function (req, res, next) {
       next();
       return;
   }
-  else if(req.url.indexOf('/usercenter?')==0){// any interface can call here
-  var openid = req.query.openid
-
-  }
+  
   match({ history, routes, location: req.url }, (error, redirectLocation, renderProps) => {
     if (error) {
       res.status(500).send(error.message)
     } else if (redirectLocation) {
       res.redirect(302, redirectLocation.pathname + redirectLocation.search)
     } else if (renderProps) {
-      loadOnServer({ ...renderProps, store, params:{openid,token:req.cookies.tokenbohe}}).then(() => {
+      loadOnServer({ ...renderProps, store, params:{ req }}).then(() => {
       // 2. use `ReduxAsyncConnect` instead of `RoutingContext` and pass it `renderProps` 
       const content = renderToString(
         <Provider store={store} key="provider">

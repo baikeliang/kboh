@@ -6,11 +6,17 @@ import Hammer from 'react-hammerjs'
 import Promise from 'bluebird'
 import Immutable from 'immutable'
 
-import { FrontPage } from './view/frontpage.js'
+import { 
+    FrontPage 
+} from './view/frontpage.js'
 
-import { isElementVisible } from 'app/util/utils.js'
+import { 
+    isElementVisible 
+} from 'app/util/utils.js'
 
-import { asyncConnect } from 'redux-connect'
+import { 
+    asyncConnect 
+} from 'redux-connect'
 
 import { 
 	isLoaded as isAuthLoaded, 
@@ -23,23 +29,33 @@ import {
 	load as loadOrders 
 } from 'app/redux/reducers/order_patient';
 
-import { push } from 'react-router-redux';
+import { 
+    push 
+} from 'react-router-redux';
 
-import { connect } from 'react-redux';
+import { 
+    connect 
+} from 'react-redux';
 
 @asyncConnect([{
     promise: ({ store: { dispatch, getState }, params }) => {
 
         if (!isAuthLoaded(getState())) {
             return dispatch(loadAuth(params)).then(function() {
-                if (!successorLoading(getState()))
-                    return dispatch(loadOrders({ num: 15, begin: 0 }));
+                if (!successorLoading(getState())){
+                    let state = getState();
+                    let user = state.getIn(['auth','user']).toJS();
+                    return dispatch(loadOrders({ user, num: 15, begin: 0 }));
+                }
                 else 
                     return Promise.resolve();
             })
         }else{
-             if (!successorLoading(getState()))
-                   return dispatch(loadOrders({ num: 15, begin: 0 })); 
+             if (!successorLoading(getState())){
+                   let state = getState();
+                   let user = state.getIn(['auth','user']).toJS();
+                   return dispatch(loadOrders({ user, num: 15, begin: 0 })); 
+             }
              else
                    return Promise.resolve();         
         }
@@ -82,9 +98,19 @@ export default class MyOrders extends Component {
 	        	   this.props.load({ num: 15, begin: 0 })
 	        }
 	    } else if (ev.direction == 16) {
-	    }
+
+	   }
 
 	}
+
+    handleRefresh(resolve, reject) {
+        // do some async code here
+        let self = this;
+        setTimeout(function() {
+           resolve()
+        }, 500);
+    }
+
 
     componentWillMount() {
         if (this.props.auth.has('user')) {
@@ -111,8 +137,8 @@ export default class MyOrders extends Component {
 	     var options = {
 	        touchAction: 'pan-y'
 	     };
-
-	    return FrontPage({ nodata, options, length: size, handlePan: (::this.handlePan), renderItem: (::this.renderOrder) })
+        var height = window.innerHeight || document.documentElement.clientHeight
+	    return FrontPage({ height, nodata, options, length: size, handlePan: (::this.handlePan), renderItem: (::this.renderOrder),handleRefresh:(::this.handleRefresh) })
 	    }else{
 	    return <div/>;
 	    }

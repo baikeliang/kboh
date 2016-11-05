@@ -2,6 +2,7 @@ require('babel-polyfill');
 var path = require('path');
 var webpack = require('webpack');
 var HtmlwebpackPlugin = require('html-webpack-plugin');
+var ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = {
     //devtool: 'cheap-source-map',
@@ -23,7 +24,8 @@ module.exports = {
                 NODE_ENV: JSON.stringify("production")
             }
         }),
-        new webpack.optimize.CommonsChunkPlugin('vendor',  'vendor.js')
+        new webpack.optimize.CommonsChunkPlugin('vendor',  'vendor.js'),
+        new ExtractTextPlugin("[name].css")
         /*
         new HtmlwebpackPlugin({
         title: '选择预约项目',
@@ -54,9 +56,16 @@ module.exports = {
                 //}
             }
         },{ test: /\.less$/, loader: 'style!css?modules&localIdentName=[name]__[local]!less' },
-        { test: /\.css$/, loader: 'style!css?modules&localIdentName=[name]__[local]' },
+        { 
+          test: /\.css$/,
+          exclude:/(weui\.min\.css|jquery-weui\.min\.css|style\.css|pulldown_Refresh\.css)/, 
+          loader: ExtractTextPlugin.extract('style-loader','css?modules&localIdentName=[name]__[local]') 
+        },
+        { 
+          test: /(weui\.min\.css|jquery-weui\.min\.css|style\.css|pulldown_Refresh\.css)/, loader: ExtractTextPlugin.extract('style-loader', 'css?modules&localIdentName=[local]') 
+        },
         { test: /\.(woff)$/, loader: 'url?limit=100000' },
-        { test: /\.(png|jpg|jpeg|svg)$/, loader: 'url?limit=25000' }]
+        { test: /\.(png|jpg|jpeg|svg|eot|ttf)$/, loader: 'url?limit=25000' }]
     },
     resolve: {
         alias: {
@@ -65,6 +74,3 @@ module.exports = {
     }
 
 };
-console.log('ssss');
-console.log("HHHHHHHf");
-console.log(__dirname);

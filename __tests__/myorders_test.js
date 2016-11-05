@@ -44,6 +44,7 @@ import {
   auth_success,
   auth_is_not_valid,
   auth_response_error_500,
+  auth_success_serverrender_openid,
   resetMock as resetMockAuth
 } from '../__mocks__/server_auth_mocker.js'
 
@@ -58,6 +59,8 @@ import {
   renderToJson 
 } from 'enzyme-to-json';
 
+import { loadOnServer } from 'redux-connect'
+
 
 describe('top', function suite() {
   const endGlobalLoadSpy = spy(endGlobalLoad);
@@ -71,6 +74,8 @@ describe('top', function suite() {
   
   pit("auth not valid",function test(){
 
+    window.__SERVER__ = false;
+    
     var preloadstate = Immutable.fromJS({})
 
     var client = new ApiClient()
@@ -129,6 +134,8 @@ describe('top', function suite() {
   })
 
   pit("auth response 500",function test(){
+    
+    window.__SERVER__ = false;
 
     var preloadstate = Immutable.fromJS({})
 
@@ -191,6 +198,8 @@ describe('top', function suite() {
 
   pit("auth valid : not loading: orders not empty ",function test(){
 
+    window.__SERVER__ = false;
+    
     var preloadstate = Immutable.fromJS({})
 
     var client = new ApiClient()
@@ -247,6 +256,62 @@ describe('top', function suite() {
 
   })
 
-  
+  pit("server render auth succed with openid",function test(){
+
+      window.__SERVER__ = true;
+      
+      var preloadstate = Immutable.fromJS({})
+
+      var client = new ApiClient()
+
+      const history = createMemoryHistory();
+
+      var store = configureStore(history, client, preloadstate)
+ 
+      const proto = ReduxAsyncConnect.WrappedComponent.prototype;
+   
+      spy(proto, 'loadAsyncData');
+
+      auth_success_serverrender_openid();
+
+    return new Promise((resolve, reject) => {
+
+      match({ history, routes, location: '/usercenter/myOrders' }, (error, redirectLocation, renderProps) => {
+         
+         if (error) {
+           return reject(error);
+         }
+         if (redirectLocation) {
+           return reject(new Error('redirected'));
+         }
+         if (!renderProps) {
+           return reject(new Error('404'));
+         }
+
+         var req = {
+            openid:'openidfortest',
+            cookies:{
+              tokenbohe:'dummy'
+            }
+         }
+
+        return loadOnServer({ ...renderProps, store, params:{ req }}).then(() => {
+            const content = render(
+              <Provider store={store} key="provider">
+                <ReduxAsyncConnect {...renderProps} />
+              </Provider>
+            )
+            var state = store.getState().toJS();
+            expect(!!state.auth.user).toBe(true);
+            expect(renderToJson(content)).toMatchSnapshot();
+            resolve();
+          },(err)=>{
+           
+       }).catch(reject);
+
+    })
+   })
+  })
+
 })
 

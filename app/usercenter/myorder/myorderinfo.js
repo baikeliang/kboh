@@ -9,38 +9,44 @@ import { OrderInfo } from './view/orderinfo.js'
 @asyncConnect([{
     promise: ({ store: { dispatch, getState }, params }) => {
         const promises = [];
-        console.log("orderinfo!!!!!!")
         var state = getState();
-        var loc = state.get('routing').toJS()
-        promises.push(dispatch(load({ id: parseInt(loc.locationBeforeTransitions.query.id, 10) })))
+        
+        var id = state.getIn(['order_patient','frontorder','id']);
+
+        console.log(id)
+
+        promises.push(dispatch(load({ id })))
         return Promise.all(promises);
     }
 }])
 @connect(
     state => {
-        console.log("connect myorderinfo!!!!!")
-        var loc = state.get('routing').toJS()
-        var idx = parseInt(loc.locationBeforeTransitions.query.idx, 10)
-        var orders = state.getIn(['order_patient', 'orders']).toJS()
-        console.log(orders)
-        return {...orders[idx] }
+        var idx = state.getIn(['order_patient','frontorder','idx'])
+        var order = state.getIn(['order_patient','orders']).get(idx)
+        return { order ,idx }
     }, { pushState: push })
 export default class MyOrderInfo extends Component {
     static propTypes = {
-        appointment_name: React.PropTypes.string.isRequired,
-        reserve_number: React.PropTypes.number.isRequired,
-        contact_tel: React.PropTypes.string.isRequired,
-        visit_time: React.PropTypes.string.isRequired,
-        company_name: React.PropTypes.string.isRequired,
-        doctor_name: React.PropTypes.string.isRequired,
-        clinic_name: React.PropTypes.string.isRequired,
-        project_name: React.PropTypes.string.isRequired,
-        clinic_address: React.PropTypes.string.isRequired,
-        status: React.PropTypes.number.isRequired,
-        patient_name: React.PropTypes.string.isRequired,
-        relations: React.PropTypes.string.isRequired
+        order:React.PropTypes.object.isRequired,
+        idx:React.PropTypes.number.isRequired
     };
+    constructor(props) {
+      super(props);
+      this.state = {cancelled:false};
+      this.cancelanimateitem = [];
+    }    
+    toCancelOrder(){
+       console.log("sssss") 
+       this.setState({cancelled:true});
+       var that = this; 
+       setTimeout(function(){
+          that.setState({cancelled:false});
+       },1000);
+    }
     render() {
-        return (OrderInfo(this.props));
+        var info = this.props.order.toJS();
+        console.log("ggg")
+        console.log(info)
+        return (OrderInfo({...info,toCancelOrderHandler:(::this.toCancelOrder),cancelled:this.state.cancelled,cancelitem:this.cancelanimateitem}));
     }
 }

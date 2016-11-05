@@ -1,9 +1,5 @@
 import React , { Component } from 'react';
 
-import wxstyles from 'app/common/css/weui.min.css'
-import styles from 'app/common/css/style.css'
-
-
 import Promise from 'bluebird'
 
 import { asyncConnect } from 'redux-connect'
