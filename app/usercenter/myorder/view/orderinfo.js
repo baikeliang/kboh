@@ -23,7 +23,7 @@ export const OrderInfo = ({status,
         var status_class;
         var status_html;
         var cancel_button = '';
-        (function(){         
+        (function(){
         if(status == 1){
         status_class ="yuyuehzong";
         status_html = '已预约'
@@ -54,7 +54,7 @@ export const OrderInfo = ({status,
                       </div>));
         else
           cancelitem.pop()
-        
+
         return (<div>
                             <div className="myOrderdescbox">
                             <div className="weui_cells" style={{borderTop:"1px #e5e5e5 solid"}}>
@@ -66,7 +66,7 @@ export const OrderInfo = ({status,
                             </a>
                             </div>
                             </div>
-                            
+
                             <div className="orderDescContain" style={{borderTop:"none"}}>
                             <p><b>预约项目：</b><span id="project_name">{service_name}</span><em className="clear"></em></p>
                             <p><b>预约编号：</b><span id="reserve_number">{reserve_number}</span><em className="clear"></em></p>
@@ -74,7 +74,7 @@ export const OrderInfo = ({status,
                             <p><b>预约诊所：</b><span id="clinic_name">{clinic_name}</span><em className="clear"></em></p>
                             <p><b>诊所地址：</b><span id="clinic_address">{clinic_address}</span><em className="clear"></em></p>
                             </div>
-                                                      
+
                             <div className="orderDescContain" id="isselfDiv" style={{marginTop:"10px",display:"none"}}>
                             <p><b>就&nbsp;&nbsp;诊&nbsp;人：</b><span id="patient_name">{patient_name}</span><em className="clear"></em></p>
                             <p><b>与我关系：</b><span id="relations">{relations}</span><em className="clear"></em></p>
@@ -87,8 +87,8 @@ export const OrderInfo = ({status,
                             </p>
                             <p><b>联系电话：</b><span id="contact_tel">{contact_tel}</span><em className="clear"></em></p>
                             <p><b>所属公司：</b><span id="company_name">{company_name}</span><em className="clear"></em></p>
-                            </div>         
-                            {cancel_button}                  
+                            </div>
+                            {cancel_button}
                             <div className="opcitybox" style={{display:"none"}}><span></span></div>
                             <ReactCSSTransitionGroup
                               transitionName="cancelorder"
@@ -97,6 +97,6 @@ export const OrderInfo = ({status,
                               {cancelitem}
                             </ReactCSSTransitionGroup>
                             </div>
-                            
+
                             );
       }

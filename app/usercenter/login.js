@@ -31,8 +31,8 @@ export default class Login extends Component {
         	}
     }
 	render(){
-		
+
        return LoginPage({bullet:this.state.bullet,handleSwipe:(::this.handleSwipe)});
 	}
-        	
+
 }

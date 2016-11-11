@@ -27,7 +27,7 @@ export const FrontPage = ({height,
 					</div>
 					<ReactHammer  height={ height } onPan={ handlePan } onRefresh={ handleRefresh }>
 					<div>
-					<div className="myOrdermainbox" style={{marginTop:'10px'}}>  
+					<div className="myOrdermainbox" style={{marginTop:'10px'}}>
 							<ReactList ref="list" axis='y'
 							itemRenderer={ renderItem }
 							length={ length }
@@ -39,4 +39,3 @@ export const FrontPage = ({height,
 		      </div>)
     }
 
-    

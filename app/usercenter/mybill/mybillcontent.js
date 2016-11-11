@@ -22,7 +22,7 @@ import { asyncConnect } from 'redux-connect'
     state => {
         var idx = state.getIn(['bill_patient','frontbill','idx'])
         var abill = state.getIn(['bill_patient','bills']).get(idx)
-        return { abill ,idx }        
+        return { abill ,idx }
     }, { pushState: push, })
 export default class MyBillContent extends Component {
     static propTypes = {

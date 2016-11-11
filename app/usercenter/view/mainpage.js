@@ -7,9 +7,9 @@ export const UCenter = ({
   toOrders,
   toCases,
   toBills
-}) => {       
+}) => {
           var photo = user.photo;
-   
+
           var username = user.username;
 
           return (<div>
@@ -22,7 +22,7 @@ export const UCenter = ({
                        <img className="shezhi" src={require('app/common/images/shezhi.png')} alt="" />
                      </a>
                   </header>
-                  
+
                   <div onClick={toOrder} className="chuzhen">
                      <div className="chuzhenson">
                        <img src={require('app/common/images/huanzhe1.png')} alt="" />
@@ -33,7 +33,7 @@ export const UCenter = ({
                        <div className="clear"></div>
                      </div>
                   </div>
-              
+
                   <div className="block">
                   <div onClick={toOrders} className="a1">
                     <div className="blockson">
@@ -60,10 +60,10 @@ export const UCenter = ({
                     </div>
                   </a>
                   </div>
-              
+
                   <div className="fotIcon">
                     <img src={require('app/common/images/logo2.png')} alt=""/>
                     <p>轻快预约&nbsp;&nbsp;&nbsp;从“齿”简单</p>
                   </div>
-                  </div>) 
+                  </div>)
       }

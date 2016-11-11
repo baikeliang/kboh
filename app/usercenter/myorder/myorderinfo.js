@@ -10,7 +10,7 @@ import { OrderInfo } from './view/orderinfo.js'
     promise: ({ store: { dispatch, getState }, params }) => {
         const promises = [];
         var state = getState();
-        
+
         var id = state.getIn(['order_patient','frontorder','id']);
 
         console.log(id)
@@ -34,11 +34,11 @@ export default class MyOrderInfo extends Component {
       super(props);
       this.state = {cancelled:false};
       this.cancelanimateitem = [];
-    }    
+    }
     toCancelOrder(){
-       console.log("sssss") 
+       console.log("sssss")
        this.setState({cancelled:true});
-       var that = this; 
+       var that = this;
        setTimeout(function(){
           that.setState({cancelled:false});
        },1000);

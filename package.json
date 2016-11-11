@@ -13,7 +13,10 @@
     "start": "babel-node ./app/server.js",
     "builddev": "NODE_ENV=production webpack --config ./webpack.server.config.js",
     "start:main": "export NODE_ENV=production; node ./build/server.js",
-    "start:main_develop": "export NODE_ENV=development; node ./build/server.js"
+    "start:main_develop": "export NODE_ENV=development; node ./build/server.js",
+    "deploy:backend": "NODE_ENV=production webpack -p --display-modules --display-chunks --config webpack.backend.config.js",
+    "builddev:backend" :"NODE_ENV=production webpack --config ./webpack.backend.server.config.js",
+    "start:backend": "export NODE_ENV=production; node ./build_backend/server.js"
   },
   "build": "webpack",
   "author": "",

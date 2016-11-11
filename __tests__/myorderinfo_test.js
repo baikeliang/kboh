@@ -1,39 +1,39 @@
 import Promise from 'bluebird';
 import React from 'react';
 import TestUtils from 'react/lib/ReactTestUtils';
-import { 
-  Provider, 
-  connect 
+import {
+  Provider,
+  connect
 } from 'react-redux';
-import { 
-  Router, 
-  createMemoryHistory, 
-  match, 
-  Route, 
-  IndexRoute 
+import {
+  Router,
+  createMemoryHistory,
+  match,
+  Route,
+  IndexRoute
 } from 'react-router';
-import { 
-  createStore, 
-  combineReducers 
+import {
+  createStore,
+  combineReducers
 } from 'redux';
 import { combineReducers as combineImmutableReducers } from 'redux-immutable';
-import { 
-  mount, 
-  render 
+import {
+  mount,
+  render
 } from 'enzyme';
 import { spy } from 'sinon';
 import { default as Immutable } from 'immutable';
 
 import routes from 'app/routes.js'
 
-import { 
-  configureStore, 
-  DevTools 
+import {
+  configureStore,
+  DevTools
 } from 'app/configure-store'
 
 import ApiClient from 'app/isomorphic-api/ApiClient'
 
-import { 
+import {
   orders_is_not_empty,
   orders_is_empty,
   orders_is_not_valid,
@@ -50,22 +50,22 @@ import {
   resetMock as resetMockInfo
 } from '../__mocks__/server_getorderinfo_mocker.js'
 
-import { 
+import {
   auth_success,
   auth_is_not_valid,
   auth_response_error_500,
   resetMock as resetMockAuth
 } from '../__mocks__/server_auth_mocker.js'
 
-import { 
-  endGlobalLoad, 
-  beginGlobalLoad 
+import {
+  endGlobalLoad,
+  beginGlobalLoad
 } from '../node_modules/redux-connect/lib/store';
 import AsyncConnect from '../node_modules/redux-connect/lib/components/AsyncConnect';
 
-import { 
-  mountToJson, 
-  renderToJson 
+import {
+  mountToJson,
+  renderToJson
 } from 'enzyme-to-json';
 
 
@@ -79,7 +79,7 @@ describe('top', function suite() {
   })(AsyncConnect);
 
     pit("info is not valid",function test(){
-    
+
     window.__SERVER__ = false;
 
     var preloadstate = Immutable.fromJS({})
@@ -89,7 +89,7 @@ describe('top', function suite() {
     const history = createMemoryHistory();
 
     var store = configureStore(history, client, preloadstate)
- 
+
     const proto = ReduxAsyncConnect.WrappedComponent.prototype;
 
     spy(proto, 'loadAsyncData');
@@ -120,7 +120,7 @@ describe('top', function suite() {
 
     expect(beginGlobalLoadSpy.called).toBe(true);
     beginGlobalLoadSpy.reset();
-    
+
     return proto.loadAsyncData.returnValues[0].then(() => {
       expect(endGlobalLoadSpy.called).toBe(true);
       var state = store.getState().toJS();
@@ -141,8 +141,8 @@ describe('top', function suite() {
 
 
 
-  
-    
+
+
   })
 
 })

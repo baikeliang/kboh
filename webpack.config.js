@@ -30,7 +30,7 @@ module.exports = {
         new HtmlwebpackPlugin({
         title: '选择预约项目',
         template: path.resolve(__dirname, 'app/index_template.html'),
-        inject: 'body' // Inject all scripts into the body 
+        inject: 'body' // Inject all scripts into the body
     })*/
     ],
 
@@ -56,13 +56,13 @@ module.exports = {
                 //}
             }
         },{ test: /\.less$/, loader: 'style!css?modules&localIdentName=[name]__[local]!less' },
-        { 
+        {
           test: /\.css$/,
-          exclude:/(weui\.min\.css|jquery-weui\.min\.css|style\.css|pulldown_Refresh\.css)/, 
-          loader: ExtractTextPlugin.extract('style-loader','css?modules&localIdentName=[name]__[local]') 
+          exclude:/(weui\.min\.css|jquery-weui\.min\.css|style\.css|pulldown_Refresh\.css)/,
+          loader: ExtractTextPlugin.extract('style-loader','css?modules&localIdentName=[name]__[local]')
         },
-        { 
-          test: /(weui\.min\.css|jquery-weui\.min\.css|style\.css|pulldown_Refresh\.css)/, loader: ExtractTextPlugin.extract('style-loader', 'css?modules&localIdentName=[local]') 
+        {
+          test: /(weui\.min\.css|jquery-weui\.min\.css|style\.css|pulldown_Refresh\.css)/, loader: ExtractTextPlugin.extract('style-loader', 'css?modules&localIdentName=[local]')
         },
         { test: /\.(woff)$/, loader: 'url?limit=100000' },
         { test: /\.(png|jpg|jpeg|svg|eot|ttf)$/, loader: 'url?limit=25000' }]

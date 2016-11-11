@@ -6,35 +6,35 @@ import Hammer from 'react-hammerjs'
 import Promise from 'bluebird'
 import Immutable from 'immutable'
 
-import { 
-    FrontPage 
+import {
+    FrontPage
 } from './view/frontpage.js'
 
-import { 
-    isElementVisible 
+import {
+    isElementVisible
 } from 'app/util/utils.js'
 
-import { 
-    asyncConnect 
+import {
+    asyncConnect
 } from 'redux-connect'
 
-import { 
-	isLoaded as isAuthLoaded, 
-	load as loadAuth, 
-	logout 
+import {
+	isLoaded as isAuthLoaded,
+	load as loadAuth,
+	logout
 } from 'app/redux/reducers/auth';
 
-import { 
-	LoadedorLoading as successorLoading ,  
-	load as loadOrders 
+import {
+	LoadedorLoading as successorLoading ,
+	load as loadOrders
 } from 'app/redux/reducers/order_patient';
 
-import { 
-    push 
+import {
+    push
 } from 'react-router-redux';
 
-import { 
-    connect 
+import {
+    connect
 } from 'react-redux';
 
 @asyncConnect([{
@@ -45,19 +45,19 @@ import {
                 if (!successorLoading(getState())){
                     let state = getState();
                     let user = state.getIn(['auth','user']).toJS();
-                    return dispatch(loadOrders({ user, num: 15, begin: 0 }));
+                    return dispatch(loadOrders( { user, num: 15, begin: 0, refresh:{flag:true} }));
                 }
-                else 
+                else
                     return Promise.resolve();
             })
         }else{
              if (!successorLoading(getState())){
                    let state = getState();
                    let user = state.getIn(['auth','user']).toJS();
-                   return dispatch(loadOrders({ user, num: 15, begin: 0 })); 
+                   return dispatch(loadOrders( { user, num: 15, begin: 0, refresh:{flag:true}  }));
              }
              else
-                   return Promise.resolve();         
+                   return Promise.resolve();
         }
     }
 }])
@@ -78,7 +78,7 @@ export default class MyOrders extends Component {
 	renderOrder(index, key) {
 
         var orderMeta = this.props.orderRepo.get('orders').get(index).toJS()
-        
+
 		orderMeta.idx = index;
 
         if(this.props.orderRepo.get('orders').size == (index+1)){
@@ -91,11 +91,13 @@ export default class MyOrders extends Component {
 	handlePan(ev) {
 
 	    var toLoad = isElementVisible(ReactDOM.findDOMNode(this._last))
-        
+
 	    if (ev.direction == 8) {
 	        if(toLoad){
-	        	if(!this.props.loading)
-	        	   this.props.load({ num: 15, begin: 0 })
+	        	if(!this.props.loading){
+                   const size = this.props.orderRepo.get('orders').size;
+	        	   this.props.load({ num: 15, begin: size,refresh:false })
+                }
 	        }
 	    } else if (ev.direction == 16) {
 
@@ -105,10 +107,12 @@ export default class MyOrders extends Component {
 
     handleRefresh(resolve, reject) {
         // do some async code here
-        let self = this;
-        setTimeout(function() {
-           resolve()
-        }, 500);
+        //let self = this;
+        //setTimeout(function() {
+        //   resolve()
+        //}, 500);
+
+        this.props.load( { num: 15, begin: 0, refresh:{ flag:true, resolve,reject } } )
     }
 
 
@@ -133,7 +137,7 @@ export default class MyOrders extends Component {
 
 		 var size = this.props.orderRepo.get('orders').size;
 	     var nodata = (size == 0) ? true : false;
-	    
+
 	     var options = {
 	        touchAction: 'pan-y'
 	     };

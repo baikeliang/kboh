@@ -10,7 +10,7 @@ import { LoadedorLoading as successorLoading ,  load as loadOrders } from 'app/r
 
 import { Order } from './view/order.js'
 
-import { 
+import {
     frontOrder
 } from 'app/redux/reducers/order_patient.js'
 
@@ -40,10 +40,10 @@ export default class MyOrder extends Component {
                 pathname: '/usercenter/myOrderInfo',
                 query: { id, idx }
             })
-        
+
 
     }
-    
+
     handleInview(){
     }
 
@@ -58,6 +58,6 @@ export default class MyOrder extends Component {
         } else
             return (Order({...this.props, toDetail: (::this.toDetail) }))
     }
-   
+
 
 }

@@ -19,8 +19,8 @@ export const FrontPage = ({nodata,
 			       <img src={require('app/common/images/logo.png')} alt="" className="logobtom"/>
 			    </div>
  				<Hammer direction={'DIRECTION_VERTICAL'} options={options}  onPan={ handlePan }>
-				<div>  
-				<div className="myOrdermainbox" style={{ marginTop:'10px'}}>           	
+				<div>
+				<div className="myOrdermainbox" style={{ marginTop:'10px'}}>
             	<ReactList ref="list" axis='y'
 							itemRenderer={ renderItem }
 							length={ length }
@@ -32,4 +32,3 @@ export const FrontPage = ({nodata,
 				</div>)
     }
 
-    

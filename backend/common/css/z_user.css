@@ -1,0 +1,479 @@
+
+.default_inputbtn{
+	width: 70px;
+	height: 28px;
+	display: block;
+	line-height: 28px;
+	margin-right: 15px;
+	text-align: center;
+	margin-top: 7px;
+	border-radius: 3px;
+	padding-left: 15px;
+	font-size: 12px;
+	border: none;
+	border: solid 1px #3a91d4;
+}
+.z_time_btn label{
+	float: right;
+}
+.z_save_btn{
+	color: #3a91d4;
+	background: #fff url(../images/savebj.png) no-repeat 15px center;
+	float: right;
+}
+.z_save_btn:hover{
+	color: #fff;
+	background: #3a91d4 url(../images/savebut.png) no-repeat 15px center;
+	
+}
+input.z_save_btn{
+	width:90px;
+}
+
+.see-but{
+	margin-right: 3.5%;
+	color: #3a91d4;
+	background: #fff url(../images/seebtn.png) no-repeat 10px center;
+	float: right;
+}
+.see-but:hover{
+	color: #fff;
+	background: #3a91d4 url(../images/seebtn2.png) no-repeat 10px center;
+	
+}
+.z_add_btn{
+	color: #3a91d4;
+	background: #fff url(../images/add2.png) no-repeat 15px center;
+	float: left;
+}
+.z_add_btn2 {
+	color: #3a91d4;
+	background: #fff url(../images/add2.png) no-repeat 15px center;
+}
+.z_add_btn:hover,.z_add_btn2:hover{
+	color: #fff;
+	background: #3a91d4 url(../images/add.png) no-repeat 15px center;
+	
+}
+.z_edit_btn{
+	color: #3a91d4;
+	background: #fff url(../images/editbtn.png) no-repeat 15px center;
+	float: right;
+}
+.z_edit_btn:hover{
+	color: #fff;
+	background: #3a91d4 url(../images/edit.png) no-repeat 15px center;
+	
+}
+.z_left_box{
+	width:25%;
+	float: left;
+}
+
+.z_right_rbox{
+	width:75%;
+	float: left;
+	padding-bottom: 30px;
+}
+.z_touxiang{
+	width:90px;
+	height: 90px;
+	margin:0 auto;
+	border-radius: 50%;
+	margin-top: 35px;
+	overflow:hidden;
+	border:solid 1px #ccc;
+}
+.z_touxiang img{
+	width:94px;
+	height: 94px;
+	margin-top: -2px;
+	margin-left: -2px;
+}
+.z_but-input{
+	width: 65px;
+	height: 25px;
+	line-height: 25px;
+	text-align: center;
+	border: solid 1px #8c8c8c;
+	color: #8c8c8c;
+	background: #fff;
+	border-radius: 3px;
+	font-size: 12px;
+	margin:0 auto;
+	margin-top: 15px;
+	cursor: pointer;
+	position: relative;
+}
+.z_but-input:hover{
+	background: #8c8c8c;
+	color: #fff;
+}
+.z_main_contain{
+	width:98%;
+	border-bottom: 1px #dbdbdb solid;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+.z_main_left{
+	width:320px;
+	float: left;
+}
+.z_main_right{
+	width:55%;
+	float: left;
+}
+.h25>span{
+	width:80px;
+	height:25px;
+	line-height: 25px;
+}
+.h25 input.text-input{
+	width:155px;
+	min-height:25px;
+	height:25px;
+	line-height: 25px;
+	padding-left: 5px;
+}
+.h25 p{
+	clear:both;
+	padding-left: 90px;
+	padding-bottom: 10px;
+}
+.h25 .select-div{
+	height: 27px;
+	width:160px;
+	padding-left: 5px;
+}
+.h25 .radio-box{
+	margin:0;
+}
+.h25 .radio-box span{
+	line-height: 27px;
+}
+.h25 .radio-box label{
+	top:4px;
+}
+.h25 input.W475{
+	width:475px;
+}
+.radio-box span{
+	width:40px;
+	display: block;
+}
+.radio-box label{
+	width:auto;
+	height:19px;
+	line-height: 19px;
+	top:0;
+	background: url(../images/radiog.png) no-repeat left top;
+	padding-left: 20px;
+	cursor: pointer;
+}
+.radio1:checked+label {
+	width: auto;
+	height:19px;
+	line-height: 19px;
+	background: url(../images/radiob.png) no-repeat left top;
+	padding-left: 20px;
+	cursor: pointer;
+}
+
+
+/* 既往史样式 */
+.z_jws_main h2{
+	width:100%;
+	height:28px;
+	line-height: 28px;
+	font-size: 12px;
+	font-weight: normal;
+	background: #f5f7f9;
+	border-bottom: solid 1px #ebebeb;
+	border-top:solid 1px #ebebeb;
+}
+.z_jws_main h2 i{
+	width:10px;
+	height:10px;
+	display: block;
+	float: left;
+	margin:10px 7px 0 10px;
+}
+.z_jws_main h2 span{
+	color: #5e90d1;
+}
+.z_jws_main h2 i.row_1{
+	background: url(../images/z_row.png) no-repeat 0 0 ;
+}
+.z_jws_main h2 i.row_2{
+	background: url(../images/z_row.png) no-repeat 0 -10px ;
+}
+.z_jws_main h2 i.row_3{
+	background: url(../images/z_row.png) no-repeat 0 -20px ;
+}
+.z_jws_main h2 i.row_4{
+	background: url(../images/z_row.png) no-repeat 0 -30px ;
+}
+.z_jws_main h2 i.row_5{
+	background: url(../images/z_row.png) no-repeat 0 -40px ;
+}
+.z_jws_main h2 i.row_6{
+	background: url(../images/z_row.png) no-repeat 0 -50px ;
+}
+.z_checkbox_main{
+	max-width: 800px;
+	padding-left: 50px;
+	padding-top: 15px;
+	padding-bottom: 10px;
+}
+.z_checkbox_main .checkbox-box i{
+	height:30px;
+	line-height: 20px;
+	float: left;
+	padding-left: 20px;
+}
+.z_checkbox_main .checkbox-box span input[type="checkbox"]{
+	position: absolute;
+	top:4px;
+	left:16px;
+}
+.z_checkbox_main .checkbox-box label{
+	top:0;
+	width:auto;
+	cursor: pointer;
+	position: relative;
+	height:30px;
+	background: url(../images/check.png) no-repeat left 2px;
+	float: left;
+}
+.checkbox-box input[type=checkbox]:checked + label {
+	position: relative;
+	top:0;
+	width: auto;
+	height:30px;
+	background: url(../images/checked.png) no-repeat left 2px;
+}
+.z_checkbox_main .checkbox-box span em{float:left;}
+.z_checkbox_main .checkbox-box span b{
+	font-weight: normal;
+	padding-left: 20px;
+	float: left;
+	line-height:20px;
+}
+.z_checkbox_main .checkbox-box span input[type="text"]{
+	float: left;
+	width:100px;
+	height: 20px;
+	line-height: 20px;
+	border-radius: 3px;
+	border:solid 1px #d1d1d1;
+	font-size: 12px;
+	background: #fff;
+}
+.clear_checkbox span{
+	clear:both;
+}
+.layicon {
+	background: url(../images/rili.png) no-repeat 95% center;
+}
+.userInfobox{
+	height:75px;
+	background: #fff;
+	border-bottom: 1px #dbdbdb solid;
+}
+.user_topmenu_edit{
+	top:175px;
+}
+.z_time_edit{
+	top:214px;
+}
+.z_userContain_edit{
+	top:260px;
+}
+.rtop_edit{
+	height:120px;
+}
+.userInfobox dl{
+	min-width: 1000px;
+	padding-top: 12px;
+}
+.userInfobox dt{
+	width:50px;
+	height:50px;
+	border-radius: 50%;
+	margin-left:20px;
+	float: left;
+	overflow: hidden;
+	border:solid 1px #ccc;
+}
+.userInfobox dt img{
+	width:54px;
+	height:54px;
+	margin-top: -2px;
+	margin-left: -2px;
+	overflow: hidden;
+	border-radius: 50%;
+}
+.userInfobox dd{
+	width:300px;
+	float: left;
+	padding-left: 20px;
+}
+.userInfobox dd h3,.userInfobox dd p{
+	font-weight: normal;
+	font-size: 14px;
+	line-height: 25px;
+}
+.userInfobox dd h3 span{
+	padding-right: 50px;
+}
+
+.z_time_btn p{
+	float: left;
+	line-height: 45px;
+	padding-left: 20px;
+	width:550px;
+	color: #666;
+}
+.z_time_btn p span{
+	color: #000;
+}
+.z_time_btn p b{
+	font-weight: normal;
+	float: left;
+}
+.z_time_btn p select{
+	width:100px;
+	height:25px;
+	border-radius: 3px;
+	border:solid 1px #ccc;
+	float: left;
+	margin:10px 30px 0 5px;
+	font-size: 12px;
+}
+.z_userContain_see .checkbox-box label,.z_userContain_see .checkbox-box{
+	cursor: auto;
+}
+/* 家庭成员样式 */
+table.family_able{
+	width:95%;
+	margin:0 auto;
+	margin-top: 10px;
+}
+table.family_able thead th{
+	width:25%;
+	background: #e6e8ef;
+}
+table.family_able tbody tr:nth-child(even) td{
+	background: #f8fafc;
+}
+table.family_able tbody tr:hover > td {
+	background-color: #e4fbff;
+}
+
+table.family_able tbody tr td span.operate a.edit_pre{
+	color: #3a91d4;
+	border-bottom: 1px #d7e2f2 solid;
+}
+table.family_able tbody tr td span.operate a.delete_pre{
+	margin-left: 30px;
+	color: red;
+	border-bottom: 1px #f4cfd0 solid;
+}
+table.family_able tbody tr td span.operate a.edit_pre:hover{
+	color: #3775c6;
+}
+table.family_able tbody tr td span.operate a.delete_pre:hover{
+	color: #ff5050;
+}
+
+
+/* 查看页面样式 */
+.z_textinfo{
+	width:200px;
+	float: left;
+	line-height: 25px;
+	min-height: 25px;
+	font-size: 12px;
+	color: #000;
+}
+.chakanspan span{
+	color: #666;
+}
+.creat_time_h6{
+	font-weight: normal;
+}
+
+
+.W520{
+	width:520px;
+}
+.W120{
+	width:120px;
+}
+.pbtom30{
+	margin-bottom: 30px;
+}
+.no_border{
+	border:none;
+}
+.z_checkbox_main .checkbox-box span input[type="text"].Wid480{
+	width:480px;
+	display: none;
+}
+.new_time{
+	color: #000;
+}
+/* .see_hide span{
+	display:none;
+} */
+.readonly{
+	background: #fff;
+}
+.no_add_real{
+	font-weight: normal;
+	color: #888;
+}
+.z_past_desc span{
+	float: left;
+	line-height: 20px;
+	padding-right: 20px;
+}
+.z_no_past_data{
+	height:100%;
+}
+.z_no_past_data p{
+	width:150px;
+	text-align: center;
+	margin:0 auto;
+	padding-top: 50px;
+}
+.z_no_past_data p img{
+	width:70px;
+	height:70px;
+	margin:0 auto;
+	display: block;
+}
+.z_no_past_data p span{
+	color: #000;
+	line-height: 25px;
+}
+
+.z_no_past_data p a{
+	margin:0 auto;
+	clear:both;
+	margin-top:10px;
+	margin-bottom: 50px;
+}
+.z_userContainMain{
+	border-top: none;
+}
+.nobord_btom{
+	border-bottom:none;
+}
+.z_default_desc{
+	color: #999;
+	line-height: 25px;
+	padding-left: 10px;
+	font-size: 12px;
+	float: left;
+}

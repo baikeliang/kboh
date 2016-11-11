@@ -1,39 +1,39 @@
 
 import Promise from 'bluebird';
 import React from 'react';
-import { 
-  Provider, 
-  connect 
+import {
+  Provider,
+  connect
 } from 'react-redux';
-import { Router, 
-  createMemoryHistory, 
-  match, 
-  Route, 
-  IndexRoute 
+import { Router,
+  createMemoryHistory,
+  match,
+  Route,
+  IndexRoute
 } from 'react-router';
 
-import { 
-  createStore, 
-  combineReducers 
+import {
+  createStore,
+  combineReducers
 } from 'redux';
 import { combineReducers as combineImmutableReducers } from 'redux-immutable';
-import { 
-  mount, 
-  render 
+import {
+  mount,
+  render
 } from 'enzyme';
 import { spy } from 'sinon';
 import { default as Immutable } from 'immutable';
 
 import routes from 'app/routes.js'
 
-import { 
-  configureStore, 
-  DevTools 
+import {
+  configureStore,
+  DevTools
 } from 'app/configure-store'
 
 import ApiClient from 'app/isomorphic-api/ApiClient'
 
-import { 
+import {
   auth_success,
   auth_is_not_valid,
   auth_response_error_500,
@@ -42,15 +42,15 @@ import {
   resetMock as resetMockAuth
 } from '../__mocks__/server_auth_mocker.js'
 
-import { 
-  endGlobalLoad, 
-  beginGlobalLoad 
+import {
+  endGlobalLoad,
+  beginGlobalLoad
 } from '../node_modules/redux-connect/lib/store';
 import AsyncConnect from '../node_modules/redux-connect/lib/components/AsyncConnect';
 
-import { 
-  mountToJson, 
-  renderToJson 
+import {
+  mountToJson,
+  renderToJson
 } from 'enzyme-to-json';
 
 import { loadOnServer } from 'redux-connect'
@@ -68,9 +68,9 @@ describe('top', function suite() {
   })(AsyncConnect);
 
   pit('user not valid', function test(){
-     
+
     window.__SERVER__ = false;
-        
+
     var preloadstate = Immutable.fromJS({})
 
     var client = new ApiClient()
@@ -78,9 +78,9 @@ describe('top', function suite() {
     const history = createMemoryHistory();
 
     var store = configureStore(history, client, preloadstate)
- 
+
     const proto = ReduxAsyncConnect.WrappedComponent.prototype;
-   
+
 
 
     spy(proto, 'loadAsyncData');
@@ -103,7 +103,7 @@ describe('top', function suite() {
                       </Router>
                   </Provider>
                  );
-    
+
 
     expect(proto.loadAsyncData.calledOnce).toBe(true);
     expect(proto.componentDidMount.calledOnce).toBe(true);
@@ -126,7 +126,7 @@ describe('top', function suite() {
       proto.componentDidMount.restore();
       resetMockAuth();
     });
-  
+
   });
 
   pit('auth succed', function test() {
@@ -140,9 +140,9 @@ describe('top', function suite() {
     const history = createMemoryHistory();
 
     var store = configureStore(history, client, preloadstate)
- 
+
     const proto = ReduxAsyncConnect.WrappedComponent.prototype;
-    
+
 
     spy(proto, 'loadAsyncData');
     spy(proto, 'componentDidMount');
@@ -163,7 +163,7 @@ describe('top', function suite() {
            </Router>
        </Provider>
       );
-    
+
 
     expect(proto.loadAsyncData.calledOnce).toBe(true);
     expect(proto.componentDidMount.calledOnce).toBe(true);
@@ -180,14 +180,14 @@ describe('top', function suite() {
       endGlobalLoadSpy.reset();
       proto.loadAsyncData.restore();
       proto.componentDidMount.restore();
-      resetMockAuth();     
+      resetMockAuth();
     });
   });
 
 
   pit('auth err 500',function test(){
 
-     
+
     window.__SERVER__ = false;
 
     var preloadstate = Immutable.fromJS({})
@@ -197,7 +197,7 @@ describe('top', function suite() {
     const history = createMemoryHistory();
 
     var store = configureStore(history, client, preloadstate)
- 
+
     const proto = ReduxAsyncConnect.WrappedComponent.prototype;
 
     spy(proto, 'loadAsyncData');
@@ -219,7 +219,7 @@ describe('top', function suite() {
            </Router>
        </Provider>
       );
-    
+
 
     expect(proto.loadAsyncData.calledOnce).toBe(true);
     expect(proto.componentDidMount.calledOnce).toBe(true);
@@ -228,22 +228,22 @@ describe('top', function suite() {
 
     expect(beginGlobalLoadSpy.called).toBe(true);
     beginGlobalLoadSpy.reset();
-    
+
     return proto.loadAsyncData.returnValues[0].then(() => {
       expect(endGlobalLoadSpy.called).toBe(true);
       endGlobalLoadSpy.reset();
       proto.loadAsyncData.restore();
       proto.componentDidMount.restore();
     });
-  
-  
+
+
 
   })
 
   pit("server render auth succed with openid",function test(){
 
       window.__SERVER__ = true;
-      
+
       var preloadstate = Immutable.fromJS({})
 
       var client = new ApiClient()
@@ -251,9 +251,9 @@ describe('top', function suite() {
       const history = createMemoryHistory();
 
       var store = configureStore(history, client, preloadstate)
- 
+
       const proto = ReduxAsyncConnect.WrappedComponent.prototype;
-   
+
       spy(proto, 'loadAsyncData');
 
       auth_success_serverrender_openid();
@@ -261,7 +261,7 @@ describe('top', function suite() {
     return new Promise((resolve, reject) => {
 
       match({ history, routes, location: '/usercenter?' }, (error, redirectLocation, renderProps) => {
-         
+
          if (error) {
            return reject(error);
          }
@@ -293,17 +293,17 @@ describe('top', function suite() {
             resetMockAuth();
             resolve();
           },(err)=>{
-           
+
        }).catch(reject);
 
     })
    })
   })
-  
+
   pit('server render auth fail with openid',function test(){
 
       window.__SERVER__ = true;
-      
+
       var preloadstate = Immutable.fromJS({})
 
       var client = new ApiClient()
@@ -311,7 +311,7 @@ describe('top', function suite() {
       const history = createMemoryHistory();
 
       var store = configureStore(history, client, preloadstate)
- 
+
       const proto = ReduxAsyncConnect.WrappedComponent.prototype;
       spy(proto, 'loadAsyncData');
 
@@ -320,7 +320,7 @@ describe('top', function suite() {
       return new Promise((resolve, reject) => {
 
        match({ history, routes, location: '/usercenter?' }, (error, redirectLocation, renderProps) => {
-         
+
          if (error) {
            return reject(error);
          }
@@ -352,5 +352,5 @@ describe('top', function suite() {
 
 
   })
-  
+
 })

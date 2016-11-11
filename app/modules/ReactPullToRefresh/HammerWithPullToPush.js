@@ -141,7 +141,7 @@ export default class ReactHammer extends Component {
 
 		// The loading function should return a promise
 		var loadingPromise = this.options.loadingFunction();
-        
+
 		// For UX continuity, make sure we show loading for at least one second before resetting
 		setTimeout( function() {
 			// Once actual loading is complete, reset pull to refresh
@@ -224,7 +224,7 @@ export default class ReactHammer extends Component {
         height,
         ...rest
        } = this.props;
-  
+
        if (disabled) {
          return (
            <div {...rest}>

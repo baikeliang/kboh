@@ -51,9 +51,9 @@ export default class MyCases extends Component {
 	// methods
 	handlePan(ev) {
 	    //var range = this.refs.list.getVisibleRange();
-	    
+
 	    var toLoad = isElementVisible(ReactDOM.findDOMNode(this._last))
-        
+
         console.log(toLoad)
 	    console.log("pan!!!!!!!!!!!!")
 	    console.log(ev.isFinal)
@@ -75,7 +75,7 @@ export default class MyCases extends Component {
 	        console.log("down")
 	    }
 
-	}	
+	}
     render() {
     	var size = this.props.caseMetas.size;
         var nodata = (size == 0) ? true : false;

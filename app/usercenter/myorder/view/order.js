@@ -10,7 +10,7 @@ export const Order = ({status,
   toDetail
 }) => {
 
-          return (<div onClick={ toDetail }> 
+          return (<div onClick={ toDetail }>
                         <div className="weui_cells weui_cells_access">
                         <a className="weui_cell">
                         <div className="weui_cell_hd">
@@ -34,7 +34,7 @@ export const Order = ({status,
                                     break;
                                 case 4:
                                     ret = <i className="quxiao">已取消</i>;
-                                    break;            
+                                    break;
                                 default:
                                     break;
                             }

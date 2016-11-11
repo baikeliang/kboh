@@ -19,24 +19,24 @@ import Login from 'app/usercenter/login.js'
 
 const App = ({ children }) => (
   <div>
-    {children || "ddddd"} 
+    {children || "ddddd"}
   </div>
 )
 
 const UserCenter =  ({ children }) => (
   <div>
-    {children} 
+    {children}
   </div>
 )
 
 function requireAuth(nextState, replaceState) {
-  
+
   //if ((__SERVER__==false)&&localStorage&&(!localStorage.token))
   //    replaceState({ nextPathname: nextState.location.pathname }, '/login')
-  
-  
+
+
   console.log("require.....auth")
-  
+
 }
 
 const routes = (
@@ -52,8 +52,8 @@ const routes = (
           <Route path="/usercenter/myBills" component={ MyBills }/>
           <Route path="/usercenter/myBillContent" component={ MyBillContent }/>
 
-        </Route>        
-        <Route path="login" component={ Login } />  
+        </Route>
+        <Route path="login" component={ Login } />
       </Route>
 )
 

@@ -53,8 +53,8 @@ const HTML = ({ content, store }) => (
     <head>
         <meta charSet="utf-8"/>
         <title>登陆</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1"/>       
-        <link rel="stylesheet" href="/app.css"/>                
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1"/>
+        <link rel="stylesheet" href="/app.css"/>
     </head>
     <body>
       <div id="root" dangerouslySetInnerHTML={{ __html: content }}/>
@@ -86,10 +86,10 @@ app.get('/wxcallback/auth',function(req,res){  //wx interface type to decide whi
         let openid = 'asdaaaaa'
 
         let u = new URLSearchParams();
-        
+
         console.log('KKKKKKKK'+u)
 
-        u.append('openid', openid);   
+        u.append('openid', openid);
         res.redirect('/usercenter?'+u)//just sample use type to switch
 
     }
@@ -112,7 +112,7 @@ app.use(function (req, res, next) {
       next();
       return;
   }
-  
+
   match({ history, routes, location: req.url }, (error, redirectLocation, renderProps) => {
     if (error) {
       res.status(500).send(error.message)
@@ -120,7 +120,7 @@ app.use(function (req, res, next) {
       res.redirect(302, redirectLocation.pathname + redirectLocation.search)
     } else if (renderProps) {
       loadOnServer({ ...renderProps, store, params:{ req }}).then(() => {
-      // 2. use `ReduxAsyncConnect` instead of `RoutingContext` and pass it `renderProps` 
+      // 2. use `ReduxAsyncConnect` instead of `RoutingContext` and pass it `renderProps`
       const content = renderToString(
         <Provider store={store} key="provider">
           <ReduxAsyncConnect {...renderProps} />
@@ -129,9 +129,9 @@ app.use(function (req, res, next) {
       //console.log("~~~~~~~~"+store.getState().auth.token)
       //res.setHeader("Set-Cookie", ['tokenbohe='+store.getState().auth.token]);
       res.send('<!doctype html>\n' + renderToString(<HTML content={content} store={store}/>))
-    
+
     },(err)=>{
-      
+
     })
     }
   })

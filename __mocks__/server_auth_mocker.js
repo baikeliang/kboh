@@ -22,7 +22,7 @@ export function auth_success() {
 
 export function auth_success_serverrender_openid(){
     var token = "kjhuih";
-    
+
     var ret$ = {
         username: "king",
         valid: 1,
@@ -35,7 +35,7 @@ export function auth_success_serverrender_openid(){
 
 export function auth_failed_serverrender_openid(){
     var token = "kjhuih";
-    
+
     var ret$ = {
         username: "king",
         valid: 0,

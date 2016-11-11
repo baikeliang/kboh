@@ -23,18 +23,18 @@ export const LoginPage = ({
 }) => {
 	    var bodystyle = {
 			position: "relative",
-			height: "100%",	
+			height: "100%",
 			fontFamily: "Helvetica Neue, Helvetica, Arial, sans-serif",
 			fontSize: "14px",
 			color:"#000",
 			margin: 0,
-			padding: 0,		
+			padding: 0,
             WebkitTapHighlightColor: "transparent",
             FontFamily: "微软雅黑,Arial,sans-serif",
             background: "#fff",
             margin:0,
             padding:0
-           } 
+           }
         return (
             <div style={bodystyle}>
             	<div className={loginstyles.wrapper}>
@@ -65,7 +65,7 @@ export const LoginPage = ({
 						</div>
 				    </div>
                     <div>
-                        <div className={loginstyles.wrapper}>                    
+                        <div className={loginstyles.wrapper}>
 							<div className={loginstyles['text-input-box']+' '+loginstyles.Mtop40}>
 								<input type="tel" className={loginstyles['input-text']} id="phone2" maxLength="11" placeholder="手机号"/>
 								<div className={loginstyles.clear_num}></div>
@@ -81,7 +81,7 @@ export const LoginPage = ({
 								<p className={loginstyles.btomjump}>没有账号？<a href="javascript:;" id="go_register">立即注册</a></p>
 							</div>
 						</div>
-					</div>                  
+					</div>
                 </ReactSwipe>
                </div>
                </Hammer>

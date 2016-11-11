@@ -23757,7 +23757,7 @@ module.exports =
 	      res.redirect(302, redirectLocation.pathname + redirectLocation.search);
 	    } else if (renderProps) {
 	      (0, _reduxConnect.loadOnServer)((0, _extends3.default)({}, renderProps, { store: store, params: { req: req } })).then(function () {
-	        // 2. use `ReduxAsyncConnect` instead of `RoutingContext` and pass it `renderProps` 
+	        // 2. use `ReduxAsyncConnect` instead of `RoutingContext` and pass it `renderProps`
 	        var content = (0, _server.renderToString)(_react2.default.createElement(
 	          _reactRedux.Provider,
 	          { store: store, key: 'provider' },
@@ -24184,7 +24184,7 @@ module.exports =
 	    key: 'toOrder',
 	    value: function toOrder(event) {
 	      event.preventDefault();
-	      this.props.pushState('/login');
+	      this.props.pushState('/usercenter/toOrder');
 	    }
 	  }, {
 	    key: 'toOrders',
@@ -24332,9 +24332,9 @@ module.exports =
 	    var params = {};
 	    if (typeof window === 'undefined' || window.__SERVER__ == true) {
 	        ///server side
-	        if (req.openid) ///  微信的鉴权要素是openid
+	        if (req.query && req.query.openid) ///  微信的鉴权要素是openid
 	            {
-	                params.openid = req.openid;
+	                params.openid = req.query.openid;
 	            } else if (req.cookies.tokenbohe) {
 	            /// 浏览器访问的鉴权要素是 cookie token
 	
@@ -24380,7 +24380,7 @@ module.exports =
 	    return {
 	        types: [LOGIN, LOGIN_SUCCESS, LOGIN_FAIL],
 	        promise: function promise(client) {
-	            return client.POST('/login', {
+	            return client.POST('http://192.168.10.10/login', {
 	                data: {
 	                    name: name
 	                }
@@ -24495,14 +24495,14 @@ module.exports =
 	                if (!(0, _order_patient.LoadedorLoading)(getState())) {
 	                    var state = getState();
 	                    var user = state.getIn(['auth', 'user']).toJS();
-	                    return dispatch((0, _order_patient.load)({ user: user, num: 15, begin: 0 }));
+	                    return dispatch((0, _order_patient.load)({ user: user, num: 15, begin: 0, refresh: { flag: true } }));
 	                } else return _bluebird2.default.resolve();
 	            });
 	        } else {
 	            if (!(0, _order_patient.LoadedorLoading)(getState())) {
 	                var state = getState();
 	                var user = state.getIn(['auth', 'user']).toJS();
-	                return dispatch((0, _order_patient.load)({ user: user, num: 15, begin: 0 }));
+	                return dispatch((0, _order_patient.load)({ user: user, num: 15, begin: 0, refresh: { flag: true } }));
 	            } else return _bluebird2.default.resolve();
 	        }
 	    }
@@ -24546,7 +24546,10 @@ module.exports =
 	
 	            if (ev.direction == 8) {
 	                if (toLoad) {
-	                    if (!this.props.loading) this.props.load({ num: 15, begin: 0 });
+	                    if (!this.props.loading) {
+	                        var size = this.props.orderRepo.get('orders').size;
+	                        this.props.load({ num: 15, begin: size, refresh: false });
+	                    }
 	                }
 	            } else if (ev.direction == 16) {}
 	        }
@@ -24554,10 +24557,12 @@ module.exports =
 	        key: 'handleRefresh',
 	        value: function handleRefresh(resolve, reject) {
 	            // do some async code here
-	            var self = this;
-	            setTimeout(function () {
-	                resolve();
-	            }, 500);
+	            //let self = this;
+	            //setTimeout(function() {
+	            //   resolve()
+	            //}, 500);
+	
+	            this.props.load({ num: 15, begin: 0, refresh: { flag: true, resolve: resolve, reject: reject } });
 	        }
 	    }, {
 	        key: 'componentWillMount',
@@ -26118,8 +26123,13 @@ module.exports =
 	        case LOAD_SUCCESS:
 	            var allres;
 	            if (_immutable2.default.List.isList(state.get('orders'))) {
+	                if (!action.refresh) {
 	
-	                allres = state.get('orders').pop().toJS().concat(action.result);
+	                    allres = state.get('orders').pop().toJS().concat(action.result);
+	                } else if (action.refresh.resolve) {
+	
+	                    action.refresh.resolve();
+	                }
 	            }
 	            if (allres) {
 	                allres.push({ flag: true });
@@ -26129,13 +26139,13 @@ module.exports =
 	                return state.merge({ loading: false, loaded: true, orders: action.result });
 	            }
 	        case LOAD_FAIL:
+	            if (action.refresh && action.refresh.reject) {
+	                action.refresh.reject();
+	            }
 	            return state.merge({ loading: false, loaded: false, error: action.error });
 	        case LOAD_DETAIL:
 	            return state.updateIn(['orders'], function (list) {
 	                return list.map(function (order) {
-	                    //console.log("MMMMMMMMNNNNNNNNNMMMMMMMMMMM")
-	                    //console.log(action.id)
-	                    //console.log("MMMMMMMMNNNNNNNNNMMMMMMMMMMM")
 	                    if (order.get('id') == action.id) {
 	                        return order.merge({ loading: true });
 	                    }
@@ -26198,13 +26208,17 @@ module.exports =
 	    var user = _ref2.user;
 	    var num = _ref2.num;
 	    var begin = _ref2.begin;
+	    var req = _ref2.req;
+	    var refresh = _ref2.refresh;
 	
-	    var params = { num: num, begin: begin };
+	    var params = {};
 	
 	    if (typeof window === 'undefined' || window.__SERVER__ == true) {
 	        ///server side
-	        if (user.token) ///  微信的鉴权要素是openid
+	        if (user.token) ///  鉴权通过 已经持有 token
 	            {
+	
+	                params = { num: req.query.num, begin: req.query.begin };
 	                params.token = user.token;
 	            } else {
 	            // server side none key to login
@@ -26216,6 +26230,8 @@ module.exports =
 	                }
 	            };
 	        }
+	    } else {
+	        params = { num: num, begin: begin };
 	    }
 	
 	    return {
@@ -26237,14 +26253,15 @@ module.exports =
 	                        return _bluebird2.default.resolve(res.orders);
 	                    } else {
 	                        //var err = { info: 'auth' }
-	                        return _bluebird2.default.reject(res.err);
+	                        return _bluebird2.default.reject({ info: 'notvalid' });
 	                    }
 	                },
 	                error: function error(err) {
 	                    return _bluebird2.default.reject({ info: 'wire' });
 	                }
 	            });
-	        }
+	        },
+	        refresh: refresh
 	    };
 	}
 	

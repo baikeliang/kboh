@@ -55,9 +55,9 @@ export function isLoaded(globalState) {
 export function load({ req }) {
     var params = {}
     if ((typeof window === 'undefined')||(window.__SERVER__ == true)) { ///server side
-        if (req.openid) ///  微信的鉴权要素是openid
+        if (req.query && req.query.openid) ///  微信的鉴权要素是openid
         {
-            params.openid = req.openid;
+            params.openid = req.query.openid;
 
         } else if (req.cookies.tokenbohe) { /// 浏览器访问的鉴权要素是 cookie token
 
@@ -90,7 +90,7 @@ export function load({ req }) {
                     return Promise.reject({ info: 'auth'})
                 }
             },
-            error: function(err) {     
+            error: function(err) {
                 return  Promise.reject({ info: 'wire' })
             }
         })
@@ -103,7 +103,7 @@ export function load({ req }) {
 export function login(name) {
   return {
     types: [LOGIN, LOGIN_SUCCESS, LOGIN_FAIL],
-    promise: (client) => client.POST('/login', {
+    promise: (client) => client.POST('http://192.168.10.10/login', {
       data: {
         name: name
       }

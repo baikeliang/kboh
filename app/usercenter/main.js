@@ -27,12 +27,12 @@ import { UCenter } from './view/mainpage.js'
   state => ({ auth : state.get('auth')}),
   {logout, pushState: push})
 export default class UserCenter extends Component {
-    
+
     toOrder(event){
     	event.preventDefault();
-    	this.props.pushState('/login')
+    	this.props.pushState('/usercenter/toOrder')
     }
-    
+
     toOrders(event){
     	event.preventDefault();
     	this.props.pushState('/usercenter/myOrders')
@@ -40,11 +40,11 @@ export default class UserCenter extends Component {
 
     toCases(event){
     	event.preventDefault();
-    	this.props.pushState('/usercenter/myCases')       
+    	this.props.pushState('/usercenter/myCases')
     }
     toBills(event){
         event.preventDefault();
-    	this.props.pushState('/usercenter/myBills') 	
+    	this.props.pushState('/usercenter/myBills')
     }
     componentWillMount(){
        if(this.props.auth.has('user')){
@@ -60,17 +60,17 @@ export default class UserCenter extends Component {
     }
     render() {
     	//console.log(this.props)
-        
+
         if(this.props.auth.has('user')){
-        
+
         var user = this.props.auth.get('user').toJS();
-        
+
         return UCenter({ user,
              toOrder:(::this.toOrder),
              toOrders:(::this.toOrders),
              toCases:(::this.toCases),
-             toBills:(::this.toBills)   
-        });	
+             toBills:(::this.toBills)
+        });
       }else{
       	return <div/>;
       }
