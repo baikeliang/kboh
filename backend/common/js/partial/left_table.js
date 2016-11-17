@@ -11,25 +11,27 @@ export const LeftList = ({
         var itemid_lv1 = item.id;
 
         if(item.children){
-          return (<li className="cur" onClick={ (ev) =>{ onClickToExpand(ev,itemid_lv1); }}>
-                    <label>
+          return (<li>
+                     <label className={(table.choose&&(table.choose==item.id))?styles['cur']:''} onClick={ (ev) =>{ onClickToExpand(ev,itemid_lv1); }}>
                      <a className={styles[item.classname]} href="#">
                      <b>{item.name}</b>
                      </a>
-                     <i className={item.showchild?'roate':''}></i>
+                     <i className={item.showchild?styles['roate']:''}></i>
                      </label>
-                      {item.showchild?item.children.map((child)=>{
+                     {item.showchild?item.children.map((child)=>{
                         var itemid_lv2 = child.id;
-                        return (<li className="cur" onClick={ (ev) =>{onClick(ev,itemid_lv2);}}>
-                                  <a className={styles['Clinicmain']} href="#" style={{paddingLeft:"62px"}}>
+                        return (<li className={(table.choose&&(table.choose==itemid_lv2))?styles['cur']:''} onClick={ (ev) =>{onClick(ev,itemid_lv2);}}>
+                                  <a href="#" style={{paddingLeft:"22px"}}>
                                   <b>{child.name}</b>
                                   </a>
                                 </li>)
                      }):''}
-                  </li>)
+                  </li>
+
+                )
         }else{
-          return (<li className="cur" onClick={ (ev) =>{onClick(ev,itemid_lv1);}}>
-                    <label>
+          return (<li>
+                    <label className={(table.choose&&(table.choose==item.id))?styles['cur']:''} onClick={ (ev) =>{onClick(ev,itemid_lv1);}}>
                      <a className={styles[item.classname]} href="#">
                      <b>{item.name}</b>
                      </a>
@@ -40,7 +42,7 @@ export const LeftList = ({
 
     return (<div className={styles["container-left"]}>
               <h3></h3>
-              <ul className="cd-accordion-menu" id="left-list">
+              <ul className={styles['list']}>
                 {itemsui}
               </ul>
             </div>)

@@ -21128,6 +21128,18 @@ module.exports =
 	
 	var _wxjdk2 = _interopRequireDefault(_wxjdk);
 	
+	var _user_patient = __webpack_require__(/*! ./redux/reducers/user_patient */ 339);
+	
+	var _user_patient2 = _interopRequireDefault(_user_patient);
+	
+	var _mteeth_status = __webpack_require__(/*! ./redux/reducers/mteeth_status */ 350);
+	
+	var _mteeth_status2 = _interopRequireDefault(_mteeth_status);
+	
+	var _cteeth_status = __webpack_require__(/*! ./redux/reducers/cteeth_status */ 351);
+	
+	var _cteeth_status2 = _interopRequireDefault(_cteeth_status);
+	
 	var _clientMiddleware = __webpack_require__(/*! ./redux/middleware/clientMiddleware */ 247);
 	
 	var _clientMiddleware2 = _interopRequireDefault(_clientMiddleware);
@@ -21167,7 +21179,10 @@ module.exports =
 	        order_patient: _order_patient2.default,
 	        case_patient: _case_patient2.default,
 	        bill_patient: _bill_patient2.default,
-	        wxjdk: _wxjdk2.default
+	        wxjdk: _wxjdk2.default,
+	        user_patient: _user_patient2.default,
+	        mteeth_status: _mteeth_status2.default,
+	        cteeth_status: _cteeth_status2.default
 	    });
 	
 	    var devTools = [];
@@ -21824,9 +21839,9 @@ module.exports =
 	        case LOGIN:
 	            return state.merge({ loggingIn: true });
 	        case LOGIN_SUCCESS:
-	            return state.merge({ loggingIn: false, user: action.result });
+	            return state.merge({ loaded: true, loggingIn: false, user: action.result });
 	        case LOGIN_FAIL:
-	            return state.merge({ loggingIn: false, user: null, loginError: action.error });
+	            return state.merge({ loaded: false, loggingIn: false, user: null, loginError: action.error });
 	
 	        case LOGOUT:
 	            return state.merge({ loggingOut: true });
@@ -23701,9 +23716,9 @@ module.exports =
 	
 	var _reactRouter = __webpack_require__(/*! react-router */ 208);
 	
-	var _main = __webpack_require__(/*! ./useradmin/main.js */ 280);
+	var _index = __webpack_require__(/*! ./index.js */ 340);
 	
-	var _main2 = _interopRequireDefault(_main);
+	var _index2 = _interopRequireDefault(_index);
 	
 	var _login = __webpack_require__(/*! ./login.js */ 281);
 	
@@ -23744,7 +23759,7 @@ module.exports =
 	  _react2.default.createElement(
 	    _reactRouter.Route,
 	    { path: 'useradmin(?)', component: UserAdmin, onEnter: requireAuth },
-	    _react2.default.createElement(_reactRouter.IndexRoute, { component: _main2.default })
+	    _react2.default.createElement(_reactRouter.IndexRoute, { component: _index2.default })
 	  ),
 	  _react2.default.createElement(_reactRouter.Route, { path: 'login', component: _login2.default })
 	);
@@ -23752,178 +23767,7 @@ module.exports =
 	exports.default = routes;
 
 /***/ },
-/* 280 */
-/*!***********************************!*\
-  !*** ./backend/useradmin/main.js ***!
-  \***********************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.default = undefined;
-	
-	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 282);
-	
-	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
-	
-	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 286);
-	
-	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-	
-	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 287);
-	
-	var _createClass3 = _interopRequireDefault(_createClass2);
-	
-	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 291);
-	
-	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
-	
-	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 292);
-	
-	var _inherits3 = _interopRequireDefault(_inherits2);
-	
-	var _dec, _dec2, _class, _class2, _temp;
-	//import Immutable from 'immutable'
-	
-	var _react = __webpack_require__(/*! react */ 47);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _reactDom = __webpack_require__(/*! react-dom */ 313);
-	
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-	
-	var _reactList = __webpack_require__(/*! react-list */ 314);
-	
-	var _reactList2 = _interopRequireDefault(_reactList);
-	
-	var _reactHammerjs = __webpack_require__(/*! react-hammerjs */ 315);
-	
-	var _reactHammerjs2 = _interopRequireDefault(_reactHammerjs);
-	
-	var _bluebird = __webpack_require__(/*! bluebird */ 242);
-	
-	var _bluebird2 = _interopRequireDefault(_bluebird);
-	
-	var _lefttable = __webpack_require__(/*! ../common/js/partial/lefttable.js */ 325);
-	
-	var _frontpage = __webpack_require__(/*! ./view/frontpage.js */ 316);
-	
-	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
-	
-	var _auth = __webpack_require__(/*! ../redux/reducers/auth */ 241);
-	
-	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
-	
-	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var UserAdmin = (_dec = (0, _reduxConnect.asyncConnect)([{
-	    promise: function promise(_ref) {
-	        var _ref$store = _ref.store;
-	        var dispatch = _ref$store.dispatch;
-	        var getState = _ref$store.getState;
-	        var params = _ref.params;
-	
-	
-	        if (!(0, _auth.isLoaded)(getState())) {
-	            return dispatch((0, _auth.load)(params)).then(function () {
-	                return _bluebird2.default.resolve();
-	            });
-	        } else {
-	            return _bluebird2.default.resolve();
-	        }
-	    }
-	}]), _dec2 = (0, _reactRedux.connect)(function (state) {
-	    return {
-	        auth: state.get('auth')
-	    };
-	}, { pushState: _reactRouterRedux.push }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
-	    (0, _inherits3.default)(UserAdmin, _Component);
-	
-	    function UserAdmin(props) {
-	        (0, _classCallCheck3.default)(this, UserAdmin);
-	
-	        var _this = (0, _possibleConstructorReturn3.default)(this, (UserAdmin.__proto__ || (0, _getPrototypeOf2.default)(UserAdmin)).call(this, props));
-	        // code
-	
-	
-	        _this.state = {
-	            table: {
-	                title: _lefttable.table.title,
-	                list: _lefttable.table.list.map(function (item) {
-	                    return item;
-	                })
-	            }
-	        };
-	        return _this;
-	    }
-	
-	    // methods
-	
-	
-	    (0, _createClass3.default)(UserAdmin, [{
-	        key: 'componentWillMount',
-	        value: function componentWillMount() {
-	            if (this.props.auth.has('user')) {
-	                return;
-	            } else {
-	                if (this.props.auth.getIn(['error', 'info']) == 'auth') {
-	                    this.props.pushState('/login');
-	                }
-	            }
-	            return;
-	        }
-	    }, {
-	        key: 'onClick',
-	        value: function onClick(ev, itemid) {}
-	    }, {
-	        key: 'onClickToExpand',
-	        value: function onClickToExpand(ev, itemid) {
-	
-	            var _list = this.state.table.list.map(function (item) {
-	
-	                if (item.showchild && item.id == itemid) {
-	                    item.showchild = false;
-	                } else if (item.id == itemid && !item.showchild) {
-	                    item.showchild = true;
-	                }
-	                return item;
-	            });
-	            var _title = this.state.table.title;
-	
-	            this.setState({ table: {
-	                    title: _title,
-	                    list: _list
-	                } });
-	            console.log('jjjjj');
-	        }
-	    }, {
-	        key: 'componentDidMount',
-	        value: function componentDidMount() {}
-	    }, {
-	        key: 'render',
-	        value: function render() {
-	
-	            if (this.props.auth.has('user')) {
-	                var table = this.state.table;
-	                console.log(table);
-	                console.log("ooooooooo");
-	                return (0, _frontpage.FrontPage)({ onClick: this.onClick.bind(this), onClickToExpand: this.onClickToExpand.bind(this), table: table });
-	            } else {
-	                return _react2.default.createElement('div', null);
-	            }
-	        }
-	    }]);
-	    return UserAdmin;
-	}(_react.Component), _class2.propTypes = {}, _temp)) || _class) || _class);
-	exports.default = UserAdmin;
-
-/***/ },
+/* 280 */,
 /* 281 */
 /*!**************************!*\
   !*** ./backend/login.js ***!
@@ -24654,48 +24498,7 @@ module.exports =
 	module.exports = require("react-hammerjs");
 
 /***/ },
-/* 316 */
-/*!*********************************************!*\
-  !*** ./backend/useradmin/view/frontpage.js ***!
-  \*********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	        value: true
-	});
-	exports.FrontPage = undefined;
-	
-	var _react = __webpack_require__(/*! react */ 47);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _reactDom = __webpack_require__(/*! react-dom */ 313);
-	
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-	
-	var _reactList = __webpack_require__(/*! react-list */ 314);
-	
-	var _reactList2 = _interopRequireDefault(_reactList);
-	
-	var _reactHammerjs = __webpack_require__(/*! react-hammerjs */ 315);
-	
-	var _reactHammerjs2 = _interopRequireDefault(_reactHammerjs);
-	
-	var _left_table = __webpack_require__(/*! ../../common/js/partial/left_table.js */ 317);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var FrontPage = exports.FrontPage = function FrontPage(_ref) {
-	        var onClick = _ref.onClick;
-	        var onClickToExpand = _ref.onClickToExpand;
-	        var table = _ref.table;
-	
-	        return (0, _left_table.LeftList)({ onClick: onClick, onClickToExpand: onClickToExpand, table: table });
-	};
-
-/***/ },
+/* 316 */,
 /* 317 */
 /*!*************************************************!*\
   !*** ./backend/common/js/partial/left_table.js ***!
@@ -24731,12 +24534,12 @@ module.exports =
 	    if (item.children) {
 	      return _react2.default.createElement(
 	        'li',
-	        { className: 'cur', onClick: function onClick(ev) {
-	            onClickToExpand(ev, itemid_lv1);
-	          } },
+	        null,
 	        _react2.default.createElement(
 	          'label',
-	          null,
+	          { className: table.choose && table.choose == item.id ? _left_list2.default['cur'] : '', onClick: function onClick(ev) {
+	              onClickToExpand(ev, itemid_lv1);
+	            } },
 	          _react2.default.createElement(
 	            'a',
 	            { className: _left_list2.default[item.classname], href: '#' },
@@ -24746,18 +24549,18 @@ module.exports =
 	              item.name
 	            )
 	          ),
-	          _react2.default.createElement('i', { className: item.showchild ? 'roate' : '' })
+	          _react2.default.createElement('i', { className: item.showchild ? _left_list2.default['roate'] : '' })
 	        ),
 	        item.showchild ? item.children.map(function (child) {
 	          var itemid_lv2 = child.id;
 	          return _react2.default.createElement(
 	            'li',
-	            { className: 'cur', onClick: function onClick(ev) {
+	            { className: table.choose && table.choose == itemid_lv2 ? _left_list2.default['cur'] : '', onClick: function onClick(ev) {
 	                _onClick(ev, itemid_lv2);
 	              } },
 	            _react2.default.createElement(
 	              'a',
-	              { className: _left_list2.default['Clinicmain'], href: '#', style: { paddingLeft: "62px" } },
+	              { href: '#', style: { paddingLeft: "22px" } },
 	              _react2.default.createElement(
 	                'b',
 	                null,
@@ -24770,12 +24573,12 @@ module.exports =
 	    } else {
 	      return _react2.default.createElement(
 	        'li',
-	        { className: 'cur', onClick: function onClick(ev) {
-	            _onClick(ev, itemid_lv1);
-	          } },
+	        null,
 	        _react2.default.createElement(
 	          'label',
-	          null,
+	          { className: table.choose && table.choose == item.id ? _left_list2.default['cur'] : '', onClick: function onClick(ev) {
+	              _onClick(ev, itemid_lv1);
+	            } },
 	          _react2.default.createElement(
 	            'a',
 	            { className: _left_list2.default[item.classname], href: '#' },
@@ -24796,7 +24599,7 @@ module.exports =
 	    _react2.default.createElement('h3', null),
 	    _react2.default.createElement(
 	      'ul',
-	      { className: 'cd-accordion-menu', id: 'left-list' },
+	      { className: _left_list2.default['list'] },
 	      itemsui
 	    )
 	  );
@@ -24829,13 +24632,14 @@ module.exports =
 	
 	
 	// module
-	exports.push([module.id, ".left_list__container-left{\n    width:175px;\n    height:100%;\n    min-height: 700px;\n    background: #354052;\n    position: fixed;\n    left:0;\n    top:46px;\n    bottom:0;\n    z-index: 10;\n    overflow: auto;\n}\n.left_list__container-left li b{\n    font-weight: normal;\n}\n.left_list__container-left li b.left_list__bHide{\n    display: none\n}\n.left_list__container-left h3{\n    width:89%;\n    font-size: 14px;;\n    height:30px;\n    line-height: 30px;\n    padding-top: 10px;\n    color: #c8c8c8;\n    font-weight: normal;\n    background: url(" + __webpack_require__(/*! ../../../images/icon.png */ 321) + ") no-repeat right center;\n    background-size: 20px 20px;\n    cursor: pointer;\n}\n.left_list__container-left h3.left_list__H3L{\n    background:url(" + __webpack_require__(/*! ../../../images/icon.png */ 321) + ") no-repeat 19px center;\n    background-size: 20px 20px;\n}\n\ni{\n    width:10px;\n    height:10px;\n    background: url(" + __webpack_require__(/*! ../../../images/row4.png */ 322) + ") no-repeat;\n    background-size: 10px 10px;\n    display: block;\n    position: absolute;\n    right:19px;\n    top:16px;\n    -webkit-transition: -webkit-transform 0.3s;\n    -moz-transition: -moz-transform 0.3s;\n    transition: transform 0.3s;\n}\ni.left_list__roate{\n    -o-transform: rotate(90deg);\n    -webkit-transform: rotate(90deg);\n    -moz-transform: rotate(90deg);\n    transform: rotate(90deg);\n    -webkit-transition: -webkit-transform 0.3s;\n    -moz-transition: -moz-transform 0.3s;\n    transition: transform 0.3s;\n}\n\n.left_list__System{\n    background: url(" + __webpack_require__(/*! ../../../images/1icon.png */ 326) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__User{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_4.png */ 327) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Role{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_2.png */ 328) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__App{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_3.png */ 329) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Clinicmain{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_6.png */ 323) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Record{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_1.png */ 330) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Appointment{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_5.png */ 331) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Company{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_7.png */ 332) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__DoctorAdmin{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_8.png */ 333) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Suggestion{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_9.png */ 334) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Bill{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_11.png */ 335) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Category{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_12.png */ 336) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Project,.left_list__Priceform{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_13.png */ 337) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Serve{\n    background: url(" + __webpack_require__(/*! ../../../images/icon14.png */ 338) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n\n\n.left_list__left-list-label{\n    height:40px;\n}\n.left_list__left-list-label:hover{\n  background:#4f5968;\n}\n#left_list__left-list ul li.left_list__cur,#left_list__left-list label.left_list__cur{\n    background: #376892;\n    /* border-left: 3px #14b9d6 solid; */\n}\n\n\n\n\n\n\n\n\n\n", ""]);
+	exports.push([module.id, ".left_list__container-left{\n    width:175px;\n    height:100%;\n    min-height: 700px;\n    background: #354052;\n    position: fixed;\n    left:0;\n    top:46px;\n    bottom:0;\n    z-index: 10;\n    overflow: auto;\n}\n.left_list__container-left li b{\n    font-weight: normal;\n}\n.left_list__container-left li b.left_list__bHide{\n    display: none\n}\n.left_list__container-left h3{\n    width:89%;\n    font-size: 14px;;\n    height:30px;\n    line-height: 30px;\n    padding-top: 10px;\n    color: #c8c8c8;\n    font-weight: normal;\n    background: url(" + __webpack_require__(/*! ../../../images/icon.png */ 321) + ") no-repeat right center;\n    background-size: 20px 20px;\n    cursor: pointer;\n}\n.left_list__container-left h3.left_list__H3L{\n    background:url(" + __webpack_require__(/*! ../../../images/icon.png */ 321) + ") no-repeat 19px center;\n    background-size: 20px 20px;\n}\n\n.left_list__list i{\n    width:10px;\n    height:10px;\n    background: url(" + __webpack_require__(/*! ../../../images/row4.png */ 322) + ") no-repeat;\n    background-size: 10px 10px;\n    display: block;\n    position: absolute;\n    right:19px;\n    top:16px;\n    -webkit-transition: -webkit-transform 0.3s;\n    -moz-transition: -moz-transform 0.3s;\n    transition: transform 0.3s;\n}\n.left_list__list i.left_list__roate{\n    -o-transform: rotate(90deg);\n    -webkit-transform: rotate(90deg);\n    -moz-transform: rotate(90deg);\n    transform: rotate(90deg);\n    -webkit-transition: -webkit-transform 0.3s;\n    -moz-transition: -moz-transform 0.3s;\n    transition: transform 0.3s;\n}\n\n.left_list__System{\n    background: url(" + __webpack_require__(/*! ../../../images/1icon.png */ 326) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__User{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_4.png */ 327) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Role{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_2.png */ 328) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__App{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_3.png */ 329) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Clinicmain{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_6.png */ 323) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Record{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_1.png */ 330) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Appointment{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_5.png */ 331) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Company{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_7.png */ 332) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__DoctorAdmin{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_8.png */ 333) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Suggestion{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_9.png */ 334) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Bill{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_11.png */ 335) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Category{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_12.png */ 336) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Project,.left_list__Priceform{\n    background: url(" + __webpack_require__(/*! ../../../images/icon_13.png */ 337) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n.left_list__Serve{\n    background: url(" + __webpack_require__(/*! ../../../images/icon14.png */ 338) + ") no-repeat 20px center;\n    background-size: 18px 18px ;\n}\n\n\n\n.left_list__list{\n    width: 100%;\n    list-style: none;\n    color: #fff;\n}\n.left_list__list li{\n    width: 100%;\n    line-height: 40px;\n    position: relative;\n}\n.left_list__list label{\n    display: block;\n    width: 100%;\n    height: 40px;\n}\n.left_list__list label a{\n    display: block;\n    width: 100%;\n    height: 40px;\n}\n.left_list__list li a b{\n    margin-left: 50px;\n    color: #fff;\n}\n.left_list__list li i{\n    position: absolute;\n    top: 15px;\n    right: 15px;\n}\n.left_list__list .left_list__cur{\n    background: #376892;\n}\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 	
 	// exports
 	exports.locals = {
 		"container-left": "left_list__container-left",
 		"bHide": "left_list__bHide",
 		"H3L": "left_list__H3L",
+		"list": "left_list__list",
 		"roate": "left_list__roate",
 		"System": "left_list__System",
 		"User": "left_list__User",
@@ -24852,8 +24656,6 @@ module.exports =
 		"Project": "left_list__Project",
 		"Priceform": "left_list__Priceform",
 		"Serve": "left_list__Serve",
-		"left-list-label": "left_list__left-list-label",
-		"left-list": "left_list__left-list",
 		"cur": "left_list__cur"
 	};
 
@@ -25147,6 +24949,3668 @@ module.exports =
 /***/ function(module, exports) {
 
 	module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA3NpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDE0IDc5LjE1MTQ4MSwgMjAxMy8wMy8xMy0xMjowOToxNSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo0MzY0ZDgyZC1iNDc4LTQ4M2UtYWNjZS03OGZmNzU2OGQwMjYiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RjcxRjYzREM0RDU0MTFFNjgwQ0JFMTMwQkM2RTc5RkQiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RjcxRjYzREI0RDU0MTFFNjgwQ0JFMTMwQkM2RTc5RkQiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6ZTljMTQ1ZGQtNTk0OS00MzNjLTg0M2MtYWI2MGRkODMxYWY5IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjQzNjRkODJkLWI0NzgtNDgzZS1hY2NlLTc4ZmY3NTY4ZDAyNiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PtjIZHgAAADhSURBVHja7JTbCoJAEIa1oiNSInQn2Bt01Sv3PD2BSHdiIUgHwtr+hVkYRGfrIqFy4GN32X/n37OrlHI+HT2nhWjdJAZK4ARC0obUlvSxSTxgJpFlQlOwAHsqdaI1KGq0G7CtM3k3DmDX0Ff+/sH/r8kcBA19K97gtysFSyFpya6rLmcgE/Spqbjs7xqDiTDoRg/QhDYZCvoLuFZXMgK+MKiomOjH6Qn6hzFx9EqIo5KjBBFpdXm36DOTmx+8bznoPpu598KlCbp30pm0a5JYtGeQUz2nthRJ3bfy3dv1FGAAB/qShThJCpwAAAAASUVORK5CYII="
+
+/***/ },
+/* 339 */
+/*!************************************************!*\
+  !*** ./backend/redux/reducers/user_patient.js ***!
+  \************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	exports.default = reducer;
+	exports.frontUserForInfo = frontUserForInfo;
+	exports.LoadedorLoading = LoadedorLoading;
+	exports.load = load;
+	exports.load_detail = load_detail;
+	
+	var _immutable = __webpack_require__(/*! immutable */ 46);
+	
+	var _immutable2 = _interopRequireDefault(_immutable);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var LOAD = 'bohe/user_patient/LOAD';
+	var LOAD_SUCCESS = 'bohe/user_patient/LOAD_SUCCESS';
+	var LOAD_FAIL = 'bohe/user_patient/LOAD_FAIL';
+	
+	var LOAD_DETAIL = 'bohe/user_patient/LOAD_DETAIL';
+	var LOAD_DETAIL_SUCCESS = 'bohe/user_patient/LOAD_DETAIL_SUCCESS';
+	var LOAD_DETAIL_FAIL = 'bohe/user_patient/LOAD_DETAIL_FAIL';
+	
+	var SET_USER_TOSHOWINFO = 'bohe/user_patient/SHOWINFO';
+	
+	var initialState = _immutable2.default.Map({
+	    loaded: false,
+	    loading: false
+	});
+	
+	function reducer() {
+	    var state = arguments.length <= 0 || arguments[0] === undefined ? initialState : arguments[0];
+	    var action = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	    switch (action.type) {
+	        case LOAD:
+	            return state.merge({ loading: true });
+	        case LOAD_SUCCESS:
+	            var allres;
+	            console.log('111DDDDDDDDDD!!!!!');
+	            if (_immutable2.default.List.isList(state.get('users'))) {
+	                if (!action.refresh) {
+	
+	                    allres = state.get('users').pop().toJS().concat(action.result);
+	                } else if (action.refresh.resolve) {
+	
+	                    action.refresh.resolve();
+	                }
+	            }
+	            if (allres) {
+	                allres.push({ flag: true });
+	                return state.merge({ loading: false, loaded: true, users: allres });
+	            } else {
+	                console.log('DDDDDDDDDD!!!!!');
+	                action.result.push({ flag: true });
+	                return state.merge({ loading: false, loaded: true, users: action.result });
+	            }
+	        case LOAD_FAIL:
+	            if (action.refresh && action.refresh.reject) {
+	                action.refresh.reject();
+	            }
+	            return state.merge({ loading: false, loaded: false, error: action.error });
+	        case LOAD_DETAIL:
+	            return state.updateIn(['users'], function (list) {
+	                return list.map(function (user) {
+	                    if (user.get('id') == action.id) {
+	                        return user.merge({ loading: true });
+	                    }
+	                    return user;
+	                });
+	            });
+	        case LOAD_DETAIL_SUCCESS:
+	            return state.updateIn(['users'], function (list) {
+	                return list.map(function (user) {
+	                    if (user.get('id') == action.result.id) {
+	                        return user.merge((0, _extends3.default)({ loading: false, loaded: true }, action.result));
+	                    }
+	                    return user;
+	                });
+	            });
+	
+	        case LOAD_DETAIL_FAIL:
+	            return state.updateIn(['users'], function (list) {
+	                return list.map(function (user) {
+	                    if (user.get('id') == action.error.id) {
+	                        return user.merge({ loading: false, loaded: false, error: action.error.info });
+	                    }
+	                    return user;
+	                });
+	            });
+	        case SET_USER_TOSHOWINFO:
+	            return state.merge({ frontuserinfo: action.result });
+	        default:
+	            return state;
+	    }
+	}
+	
+	function frontUserForInfo(_ref) {
+	    var idx = _ref.idx;
+	    var id = _ref.id;
+	
+	    return {
+	        type: SET_USER_TOSHOWINFO,
+	        result: { idx: idx, id: id }
+	    };
+	}
+	
+	function LoadedorLoading(state) {
+	    var loaded = false;
+	    var loading = false;
+	    if (state.hasIn(['user_patient', 'loaded'])) {
+	        loaded = state.getIn(['user_patient', 'loaded']);
+	    }
+	    if (state.hasIn(['user_patient', 'loading'])) {
+	        loading = state.getIn(['user_patient', 'loading']);
+	    }
+	    return loaded || loading;
+	}
+	
+	/* 当 直接采用 浏览器发起域名访问时 不会携带本地Token 所以在鉴权阶段 会转入login 登录后得到新的签发token
+	   当采用 微信公众号直接跳转时 鉴权阶段使用openid 通过鉴权，签发新的token到state的user中
+	   所以本地token最大的作用是在进入usercenter时 快捷判断是否登录过
+	*/
+	function load(_ref2) {
+	    var user = _ref2.user;
+	    var num = _ref2.num;
+	    var begin = _ref2.begin;
+	    var req = _ref2.req;
+	    var refresh = _ref2.refresh;
+	
+	    var params = {};
+	
+	    if (typeof window === 'undefined' || window.__SERVER__ == true) {
+	        ///server side
+	        if (user.token) ///  鉴权通过 已经持有 token
+	            {
+	
+	                params = { num: req.query.num, begin: req.query.begin };
+	                params.token = user.token;
+	            } else {
+	            // server side none key to login
+	
+	            return {
+	                type: LOAD_FAIL,
+	                promise: function promise() {
+	                    return _bluebird2.default.reject({ info: 'auth' });
+	                }
+	            };
+	        }
+	    } else {
+	        params = { num: num, begin: begin };
+	    }
+	
+	    return {
+	        types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
+	        promise: function promise(client) {
+	            return client.GET('http://192.168.10.10/user_patient/rest?', { params: params }, {
+	                format: function format(response) {
+	                    if (response.status >= 400) {
+	                        throw new Error("Bad response from server");
+	                    }
+	                    return response.json();
+	                },
+	                done: function done(res) {
+	
+	                    console.log(res);
+	
+	                    if (res.valid == 1) {
+	
+	                        return _bluebird2.default.resolve(res.users);
+	                    } else {
+	                        //var err = { info: 'auth' }
+	                        return _bluebird2.default.reject({ info: 'notvalid' });
+	                    }
+	                },
+	                error: function error(err) {
+	                    return _bluebird2.default.reject({ info: 'wire' });
+	                }
+	            });
+	        },
+	        refresh: refresh
+	    };
+	}
+	
+	function load_detail(_ref3) {
+	    var id = _ref3.id;
+	
+	    var params = {};
+	    params.id = id;
+	
+	    console.log('load_detail!!!!!!!!!!!');
+	    console.log(id);
+	    return {
+	        types: [LOAD_DETAIL, LOAD_DETAIL_SUCCESS, LOAD_DETAIL_FAIL],
+	        promise: function promise(client) {
+	            return client.GET('http://192.168.10.10/patient/info/rest?', { params: params }, {
+	                format: function format(response) {
+	                    if (response.status >= 400) {
+	                        throw new Error("Bad response from server");
+	                    }
+	                    console.log('>>>>>>>>>>>>>>>>');
+	                    return response.json();
+	                },
+	                done: function done(res) {
+	
+	                    console.log(res);
+	
+	                    if (res.valid == 1) {
+	
+	                        return _bluebird2.default.resolve(res.user);
+	                    } else {
+	                        //var err = { info: 'auth' }
+	                        return _bluebird2.default.reject({ id: id, info: 'notvalid' });
+	                    }
+	                },
+	                error: function error(err) {
+	                    console.log(err);
+	                    console.log('GGGGGGGGGGGGGG1');
+	                    return _bluebird2.default.reject({ id: id, info: 'wire' });
+	                }
+	            });
+	        },
+	        id: id
+	    };
+	}
+
+/***/ },
+/* 340 */
+/*!**************************!*\
+  !*** ./backend/index.js ***!
+  \**************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = undefined;
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 282);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 286);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 287);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 291);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 292);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _dec, _dec2, _class, _class2, _temp;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 313);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reactList = __webpack_require__(/*! react-list */ 314);
+	
+	var _reactList2 = _interopRequireDefault(_reactList);
+	
+	var _reactHammerjs = __webpack_require__(/*! react-hammerjs */ 315);
+	
+	var _reactHammerjs2 = _interopRequireDefault(_reactHammerjs);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _lefttable = __webpack_require__(/*! ./common/js/partial/lefttable.js */ 325);
+	
+	var _userlist = __webpack_require__(/*! ./useradmin/userlist.js */ 341);
+	
+	var _userlist2 = _interopRequireDefault(_userlist);
+	
+	var _left_table = __webpack_require__(/*! ./common/js/partial/left_table.js */ 317);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	var _auth = __webpack_require__(/*! ./redux/reducers/auth */ 241);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var UserAdmin = (_dec = (0, _reduxConnect.asyncConnect)([{
+	    promise: function promise(_ref) {
+	        var _ref$store = _ref.store;
+	        var dispatch = _ref$store.dispatch;
+	        var getState = _ref$store.getState;
+	        var params = _ref.params;
+	
+	
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                return _bluebird2.default.resolve();
+	            });
+	        } else {
+	            return _bluebird2.default.resolve();
+	        }
+	    }
+	}]), _dec2 = (0, _reactRedux.connect)(function (state) {
+	    return {
+	        auth: state.get('auth')
+	    };
+	}, { pushState: _reactRouterRedux.push }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
+	    (0, _inherits3.default)(UserAdmin, _Component);
+	
+	    function UserAdmin(props) {
+	        (0, _classCallCheck3.default)(this, UserAdmin);
+	
+	        var _this = (0, _possibleConstructorReturn3.default)(this, (UserAdmin.__proto__ || (0, _getPrototypeOf2.default)(UserAdmin)).call(this, props));
+	        // code
+	
+	
+	        _this.state = {
+	            table: {
+	                title: _lefttable.table.title,
+	                list: _lefttable.table.list.map(function (item) {
+	                    return item;
+	                })
+	            },
+	            toShowRight: function toShowRight() {
+	                return '';
+	            }
+	        };
+	        return _this;
+	    }
+	
+	    // methods
+	
+	
+	    (0, _createClass3.default)(UserAdmin, [{
+	        key: 'getChildContext',
+	        value: function getChildContext() {
+	            return {
+	                showRight: this.showRight.bind(this)
+	            };
+	        }
+	    }, {
+	        key: 'showRight',
+	        value: function showRight(_ref2) {
+	            var asyncProcess = _ref2.asyncProcess;
+	            var itemid = _ref2.itemid;
+	            var comCreater = _ref2.comCreater;
+	
+	
+	            var _list = this.state.table.list.map(function (item) {
+	                return item;
+	            });
+	            var _title = this.state.table.title;
+	
+	            var promises = [];
+	            var self = this;
+	            var choose = itemid ? itemid : this.state.table.choose;
+	            console.log(this.context.store);
+	            console.log("sssseeeewwwwww");
+	            asyncProcess.forEach(function (p) {
+	                promises.push(p.promise({ store: self.context.store, params: {} }));
+	            });
+	
+	            _bluebird2.default.all(promises).then(function (s) {
+	                self.setState({ table: {
+	                        title: _title,
+	                        list: _list,
+	                        choose: choose
+	                    }, toShowRight: function toShowRight() {
+	                        return comCreater();
+	                    }
+	                });
+	            }, function (e) {});
+	        }
+	    }, {
+	        key: 'componentWillMount',
+	        value: function componentWillMount() {
+	            if (this.props.auth.has('user')) {
+	                return;
+	            } else {
+	                if (this.props.auth.getIn(['error', 'info']) == 'auth') {
+	                    this.props.pushState('/login');
+	                }
+	            }
+	            return;
+	        }
+	    }, {
+	        key: 'onClick',
+	        value: function onClick(ev, itemid) {
+	
+	            this.showRight({
+	                asyncProcess: _userlist.asyncEvent,
+	                itemid: itemid,
+	                comCreater: function comCreater() {
+	                    return _react2.default.createElement(_userlist2.default, null);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'onClickToExpand',
+	        value: function onClickToExpand(ev, itemid) {
+	
+	            var _list = this.state.table.list.map(function (item) {
+	                if (item.showchild && item.id == itemid) {
+	                    item.showchild = false;
+	                } else if (item.id == itemid && !item.showchild) {
+	                    item.showchild = true;
+	                }
+	                return item;
+	            });
+	            var _title = this.state.table.title;
+	
+	            this.setState({ table: {
+	                    title: _title,
+	                    list: _list,
+	                    choose: itemid
+	                } });
+	            console.log('jjjjj');
+	        }
+	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {}
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	
+	            if (this.props.auth.has('user')) {
+	                var table = this.state.table;
+	                console.log(table);
+	                console.log("ooooooooo");
+	                return _react2.default.createElement(
+	                    'div',
+	                    { style: { position: "fixed", width: '100%', height: '100%', top: '0px' } },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'header' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'logo' },
+	                            _react2.default.createElement('img', { src: __webpack_require__(/*! ./common/images/logo2.png */ 346), alt: '' }),
+	                            _react2.default.createElement(
+	                                'span',
+	                                null,
+	                                '薄荷口腔'
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'exit' },
+	                            _react2.default.createElement(
+	                                'a',
+	                                { href: '#', className: 'exit-but' },
+	                                '退出'
+	                            ),
+	                            _react2.default.createElement(
+	                                'p',
+	                                null,
+	                                '欢迎您！',
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    this.props.auth.getIn(['user', 'username'])
+	                                )
+	                            )
+	                        )
+	                    ),
+	                    (0, _left_table.LeftList)({ onClick: this.onClick.bind(this), onClickToExpand: this.onClickToExpand.bind(this), table: table }),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'container-right' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'container-right-main' },
+	                            this.state.toShowRight()
+	                        )
+	                    )
+	                );
+	            } else {
+	                return _react2.default.createElement('div', null);
+	            }
+	        }
+	    }]);
+	    return UserAdmin;
+	}(_react.Component), _class2.propTypes = {}, _class2.contextTypes = {
+	    store: _react.PropTypes.object.isRequired
+	}, _class2.childContextTypes = {
+	    showRight: _react2.default.PropTypes.func.isRequired
+	}, _temp)) || _class) || _class);
+	exports.default = UserAdmin;
+
+/***/ },
+/* 341 */
+/*!***************************************!*\
+  !*** ./backend/useradmin/userlist.js ***!
+  \***************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = exports.asyncEvent = undefined;
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 282);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 286);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 287);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 291);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 292);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _dec, _dec2, _class, _class2, _temp;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 313);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _user = __webpack_require__(/*! ./user.js */ 342);
+	
+	var _user2 = _interopRequireDefault(_user);
+	
+	var _reactList = __webpack_require__(/*! react-list */ 314);
+	
+	var _reactList2 = _interopRequireDefault(_reactList);
+	
+	var _reactHammerjs = __webpack_require__(/*! react-hammerjs */ 315);
+	
+	var _reactHammerjs2 = _interopRequireDefault(_reactHammerjs);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _immutable = __webpack_require__(/*! immutable */ 46);
+	
+	var _immutable2 = _interopRequireDefault(_immutable);
+	
+	var _userlistpage = __webpack_require__(/*! ./view/userlistpage.js */ 344);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	var _auth = __webpack_require__(/*! ../redux/reducers/auth */ 241);
+	
+	var _user_patient = __webpack_require__(/*! ../redux/reducers/user_patient */ 339);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	var _container = __webpack_require__(/*! ./userinfo/container.js */ 347);
+	
+	var _container2 = _interopRequireDefault(_container);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var asyncEvent = exports.asyncEvent = [{
+	    promise: function promise(_ref) {
+	        var _ref$store = _ref.store;
+	        var dispatch = _ref$store.dispatch;
+	        var getState = _ref$store.getState;
+	        var params = _ref.params;
+	
+	        console.log("EEEEEEEEEEEEEEEEEEEE111111");
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                if (!(0, _user_patient.LoadedorLoading)(getState())) {
+	                    var state = getState();
+	                    var user = state.getIn(['auth', 'user']).toJS();
+	                    return dispatch((0, _user_patient.load)({ user: user, num: 10, begin: 0, refresh: { flag: true } }));
+	                } else return _bluebird2.default.resolve();
+	            });
+	        } else {
+	            console.log("EEEEEEEEEEEEEEEEEEEE");
+	            if (!(0, _user_patient.LoadedorLoading)(getState())) {
+	                console.log("EEEEEEEEEEEEEEEEEEEE2");
+	                var state = getState();
+	                var user = state.getIn(['auth', 'user']).toJS();
+	                return dispatch((0, _user_patient.load)({ user: user, num: 10, begin: 0, refresh: { flag: true } }));
+	            } else return _bluebird2.default.resolve();
+	        }
+	    }
+	}];
+	
+	var UserListCom = (_dec = (0, _reduxConnect.asyncConnect)(asyncEvent), _dec2 = (0, _reactRedux.connect)(function (state) {
+	    return {
+	        auth: state.get('auth'),
+	        userRepo: state.get('user_patient')
+	    };
+	}, { pushState: _reactRouterRedux.push, load: _user_patient.load, toDetail: _user_patient.frontUserForInfo }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
+	    (0, _inherits3.default)(UserListCom, _Component);
+	
+	    function UserListCom() {
+	        (0, _classCallCheck3.default)(this, UserListCom);
+	        return (0, _possibleConstructorReturn3.default)(this, (UserListCom.__proto__ || (0, _getPrototypeOf2.default)(UserListCom)).apply(this, arguments));
+	    }
+	
+	    (0, _createClass3.default)(UserListCom, [{
+	        key: 'handlePan',
+	
+	        // methods
+	        value: function handlePan(ev) {}
+	    }, {
+	        key: 'handleRefresh',
+	        value: function handleRefresh(resolve, reject) {
+	
+	            this.props.load({ num: 10, begin: 0, refresh: { flag: true, resolve: resolve, reject: reject } });
+	        }
+	    }, {
+	        key: 'componentWillMount',
+	        value: function componentWillMount() {
+	            if (this.props.auth.has('user')) {
+	                return;
+	            } else {
+	                if (this.props.auth.getIn(['error', 'info']) == 'auth') {
+	                    this.props.pushState('/login');
+	                }
+	            }
+	            return;
+	        }
+	    }, {
+	        key: 'toAddUser',
+	        value: function toAddUser() {}
+	    }, {
+	        key: 'toDeleteUser',
+	        value: function toDeleteUser() {}
+	    }, {
+	        key: 'toEditUser',
+	        value: function toEditUser() {}
+	    }, {
+	        key: 'toSearch',
+	        value: function toSearch() {}
+	    }, {
+	        key: 'toUserInfo',
+	        value: function toUserInfo(ev, idx) {
+	            console.log(idx);
+	            console.log(this.context);
+	
+	            this.props.toDetail({ idx: idx });
+	
+	            this.context.showRight({
+	                asyncProcess: [],
+	                comCreater: function comCreater() {
+	                    return _react2.default.createElement(_container2.default, null);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {}
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            console.log(this.props.userRepo.toJS());
+	            if (this.props.auth.has('user')) {
+	
+	                var size = this.props.userRepo.get('users').size;
+	                var nodata = size == 0 ? true : false;
+	                console.log(size);
+	                console.log("sssssssrrr");
+	                var options = {
+	                    touchAction: 'pan-y'
+	                };
+	                var height = window.innerHeight || document.documentElement.clientHeight;
+	                var data = nodata ? [] : this.props.userRepo.get('users').toJS();
+	                console.log("ffffggg");
+	                console.log(data);
+	                return (0, _userlistpage.UserList)({ toUserInfo: this.toUserInfo.bind(this), toSearch: this.toSearch.bind(this), toAddUser: this.toAddUser.bind(this), toDeleteUser: this.toDeleteUser.bind(this), toEditUser: this.toEditUser.bind(this), data: data, nodata: nodata, options: options, length: size, handlePan: this.handlePan.bind(this), handleRefresh: this.handleRefresh.bind(this) });
+	            } else {
+	                return _react2.default.createElement('div', null);
+	            }
+	        }
+	    }]);
+	    return UserListCom;
+	}(_react.Component), _class2.propTypes = {
+	    userRepo: _react2.default.PropTypes.object.isRequired
+	}, _class2.contextTypes = {
+	    showRight: _react.PropTypes.func.isRequired
+	}, _temp)) || _class) || _class);
+	exports.default = UserListCom;
+
+/***/ },
+/* 342 */
+/*!***********************************!*\
+  !*** ./backend/useradmin/user.js ***!
+  \***********************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = undefined;
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 282);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 286);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 287);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 291);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 292);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _dec, _class;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 313);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	var _user_patient = __webpack_require__(/*! ../redux/reducers/user_patient */ 339);
+	
+	var _userdata = __webpack_require__(/*! ./view/userdata.js */ 343);
+	
+	var _user_patient2 = __webpack_require__(/*! ../redux/reducers/user_patient.js */ 339);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var UserCom = (_dec = (0, _reactRedux.connect)(function (state) {
+	    return {};
+	}, { pushState: _reactRouterRedux.push, load: _user_patient.load, toShow: _user_patient2.frontUser }), _dec(_class = function (_Component) {
+	    (0, _inherits3.default)(UserCom, _Component);
+	
+	    function UserCom() {
+	        (0, _classCallCheck3.default)(this, UserCom);
+	        return (0, _possibleConstructorReturn3.default)(this, (UserCom.__proto__ || (0, _getPrototypeOf2.default)(UserCom)).apply(this, arguments));
+	    }
+	
+	    (0, _createClass3.default)(UserCom, [{
+	        key: 'toDetail',
+	        value: function toDetail() {
+	            var idx = this.props.idx;
+	            var id = this.props.id;
+	            console.log(id);
+	            console.log(idx);
+	            this.props.toShow({ idx: idx, id: id });
+	            this.props.pushState({
+	                pathname: '/usercenter/myOrderInfo',
+	                query: { id: id, idx: idx }
+	            });
+	        }
+	    }, {
+	        key: 'handleInview',
+	        value: function handleInview() {}
+	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {}
+	    }, {
+	        key: 'componentDidUpdate',
+	        value: function componentDidUpdate() {}
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            return (0, _userdata.Userdata)((0, _extends3.default)({}, this.props, { toDetail: this.toDetail.bind(this) }));
+	        }
+	    }]);
+	    return UserCom;
+	}(_react.Component)) || _class);
+	exports.default = UserCom;
+
+/***/ },
+/* 343 */
+/*!********************************************!*\
+  !*** ./backend/useradmin/view/userdata.js ***!
+  \********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.UserData = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 313);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var UserData = exports.UserData = function UserData(_ref) {
+	    var id = _ref.id;
+	    var account = _ref.account;
+	    var real_name = _ref.real_name;
+	    var photo = _ref.photo;
+	    var birth = _ref.birth;
+	    var age = _ref.age;
+	    var card_id = _ref.card_id;
+	    var sex = _ref.sex;
+	    var phone = _ref.phone;
+	    var email = _ref.email;
+	    var company_name = _ref.company_name;
+	    var create_time = _ref.create_time;
+	    var rowidx = _ref.rowidx;
+	    var toUserInfo = _ref.toUserInfo;
+	
+	    return _react2.default.createElement(
+	        'tr',
+	        null,
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                { className: 'radio-span' },
+	                _react2.default.createElement('input', { type: 'radio', className: 'radio', name: 'radio', id: 'userlist_row_' + rowidx }),
+	                _react2.default.createElement('label', { htmlFor: 'userlist_row_' + rowidx })
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            { className: 'W100' },
+	            _react2.default.createElement(
+	                'span',
+	                { onClick: function onClick(ev) {
+	                        toUserInfo(ev, rowidx);
+	                    }, className: 'spanName' },
+	                account
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                real_name
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                { className: 'user-pic' },
+	                _react2.default.createElement('img', { src: !photo || photo == 'ssssss' ? __webpack_require__(/*! ../../common/images/user_default.png */ 345) : photo, alt: true })
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                birth
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                age
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            { className: 'W150' },
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                card_id
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                sex
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                phone
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                email
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            { className: 'W150' },
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                company_name
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            { className: 'W100' },
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                create_time
+	            )
+	        )
+	    );
+	};
+
+/***/ },
+/* 344 */
+/*!************************************************!*\
+  !*** ./backend/useradmin/view/userlistpage.js ***!
+  \************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.UserList = undefined;
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 313);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reactList = __webpack_require__(/*! react-list */ 314);
+	
+	var _reactList2 = _interopRequireDefault(_reactList);
+	
+	var _reactHammerjs = __webpack_require__(/*! react-hammerjs */ 315);
+	
+	var _reactHammerjs2 = _interopRequireDefault(_reactHammerjs);
+	
+	var _userdata = __webpack_require__(/*! ./userdata.js */ 343);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var UserList = exports.UserList = function UserList(_ref) {
+	  var data = _ref.data;
+	  var nodata = _ref.nodata;
+	  var length = _ref.length;
+	  var toAddUser = _ref.toAddUser;
+	  var toDeleteUser = _ref.toDeleteUser;
+	  var toEditUser = _ref.toEditUser;
+	  var toUserInfo = _ref.toUserInfo;
+	
+	  var rowidx = 0;
+	  return _react2.default.createElement(
+	    'div',
+	    null,
+	    _react2.default.createElement(
+	      'div',
+	      { className: 'rtop rtop2' },
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'but-box' },
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          _react2.default.createElement(
+	            'a',
+	            { onClick: toAddUser, className: 'add-but' },
+	            '新建'
+	          ),
+	          _react2.default.createElement(
+	            'a',
+	            { onClick: toDeleteUser, className: 'edit-but' },
+	            '修改'
+	          ),
+	          _react2.default.createElement(
+	            'a',
+	            { onClick: toEditUser, className: 'delete-but' },
+	            '删除'
+	          )
+	        )
+	      ),
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'top-input-box' },
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          '真实姓名：',
+	          _react2.default.createElement('input', { type: 'text', id: 'real_name' })
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          '账号：',
+	          _react2.default.createElement('input', { type: 'text', id: 'account' })
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          '所在公司：',
+	          _react2.default.createElement('input', { type: 'text', id: 'company_name' })
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          _react2.default.createElement(
+	            'a',
+	            { href: 'javascript:void(0)', className: 'search-but', id: 'search' },
+	            '搜索'
+	          ),
+	          _react2.default.createElement(
+	            'a',
+	            { href: 'javascript:void(0)', className: 'reset-but', id: 'reset' },
+	            '重置'
+	          )
+	        )
+	      )
+	    ),
+	    _react2.default.createElement(
+	      'div',
+	      { className: 'table-box' },
+	      _react2.default.createElement(
+	        'table',
+	        { className: 'table table-bordered table-hover table-height table-height4 mtop100 Mbtom50 poolTable' },
+	        _react2.default.createElement(
+	          'thead',
+	          null,
+	          _react2.default.createElement(
+	            'tr',
+	            null,
+	            _react2.default.createElement(
+	              'th',
+	              { width: '60px' },
+	              '选择'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              '账号'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              '真实姓名'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              '头像'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              '出生日期'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              '年龄'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              '身份证'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              '性别'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              '联系电话'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              'Email'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              '所在公司'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '80px' },
+	              '注册时间'
+	            )
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'tbody',
+	          { id: 'accountTbody' },
+	          data.map(function (row) {
+	            var ret = (0, _userdata.UserData)((0, _extends3.default)({}, row, { rowidx: rowidx, toUserInfo: toUserInfo }));
+	            rowidx++;
+	            return ret;
+	          })
+	        )
+	      )
+	    )
+	  );
+	};
+
+/***/ },
+/* 345 */
+/*!************************************************!*\
+  !*** ./backend/common/images/user_default.png ***!
+  \************************************************/
+/***/ function(module, exports) {
+
+	module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAaVBMVEX///8As+MAr+IAseLC5vUAreGo3vIvvuf8///2/P4AtOPW8vouu+Z2z+3s+f1hxemU2fGh3fLJ7Pix4/Tn9/zw+/2+6PZtzOyK1e/G6/em3PLc8/pSxOnS8PnC5vZwzeyO1/BGwOhZw+l98HXGAAAL1ElEQVR4nO1d63qiMBCtiShS8FLvBbel7/+QC1VbyMzkRmJSP87+2W9XkUOSyVxOhpeXESNGjBgxYsSIESM6SMvLefqv+XO+lGnom3GM/WVTzHnCfpHwebG57EPfmBu8ruuMcc4nfTT/wib1+jX07Q1FecoZINelyfJTGfom7ZFu80RC704yybd/c1mmm2ZyKujdSLJs8wc5znT53TjOQt+wIS65Ab8rx/wS+qYNsCgM+V05FovQN66LS2bO75tj9keGcZ3YEWwoJuvQN6+BtGKW/FqwKnqjusxtB/A2jPkyNAU5Sssl2KGYRe3jlEoXRoMij9hXfXVAMGqKLkbwSjHSibpzRLCluAtNBsNioBXtUcxjdG9qdwQbinVoOhDFkI0eghWhCYk4JE4JTibJITSlPpYup+gVPC7npvLAsApNqout20V4BduGpvWLhfsRbMHj2TIKTwyjsac7H3O0BYvFtTn6GcJmEI+hqV1R+iLYUIzDBfe0Cr8ZRrESF75WYQsWgzmdeWW4CU3vxXFMISKGGKP0OYSNAx7e1qx9DmEziOFzxA4je5RhHprgzi/BhmJov+bgdxk21jR0JHzyPoanwAzn3hnOAzP0PUmbaRqW4M51AgoiCWtqzg8Yw3NQhl4SNALDsCoN76Y0uDH9eADDj6AMVw9guArK8OsBDL+enmHYENFr+DsyfAief5Y+v6V5/t3i+Xf85/favKaDbwzDet7Tp4+ePOeDvxkGzgk/IMYPS9B3QjiClLDH4uGNYegSovc0RnDNyfNn9Z+/MuPbqwme1Pe+I7IINN9ep2kEk9RzETiCEvDLy96nW5NEcRjam+grGtnXqz9bwyI5rudBIHxFNDLh0tdKTCLYKq7wtBIjWYUt9n5WIovCkF6x9qJkj2Ev/IEHSUZwEUYfHnTCkeiDf7BxPU+jUJb24HhTjGYr7MBpjBFFTCFiN/gYd4dgFjx3geHVnWsTjzPTx5uzk85voalQcCQ2DS4pleBs3fTjFzyZhqYhw/CJGvEUvWJoY4zI22K02OeDurfkEcUTJGxaKN0GML4z6jgOlouR89BVGG0sKwubypMqovPpi2khd/23xgaHZ/IB3BTTx53UOx8zpqquL05GU5Xzk+L+S8ay40NEC+mm7fWoEYDvC1lPyD49VqhN6Lztlpl7bz+Ybvi3peRwku7Bby/WOp0FOcvWYPxSyHjz/buM++V4uG92yCStkC5d6WE1UXT3nKwO8JaXcxgA38t4LPfn1aUfdxPJM3BXh2a4MI95fygmCdGhNZkUB2x6HpqxAtdK78aLJx+ehvH11z4iesEmxOfJEf/p3aH4ynnbXZe3+P5L/lUc8DA3PTYPEgnyf3WQPPMSP247a4p/iv97DX95Tlq7dLE7b7ez9/f32XZ73i3IYThfHyQMgjv1dO5DodFL+sI59MlvP30c5ljuj7cHCR9iT9jiPl3cb5IEq+s/gm/O1varJF3/ThRga976t+DYhRW6QIHS7KL72wrvhMY2+/0ZnolbiKCJcEvxJEREQE237H6g2ZhtNKGzft9aJm4+CyHTxRwKUWDhRfyEcEqv2ebWZm70bj0RvAMGYn0xl+duLYI+XtCUA3lbsymszroLsnEM4IYJrRnwHFz1A4PdAqFXign4Gnes0HGVzwXq3MENAcQrjroPpjBdDxnieu92c682FzpqWFw2FSPcOniyEinh5S68G0RBijAkfc/W9ZwXs0N/j2/2/8OsmMucVsiwRq7uwKC+Ibl6E4Y3lizhWV6tVsfjcbWq8qx9U4I8uIIMsfJWMjj3iMxRc4Z3nh2oPw4ZYgd0+OB5ilbo7RgaQo/h4C1jj955TAwnfJgjjAvVAzHEy8zDjA0hlImK4TDZDSFx9szwGiUnugyHCKWpjo8+GXKeZPXxczadAn+lor5jn0ilJCTeGHLGqxn5qiTq0PEAYQolr/DEkCfzmSwioRjaCzfeqDqZF4acVQq9LCktg4GWJkhRpQ+GGm9hIRnayjRTUj3iniHXWUu7irqjxM51ow9tOWfIc71Aj6pMWiYX6ZPorhky7ePaO3ym2p1ol7Q/dszQ5O0y6QqPtW22RMnJQrcMDdskoe3traapRJ7ulKFxHyiMoo01TSV1apcME3OH5AgpIsUwJS4SWYxDhlaZa8S5sThdIzuS5o6hnRR4D+eXxSG3WnZfrhjyiV1sBxvhWTwqmXbLGcPEVlwBcw/G7RVly9AZQ/lGLbMd6QQUAUwX4kZ6y5o5byVDylfbzT6+8rz+KrZUNAULJaY2WdI8qAlTgQGcmryx8udCRPphO0+aq11L/klNVF/E2NXUcUMTwbdLTdaofqI254iaGeH1l03YiMqvRMW1aWp4SQa/7JO60sFQy4anAU/gQXG8B484BqCiKgelSWe17Dpmb0RCW6+ijnWCPQtx6Rvq34n9XlVYNlGWotI4PHJAPR/xjQWGez6emkyUHnwJrDgJLKonJwFWnRDu0XDPRw2NzjxYai9GZKvY0qduErjdCRuGWcZtiT5HrTBH9w16yA3tJRMAMZWgcYyJqcHaeeiKOzSbJyMRnbRfETKphYlm1DILie/1D63qHQqGW4D8zWZIBCg0/DOK8xFTaiB70Gr5CduwKY6hMiArFZxhI2OKuO6f+t/W6kAAd0PFg4EOgrBpGxUSa3D5zODbWv0iYXZM8VzgLYjWwqTRKTD5ZukijfZYSmEeBBDTCfVbo1GAIbQJQZ02EtD6k3WgO8A7ysSMrkEQLKoAyThnucTdcGn8TDBUNpkEolaRoUH1ArwqDg2gyyLPJlmF2mjlwW4nDMUP6Jt7sacOmo28HhhpgtQ5cmFls0EvDPX17eKSwOLn35fEY69gVt6uF4b6hVLxx/g7+Eg3CoB2Uf1mDy8M/2kzFJ02GFT0TQmy1waZpfpum5hog0tYjM2AW69q5+KDoUG67VNkCGahOMjg6akagXhhqO+YilIo4GGJnie8tmrP98JQXxwFbL3IEGwn4NpBGOq73qLnDMZQNJXQ2Kra0XthqN+9XRwAuA7FD4Bgj9SguWQoDoR+IVgcAJgf6K9UxOdRuW0wZYAJynsAEaVYpjZI7AOGYD/sx0dIDkUxIDyDaSNF9gPZ7UpnDJGNppv4Q96xofJp0EZe0sAZ1XP3o/whDJFk6+ynqQBD/lfRqQbXeEnKQVQA37P6QxhCx/Pl5fx9ap0zeBRS/GUAqk4kkfAgGeEWe0cMCa99eqqqD1wRKjc0pPNBl/SohHZ3Zg9haCrIUWQkyBf+kUNPupzdXxrC0PTt0Yr9nsz6kNOUrNJ3Ey4GDKHLZVa6UuTa6PQ5mW+j89HdWao/07DjaibCF0VgQdfByAaTyPZ5Q2fFG/iliBDDJKF8UW2Gvhjqx4fYbmaQBDH32O4g20przVKDOjf2Q1xbpKqRDqa+am5puv3SDXJtqIZd9/1nGp1MyRem07sFZem6EYmJnh0vcmuZKnDw2+R+DZTlN3R2fKMyN/4sdShqtU6k9K4S7RhxGrZbVTWqrhH3yVaqeaCpb8MPfg70vI0ENVTBmSN9hLo46bYwRaMneR0feyg9zQBMacpA7tmyrGup31CQZ9CDsIiAewTN9DR0HMNqwibvjfqXwVMySoEDoHjpqVMMDyQsaOEPZytk1S9P+mqo62X6LQQXhN6rR7FvSta9J4rGsDKIae8+x+z01pn0abmpLdoIsvxwv6kdVCSiP8w395Hfb4UlgQbiMoi6OPGn2CRfnd5ns/f1R51pdRBArsKyqrnG+0eu/X3G50XzjVMt9noxje9eNJaFUYMExTXMvyL+s03jAe9vxXMJq4OySm1ETLA7Jys2h4oYti2jHvBKajewfu3z4o8sRZ5btxzQF/yGBFYD0cb+D4wiH9Yge1HFbm5YNbS9cOGgVb4/cPQohiHOES9GnjnpnWzY1vlxUDeQ1kZ5TKIjyXlydPmSgeUp0+1d/QjwNoBz3cE9fStyHgPLtiibF29+miWX21PdNssLiITXp63nV2Ck5eU8DYPzheywNGLEiBEjRowYMeJv4z8er6hb38ag0wAAAABJRU5ErkJggg=="
+
+/***/ },
+/* 346 */
+/*!*****************************************!*\
+  !*** ./backend/common/images/logo2.png ***!
+  \*****************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "51ccbc750d497ba59fba3d641a407a13.png";
+
+/***/ },
+/* 347 */
+/*!*************************************************!*\
+  !*** ./backend/useradmin/userinfo/container.js ***!
+  \*************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = undefined;
+	
+	var _promise = __webpack_require__(/*! babel-runtime/core-js/promise */ 352);
+	
+	var _promise2 = _interopRequireDefault(_promise);
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 282);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 286);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 287);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 291);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 292);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _class, _temp;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _auth = __webpack_require__(/*! ../../redux/reducers/auth.js */ 241);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	var _nav = __webpack_require__(/*! ./nav.js */ 348);
+	
+	var _nav2 = _interopRequireDefault(_nav);
+	
+	var _header = __webpack_require__(/*! ./view/header.js */ 349);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var Container = (_temp = _class = function (_Component) {
+	    (0, _inherits3.default)(Container, _Component);
+	
+	    function Container(props) {
+	        (0, _classCallCheck3.default)(this, Container);
+	
+	        var _this = (0, _possibleConstructorReturn3.default)(this, (Container.__proto__ || (0, _getPrototypeOf2.default)(Container)).call(this, props));
+	        // code
+	
+	
+	        _this.state = { toShowData: function toShowData() {
+	                return _react2.default.createElement('div', null);
+	            } };
+	        return _this;
+	    }
+	
+	    (0, _createClass3.default)(Container, [{
+	        key: 'getChildContext',
+	        value: function getChildContext() {
+	            return {
+	                showUserData: this.showUserData.bind(this)
+	            };
+	        }
+	    }, {
+	        key: 'showUserData',
+	        value: function showUserData(_ref) {
+	            var asyncProcess = _ref.asyncProcess;
+	            var itemid = _ref.itemid;
+	            var comCreater = _ref.comCreater;
+	
+	
+	            var promises = [];
+	            var self = this;
+	            console.log(this.context.store);
+	            console.log("sssseeeewwwwww");
+	            asyncProcess.forEach(function (p) {
+	                promises.push(p.promise({ store: self.context.store, params: {} }));
+	            });
+	
+	            _promise2.default.all(promises).then(function (s) {
+	                self.setState({
+	                    toShowData: function toShowData() {
+	                        return comCreater();
+	                    }
+	                });
+	            }, function (e) {});
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            return _react2.default.createElement(
+	                'div',
+	                { style: { height: "100%" } },
+	                (0, _header.Header)({}),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'add-box-container' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'user_main_top' },
+	                        _react2.default.createElement(_nav2.default, null),
+	                        this.state.toShowData()
+	                    )
+	                )
+	            );
+	        }
+	    }]);
+	    return Container;
+	}(_react.Component), _class.contextTypes = {
+	    store: _react.PropTypes.object.isRequired
+	}, _class.childContextTypes = {
+	    showUserData: _react2.default.PropTypes.func.isRequired
+	}, _temp);
+	exports.default = Container;
+
+/***/ },
+/* 348 */
+/*!*******************************************!*\
+  !*** ./backend/useradmin/userinfo/nav.js ***!
+  \*******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = undefined;
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 282);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 286);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 287);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 291);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 292);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _class, _temp;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _auth = __webpack_require__(/*! ../../redux/reducers/auth.js */ 241);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	var _teethgraph = __webpack_require__(/*! ./teethgraph.js */ 363);
+	
+	var _teethgraph2 = _interopRequireDefault(_teethgraph);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var BASIC = 'BASIC';
+	var ILLHISTORY = 'ILLHISTORY';
+	var TEETHSTATUS = 'TEETHSTATUS';
+	var TEETHGRAPH = 'TEETHGRAPH';
+	
+	var NavPage = function NavPage(_ref) {
+	    var toBasic = _ref.toBasic;
+	    var toillHistory = _ref.toillHistory;
+	    var toTeethStatus = _ref.toTeethStatus;
+	    var toTeethGraph = _ref.toTeethGraph;
+	    var tab = _ref.tab;
+	
+	
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'user_topmenu user_topmenu_edit' },
+	        _react2.default.createElement(
+	            'ul',
+	            { id: 'routeUl' },
+	            _react2.default.createElement(
+	                'li',
+	                null,
+	                _react2.default.createElement(
+	                    'a',
+	                    { className: tab == BASIC ? "active" : '', onClick: toBasic },
+	                    '基础信息'
+	                )
+	            ),
+	            _react2.default.createElement(
+	                'li',
+	                null,
+	                _react2.default.createElement(
+	                    'a',
+	                    { className: tab == ILLHISTORY ? "active" : '', onClick: toillHistory },
+	                    '既往史'
+	                )
+	            ),
+	            _react2.default.createElement(
+	                'li',
+	                null,
+	                _react2.default.createElement(
+	                    'a',
+	                    { className: tab == TEETHSTATUS ? "active" : '', onClick: toTeethStatus },
+	                    '口腔情况'
+	                )
+	            ),
+	            _react2.default.createElement(
+	                'li',
+	                null,
+	                _react2.default.createElement(
+	                    'a',
+	                    { className: tab == TEETHGRAPH ? "active" : '', onClick: toTeethGraph },
+	                    '牙位图'
+	                )
+	            )
+	        )
+	    );
+	};
+	var Nav = (_temp = _class = function (_Component) {
+	    (0, _inherits3.default)(Nav, _Component);
+	
+	    function Nav(props) {
+	        (0, _classCallCheck3.default)(this, Nav);
+	
+	        var _this = (0, _possibleConstructorReturn3.default)(this, (Nav.__proto__ || (0, _getPrototypeOf2.default)(Nav)).call(this, props));
+	        // code
+	
+	
+	        _this.state = { tab: BASIC };
+	        return _this;
+	    }
+	
+	    (0, _createClass3.default)(Nav, [{
+	        key: 'componentDidUpdate',
+	        value: function componentDidUpdate() {}
+	    }, {
+	        key: 'toBasic',
+	        value: function toBasic() {
+	            this.setState({ tab: BASIC });
+	        }
+	    }, {
+	        key: 'toillHistory',
+	        value: function toillHistory() {
+	            this.setState({ tab: ILLHISTORY });
+	        }
+	    }, {
+	        key: 'toTeethGraph',
+	        value: function toTeethGraph() {
+	            this.setState({ tab: TEETHGRAPH });
+	            this.context.showUserData({ asyncProcess: _teethgraph.asyncEvent, comCreater: function comCreater() {
+	                    return _react2.default.createElement(_teethgraph2.default, null);
+	                } });
+	        }
+	    }, {
+	        key: 'toTeethStatus',
+	        value: function toTeethStatus() {
+	            this.setState({ tab: TEETHSTATUS });
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	
+	            return NavPage({ tab: this.state.tab, toTeethGraph: this.toTeethGraph.bind(this), toBasic: this.toBasic.bind(this), toillHistory: this.toillHistory.bind(this), toTeethStatus: this.toTeethStatus.bind(this) });
+	        }
+	    }]);
+	    return Nav;
+	}(_react.Component), _class.contextTypes = {
+	    showUserData: _react.PropTypes.func.isRequired
+	}, _temp);
+	exports.default = Nav;
+
+/***/ },
+/* 349 */
+/*!***************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/header.js ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.Header = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 313);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var Header = exports.Header = function Header(_ref) {
+	    var backToUsers = _ref.backToUsers;
+	    var toMedRecord = _ref.toMedRecord;
+	    var photo = _ref.photo;
+	    var realname = _ref.realname;
+	    var phone = _ref.phone;
+	    var age = _ref.age;
+	
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'rtop rtop_edit' },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'but-box bj-none' },
+	            _react2.default.createElement(
+	                'p',
+	                null,
+	                _react2.default.createElement(
+	                    'a',
+	                    { onClick: backToUsers, className: 'back-but' },
+	                    '返回'
+	                )
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'userInfobox' },
+	            _react2.default.createElement(
+	                'dl',
+	                null,
+	                _react2.default.createElement(
+	                    'dt',
+	                    null,
+	                    _react2.default.createElement('img', { src: !photo || photo == 'ssssss' ? __webpack_require__(/*! ../../../common/images/user_default.png */ 345) : photo, alt: '' })
+	                ),
+	                _react2.default.createElement(
+	                    'dd',
+	                    null,
+	                    _react2.default.createElement(
+	                        'h3',
+	                        null,
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            realname
+	                        ),
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            age
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'p',
+	                        null,
+	                        phone
+	                    )
+	                )
+	            ),
+	            _react2.default.createElement(
+	                'a',
+	                { onClick: toMedRecord, className: 'default_inputbtn see-but' },
+	                '查看病历'
+	            )
+	        )
+	    );
+	};
+
+/***/ },
+/* 350 */
+/*!*************************************************!*\
+  !*** ./backend/redux/reducers/mteeth_status.js ***!
+  \*************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	exports.default = reducer;
+	exports.switchtooth = switchtooth;
+	exports.switchteeth = switchteeth;
+	exports.switchache = switchache;
+	exports.LoadedorLoading = LoadedorLoading;
+	exports.load = load;
+	
+	var _immutable = __webpack_require__(/*! immutable */ 46);
+	
+	var _immutable2 = _interopRequireDefault(_immutable);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var LOAD = 'bohe/mteeth_status/LOAD';
+	var LOAD_SUCCESS = 'bohe/mteeth_status/LOAD_SUCCESS';
+	var LOAD_FAIL = 'bohe/mteeth_status/LOAD_FAIL';
+	
+	var SWITCH_TEETH = 'bohe/mteeth_status/SWITCHTEETH';
+	var SWITCH_ACHE = 'bohe/mteeth_status/SWITCHACHE';
+	var SWITCH_TOOTH = 'bohe/mteeth_status/SWITCHTOOTH';
+	
+	var teeth_ui = {
+	  size: 0,
+	  ache_list: [{
+	    name: 'C:龋坏',
+	    bool: false
+	  }, {
+	    name: 'M:缺失',
+	    bool: false
+	  }, {
+	    name: 'F:填充物',
+	    bool: false
+	  }, {
+	    name: 'R:扭转牙',
+	    bool: false
+	  }, {
+	    name: 'U:未见萌出',
+	    bool: false
+	  }, {
+	    name: 'IT:种植牙',
+	    bool: false
+	  }, {
+	    name: 'IM:阻生牙',
+	    bool: false
+	  }, {
+	    name: 'CP:部分冠',
+	    bool: false
+	  }, {
+	    name: 'CF:全冠',
+	    bool: false
+	  }, {
+	    name: 'GO:金合金高嵌体',
+	    bool: false
+	  }, {
+	    name: 'CV:瓷贴面',
+	    bool: false
+	  }, {
+	    name: 'RV:树脂贴面',
+	    bool: false
+	  }, {
+	    name: 'FP:固定桥',
+	    bool: false
+	  }, {
+	
+	    name: 'RP:可摘局部义齿',
+	    bool: false
+	  }, {
+	
+	    name: 'RP:可摘局部义齿',
+	    bool: false
+	  }, {
+	
+	    name: 'DCP:畸形中央尖',
+	    bool: false
+	  }, {
+	
+	    name: 'TC:牙隐裂',
+	    bool: false
+	  }],
+	  teeth: [{
+	    name: 11,
+	    ache: [0, 1, 2]
+	  }, {
+	    name: 12,
+	    ache: []
+	  }, {
+	    name: 13,
+	    ache: []
+	  }, {
+	    name: 14,
+	    ache: []
+	  }, {
+	    name: 15,
+	    ache: []
+	  }, {
+	    name: 16,
+	    ache: []
+	  }, {
+	    name: 17,
+	    ache: []
+	  }, {
+	    name: 18,
+	    ache: []
+	  }, {
+	    name: 21,
+	    ache: []
+	  }, {
+	    name: 22,
+	    ache: []
+	  }, {
+	    name: 23,
+	    ache: []
+	  }, {
+	    name: 24,
+	    ache: []
+	  }, {
+	    name: 25,
+	    ache: []
+	  }, {
+	    name: 26,
+	    ache: []
+	  }, {
+	    name: 27,
+	    ache: []
+	  }, {
+	    name: 28,
+	    ache: []
+	  }, {
+	    name: 41,
+	    ache: []
+	  }, {
+	    name: 42,
+	    ache: []
+	  }, {
+	    name: 43,
+	    ache: []
+	  }, {
+	    name: 44,
+	    ache: []
+	  }, {
+	    name: 45,
+	    ache: []
+	  }, {
+	    name: 46,
+	    ache: []
+	  }, {
+	    name: 47,
+	    ache: []
+	  }, {
+	    name: 48,
+	    ache: []
+	  }, {
+	    name: 31,
+	    ache: []
+	  }, {
+	    name: 32,
+	    ache: []
+	  }, {
+	    name: 33,
+	    type: 0,
+	    ache: []
+	  }, {
+	    name: 34,
+	    ache: []
+	  }, {
+	    name: 35,
+	    ache: []
+	  }, {
+	    name: 36,
+	    ache: []
+	  }, {
+	    name: 37,
+	    ache: []
+	  }, {
+	    name: 38,
+	    ache: []
+	  }]
+	};
+	
+	var initialState = _immutable2.default.Map({
+	  loaded: false,
+	  loading: false,
+	  teeth_ui: teeth_ui
+	});
+	
+	function reducer() {
+	  var state = arguments.length <= 0 || arguments[0] === undefined ? initialState : arguments[0];
+	  var action = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	  switch (action.type) {
+	    case LOAD:
+	      return state.merge({ loading: true });
+	    case LOAD_SUCCESS:
+	      var _data = {};
+	      var teethlist = action.result;
+	      console.log("RRRRRRRRR!");
+	      console.log(teethlist);
+	      console.log(action.index);
+	      console.log("RRRRRRRRR!");
+	      _data[action.index] = teethlist;
+	
+	      var teethui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
+	
+	      var latest_data = (0, _extends3.default)({ idx: teethlist.length - 1, useridx: action.index, size: teethlist.length }, teethui);
+	      //return state.merge({ loading: false, loaded: true, teeth: action.result })
+	      return state.mergeDeep({ loading: false, loaded: true, teeth_ui: latest_data, allUserTeeth: _data });
+	    case LOAD_FAIL:
+	      return state.merge({ loading: false, loaded: false, error: action.error });
+	    case SWITCH_TEETH:
+	      var pos = action.result;
+	      var teeth;
+	      var dataToShow;
+	      if (pos.useridx) {
+	        teeth = state.get('allUserTeeth').get(pos.useridx).get(pos.idx).toJS();
+	        dataToShow = (0, _extends3.default)({}, pos, { size: state.get('allUserTeeth').get(pos.useridx).size, teeth: teeth });
+	      } else {
+	        teeth = state.get('allUserTeeth').get(state.getIn(['teeth_ui', 'useridx'])).get(pos.idx).toJS();
+	        dataToShow = (0, _extends3.default)({}, pos, { teeth: teeth });
+	      }
+	      return state.mergeDeep({ teeth_ui: dataToShow });
+	    case SWITCH_ACHE:
+	      var achetoAdd = action.result;
+	      if (achetoAdd.status) {
+	        return state.updateIn(['teeth_ui', 'teeth'], function (list) {
+	          return list.map(function (tooth) {
+	            if (tooth.get('name') == achetoAdd.curToothName) {
+	              return tooth.updateIn(['ache'], function (list) {
+	                return list.push(achetoAdd.acheidx);
+	              });
+	            }
+	            return tooth;
+	          });
+	        }).setIn(['teeth_ui', 'ache_list', achetoAdd.acheidx, 'bool'], achetoAdd.status);
+	      } else {
+	
+	        var curtoothindex = state.getIn(['teeth_ui', 'teeth']).findIndex(function (tooth) {
+	          return tooth.get('name') === achetoAdd.curToothName;
+	        });
+	        var acheindex = state.getIn(['teeth_ui', 'teeth', curtoothindex, 'ache']).findIndex(function (ache) {
+	          return ache === achetoAdd.acheidx;
+	        });
+	        return state.removeIn(['teeth_ui', 'teeth', curtoothindex, acheindex]).setIn(['teeth_ui', 'ache_list', achetoAdd.acheidx, 'bool'], achetoAdd.status);
+	      }
+	    case SWITCH_TOOTH:
+	      var toothname = action.toothname;
+	      var index = state.getIn(['teeth_ui', 'teeth']).findIndex(function (tooth) {
+	        return tooth.get('name') === toothname;
+	      });
+	      var toothJs = state.getIn(['teeth_ui', 'teeth', index]).toJS();
+	      var idx = 0;
+	      return state.mergeDeep({ 'teeth_ui': { toothname: toothname } }).updateIn(['teeth_ui', 'ache_list'], function (list) {
+	        return list.map(function (ache) {
+	          var flag = false;
+	          toothJs.ache.map(function (i) {
+	            if (i == idx) {
+	              flag = true;
+	            }
+	          });
+	          idx++;
+	          return ache.merge({ 'bool': flag });
+	        });
+	      });
+	
+	    default:
+	      return state;
+	
+	  }
+	}
+	
+	function switchtooth(_ref) {
+	  var toothname = _ref.toothname;
+	
+	  return {
+	    type: SWITCH_TOOTH,
+	    toothname: toothname
+	  };
+	}
+	
+	function switchteeth(pos) {
+	  return {
+	    type: SWITCH_TEETH,
+	    result: pos
+	  };
+	}
+	
+	function switchache(_ref2) {
+	  var acheidx = _ref2.acheidx;
+	  var curToothName = _ref2.curToothName;
+	  var status = _ref2.status;
+	
+	  return {
+	    type: SWITCH_ACHE,
+	    result: { acheidx: acheidx, curToothName: curToothName, status: status }
+	  };
+	}
+	
+	function LoadedorLoading(state) {
+	  var loaded = false;
+	  var loading = false;
+	  if (state.hasIn(['mteeth_status', 'loaded'])) {
+	    loaded = state.getIn(['mteeth_status', 'loaded']);
+	  }
+	  if (state.hasIn(['mteeth_status', 'loading'])) {
+	    loading = state.getIn(['mteeth_status', 'loading']);
+	  }
+	  return loaded || loading;
+	}
+	
+	function load(_ref3) {
+	  var user = _ref3.user;
+	  var patient = _ref3.patient;
+	  var index = _ref3.index;
+	  var req = _ref3.req;
+	  var refresh = _ref3.refresh;
+	
+	  var params = {};
+	
+	  if (typeof window === 'undefined' || window.__SERVER__ == true) {
+	    ///server side
+	    if (user.token) ///  鉴权通过 已经持有 token
+	      {
+	
+	        params = {};
+	        params.token = user.token;
+	      } else {
+	      // server side none key to login
+	
+	      return {
+	        type: LOAD_FAIL,
+	        promise: function promise() {
+	          return _bluebird2.default.reject({ info: 'auth' });
+	        }
+	      };
+	    }
+	  } else {
+	    params = {};
+	  }
+	
+	  return {
+	    types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
+	    promise: function promise(client) {
+	      return client.GET('http://192.168.10.10/patient/mteeth/rest?', { params: params }, {
+	        format: function format(response) {
+	          if (response.status >= 400) {
+	            throw new Error("Bad response from server");
+	          }
+	          return response.json();
+	        },
+	        done: function done(res) {
+	
+	          console.log(res);
+	
+	          if (res.valid == 1) {
+	
+	            return _bluebird2.default.resolve(res.teethlist);
+	          } else {
+	            //var err = { info: 'auth' }
+	            return _bluebird2.default.reject({ info: 'notvalid' });
+	          }
+	        },
+	        error: function error(err) {
+	          return _bluebird2.default.reject({ info: 'wire' });
+	        }
+	      });
+	    },
+	    refresh: refresh,
+	    index: index
+	  };
+	}
+
+/***/ },
+/* 351 */
+/*!*************************************************!*\
+  !*** ./backend/redux/reducers/cteeth_status.js ***!
+  \*************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	exports.default = reducer;
+	exports.switchtooth = switchtooth;
+	exports.switchteeth = switchteeth;
+	exports.switchache = switchache;
+	exports.LoadedorLoading = LoadedorLoading;
+	exports.load = load;
+	
+	var _immutable = __webpack_require__(/*! immutable */ 46);
+	
+	var _immutable2 = _interopRequireDefault(_immutable);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var LOAD = 'bohe/cteeth_status/LOAD';
+	var LOAD_SUCCESS = 'bohe/cteeth_status/LOAD_SUCCESS';
+	var LOAD_FAIL = 'bohe/cteeth_status/LOAD_FAIL';
+	
+	var LOAD_DETAIL = 'bohe/cteeth_status/LOAD_DETAIL';
+	var LOAD_DETAIL_SUCCESS = 'bohe/cteeth_status/LOAD_DETAIL_SUCCESS';
+	var LOAD_DETAIL_FAIL = 'bohe/cteeth_status/LOAD_DETAIL_FAIL';
+	
+	var SWITCH_TEETH = 'bohe/cteeth_status/SWITCHTEETH';
+	var SWITCH_ACHE = 'bohe/cteeth_status/SWITCHACHE';
+	var SWITCH_TOOTH = 'bohe/cteeth_status/SWITCHTOOTH';
+	
+	var teeth_ui = {
+	    size: 0,
+	    ache_list: [{
+	        name: 'C:龋坏',
+	        bool: false
+	    }, {
+	        name: 'M:缺失',
+	        bool: false
+	    }, {
+	        name: 'PFS:窝沟封闭',
+	        bool: false
+	    }, {
+	        name: 'CF:全冠',
+	        bool: false
+	    }, {
+	        name: 'U:未见萌出',
+	        bool: false
+	    }, {
+	        name: 'F:填充物',
+	        bool: false
+	    }, {
+	        name: 'RT:根管治疗后',
+	        bool: false
+	    }, {
+	        name: 'SR:间隙保持器',
+	        bool: false
+	    }],
+	    teeth: [{
+	        name: 51,
+	        ache: []
+	    }, {
+	        name: 52,
+	        ache: []
+	    }, {
+	        name: 53,
+	        ache: []
+	    }, {
+	        name: 54,
+	        ache: []
+	    }, {
+	        name: 55,
+	        ache: []
+	    }, {
+	        name: 61,
+	        ache: []
+	    }, {
+	        name: 62,
+	        ache: []
+	    }, {
+	        name: 63,
+	        ache: []
+	    }, {
+	        name: 64,
+	        ache: []
+	    }, {
+	        name: 65,
+	        ache: []
+	    }, {
+	        name: 81,
+	        ache: []
+	    }, {
+	        name: 82,
+	        ache: []
+	    }, {
+	        name: 83,
+	        ache: []
+	    }, {
+	        name: 84,
+	        ache: []
+	    }, {
+	        name: 85,
+	        ache: []
+	    }, {
+	        name: 71,
+	        ache: []
+	    }, {
+	        name: 72,
+	        ache: []
+	    }, {
+	        name: 73,
+	        ache: []
+	    }, {
+	        name: 74,
+	        ache: []
+	    }, {
+	        name: 75,
+	        ache: []
+	    }]
+	};
+	
+	var initialState = _immutable2.default.Map({
+	    loaded: false,
+	    loading: false,
+	    teeth_ui: teeth_ui
+	});
+	
+	function reducer() {
+	    var state = arguments.length <= 0 || arguments[0] === undefined ? initialState : arguments[0];
+	    var action = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+	    switch (action.type) {
+	        case LOAD:
+	            return state.merge({ loading: true });
+	        case LOAD_SUCCESS:
+	            var _data = {};
+	            var teethlist = action.result;
+	            console.log("RRRRRRRRR!");
+	            console.log(teethlist);
+	            console.log(action.index);
+	            console.log("RRRRRRRRR!");
+	            _data[action.index] = teethlist;
+	
+	            var teethui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
+	
+	            var latest_data = (0, _extends3.default)({ idx: teethlist.length - 1, useridx: action.index, size: teethlist.length }, teethui);
+	            //return state.merge({ loading: false, loaded: true, teeth: action.result })
+	            return state.mergeDeep({ loading: false, loaded: true, teeth_ui: latest_data, allUserTeeth: _data });
+	        case LOAD_FAIL:
+	            return state.merge({ loading: false, loaded: false, error: action.error });
+	        case SWITCH_TEETH:
+	            var pos = action.result;
+	            var teeth;
+	            var dataToShow;
+	            if (pos.useridx) {
+	                teeth = state.get('allUserTeeth').get(pos.useridx).get(pos.idx).toJS();
+	                dataToShow = (0, _extends3.default)({}, pos, { size: state.get('allUserTeeth').get(pos.useridx).size, teeth: teeth });
+	            } else {
+	                teeth = state.get('allUserTeeth').get(state.getIn(['teeth_ui', 'useridx'])).get(pos.idx).toJS();
+	                dataToShow = (0, _extends3.default)({}, pos, { teeth: teeth });
+	            }
+	            return state.mergeDeep({ teeth_ui: dataToShow });
+	        case SWITCH_ACHE:
+	            var achetoAdd = action.result;
+	            if (achetoAdd.status) {
+	                return state.updateIn(['teeth_ui', 'teeth'], function (list) {
+	                    return list.map(function (tooth) {
+	                        if (tooth.get('name') == achetoAdd.curToothName) {
+	                            return tooth.updateIn(['ache'], function (list) {
+	                                return list.push(achetoAdd.acheidx);
+	                            });
+	                        }
+	                        return tooth;
+	                    });
+	                }).setIn(['teeth_ui', 'ache_list', achetoAdd.acheidx, 'bool'], achetoAdd.status);
+	            } else {
+	
+	                var curtoothindex = state.getIn(['teeth_ui', 'teeth']).findIndex(function (tooth) {
+	                    return tooth.get('name') === achetoAdd.curToothName;
+	                });
+	                var acheindex = state.getIn(['teeth_ui', 'teeth', curtoothindex, 'ache']).findIndex(function (ache) {
+	                    return ache === achetoAdd.acheidx;
+	                });
+	                return state.removeIn(['teeth_ui', 'teeth', curtoothindex, acheindex]).setIn(['teeth_ui', 'ache_list', achetoAdd.acheidx, 'bool'], achetoAdd.status);
+	            }
+	        case SWITCH_TOOTH:
+	            var toothname = action.toothname;
+	            var index = state.getIn(['teeth_ui', 'teeth']).findIndex(function (tooth) {
+	                return tooth.get('name') === toothname;
+	            });
+	            var toothJs = state.getIn(['teeth_ui', 'teeth', index]).toJS();
+	            var idx = 0;
+	            return state.mergeDeep({ 'teeth_ui': { toothname: toothname } }).updateIn(['teeth_ui', 'ache_list'], function (list) {
+	                return list.map(function (ache) {
+	                    var flag = false;
+	                    toothJs.ache.map(function (i) {
+	                        if (i == idx) {
+	                            flag = true;
+	                        }
+	                    });
+	                    idx++;
+	                    return ache.merge({ 'bool': flag });
+	                });
+	            });
+	        default:
+	            return state;
+	    }
+	}
+	
+	function switchtooth(_ref) {
+	    var toothname = _ref.toothname;
+	
+	    return {
+	        type: SWITCH_TOOTH,
+	        toothname: toothname
+	    };
+	}
+	
+	function switchteeth(pos) {
+	    return {
+	        type: SWITCH_TEETH,
+	        result: pos
+	    };
+	}
+	
+	function switchache(_ref2) {
+	    var acheidx = _ref2.acheidx;
+	    var curToothName = _ref2.curToothName;
+	    var status = _ref2.status;
+	
+	    return {
+	        type: SWITCH_ACHE,
+	        result: { acheidx: acheidx, curToothName: curToothName, status: status }
+	    };
+	}
+	
+	function LoadedorLoading(state) {
+	    var loaded = false;
+	    var loading = false;
+	    if (state.hasIn(['cteeth_status', 'loaded'])) {
+	        loaded = state.getIn(['cteeth_status', 'loaded']);
+	    }
+	    if (state.hasIn(['cteeth_status', 'loading'])) {
+	        loading = state.getIn(['cteeth_status', 'loading']);
+	    }
+	    return loaded || loading;
+	}
+	
+	function load(_ref3) {
+	    var user = _ref3.user;
+	    var patient = _ref3.patient;
+	    var index = _ref3.index;
+	    var req = _ref3.req;
+	    var refresh = _ref3.refresh;
+	
+	    var params = {};
+	
+	    if (typeof window === 'undefined' || window.__SERVER__ == true) {
+	        ///server side
+	        if (user.token) ///  鉴权通过 已经持有 token
+	            {
+	
+	                params = {};
+	                params.token = user.token;
+	            } else {
+	            // server side none key to login
+	
+	            return {
+	                type: LOAD_FAIL,
+	                promise: function promise() {
+	                    return _bluebird2.default.reject({ info: 'auth' });
+	                }
+	            };
+	        }
+	    } else {
+	        params = {};
+	    }
+	
+	    return {
+	        types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
+	        promise: function promise(client) {
+	            return client.GET('http://192.168.10.10/patient/cteeth/rest?', { params: params }, {
+	                format: function format(response) {
+	                    if (response.status >= 400) {
+	                        throw new Error("Bad response from server");
+	                    }
+	                    return response.json();
+	                },
+	                done: function done(res) {
+	
+	                    console.log(res);
+	
+	                    if (res.valid == 1) {
+	
+	                        return _bluebird2.default.resolve(res.teethlist);
+	                    } else {
+	                        //var err = { info: 'auth' }
+	                        return _bluebird2.default.reject({ info: 'notvalid' });
+	                    }
+	                },
+	                error: function error(err) {
+	                    return _bluebird2.default.reject({ info: 'wire' });
+	                }
+	            });
+	        },
+	        refresh: refresh,
+	        index: index
+	    };
+	}
+
+/***/ },
+/* 352 */
+/*!********************************************!*\
+  !*** ./~/babel-runtime/core-js/promise.js ***!
+  \********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = { "default": __webpack_require__(/*! core-js/library/fn/promise */ 353), __esModule: true };
+
+/***/ },
+/* 353 */
+/*!*********************************************************!*\
+  !*** ./~/babel-runtime/~/core-js/library/fn/promise.js ***!
+  \*********************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(/*! ../modules/es6.object.to-string */ 267);
+	__webpack_require__(/*! ../modules/es6.string.iterator */ 215);
+	__webpack_require__(/*! ../modules/web.dom.iterable */ 251);
+	__webpack_require__(/*! ../modules/es6.promise */ 354);
+	module.exports = __webpack_require__(/*! ../modules/_core */ 8).Promise;
+
+/***/ },
+/* 354 */
+/*!******************************************************************!*\
+  !*** ./~/babel-runtime/~/core-js/library/modules/es6.promise.js ***!
+  \******************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	var LIBRARY            = __webpack_require__(/*! ./_library */ 218)
+	  , global             = __webpack_require__(/*! ./_global */ 7)
+	  , ctx                = __webpack_require__(/*! ./_ctx */ 9)
+	  , classof            = __webpack_require__(/*! ./_classof */ 233)
+	  , $export            = __webpack_require__(/*! ./_export */ 6)
+	  , isObject           = __webpack_require__(/*! ./_is-object */ 14)
+	  , aFunction          = __webpack_require__(/*! ./_a-function */ 10)
+	  , anInstance         = __webpack_require__(/*! ./_an-instance */ 355)
+	  , forOf              = __webpack_require__(/*! ./_for-of */ 356)
+	  , speciesConstructor = __webpack_require__(/*! ./_species-constructor */ 357)
+	  , task               = __webpack_require__(/*! ./_task */ 358).set
+	  , microtask          = __webpack_require__(/*! ./_microtask */ 360)()
+	  , PROMISE            = 'Promise'
+	  , TypeError          = global.TypeError
+	  , process            = global.process
+	  , $Promise           = global[PROMISE]
+	  , process            = global.process
+	  , isNode             = classof(process) == 'process'
+	  , empty              = function(){ /* empty */ }
+	  , Internal, GenericPromiseCapability, Wrapper;
+	
+	var USE_NATIVE = !!function(){
+	  try {
+	    // correct subclassing with @@species support
+	    var promise     = $Promise.resolve(1)
+	      , FakePromise = (promise.constructor = {})[__webpack_require__(/*! ./_wks */ 226)('species')] = function(exec){ exec(empty, empty); };
+	    // unhandled rejections tracking support, NodeJS Promise without it fails @@species test
+	    return (isNode || typeof PromiseRejectionEvent == 'function') && promise.then(empty) instanceof FakePromise;
+	  } catch(e){ /* empty */ }
+	}();
+	
+	// helpers
+	var sameConstructor = function(a, b){
+	  // with library wrapper special case
+	  return a === b || a === $Promise && b === Wrapper;
+	};
+	var isThenable = function(it){
+	  var then;
+	  return isObject(it) && typeof (then = it.then) == 'function' ? then : false;
+	};
+	var newPromiseCapability = function(C){
+	  return sameConstructor($Promise, C)
+	    ? new PromiseCapability(C)
+	    : new GenericPromiseCapability(C);
+	};
+	var PromiseCapability = GenericPromiseCapability = function(C){
+	  var resolve, reject;
+	  this.promise = new C(function($$resolve, $$reject){
+	    if(resolve !== undefined || reject !== undefined)throw TypeError('Bad Promise constructor');
+	    resolve = $$resolve;
+	    reject  = $$reject;
+	  });
+	  this.resolve = aFunction(resolve);
+	  this.reject  = aFunction(reject);
+	};
+	var perform = function(exec){
+	  try {
+	    exec();
+	  } catch(e){
+	    return {error: e};
+	  }
+	};
+	var notify = function(promise, isReject){
+	  if(promise._n)return;
+	  promise._n = true;
+	  var chain = promise._c;
+	  microtask(function(){
+	    var value = promise._v
+	      , ok    = promise._s == 1
+	      , i     = 0;
+	    var run = function(reaction){
+	      var handler = ok ? reaction.ok : reaction.fail
+	        , resolve = reaction.resolve
+	        , reject  = reaction.reject
+	        , domain  = reaction.domain
+	        , result, then;
+	      try {
+	        if(handler){
+	          if(!ok){
+	            if(promise._h == 2)onHandleUnhandled(promise);
+	            promise._h = 1;
+	          }
+	          if(handler === true)result = value;
+	          else {
+	            if(domain)domain.enter();
+	            result = handler(value);
+	            if(domain)domain.exit();
+	          }
+	          if(result === reaction.promise){
+	            reject(TypeError('Promise-chain cycle'));
+	          } else if(then = isThenable(result)){
+	            then.call(result, resolve, reject);
+	          } else resolve(result);
+	        } else reject(value);
+	      } catch(e){
+	        reject(e);
+	      }
+	    };
+	    while(chain.length > i)run(chain[i++]); // variable length - can't use forEach
+	    promise._c = [];
+	    promise._n = false;
+	    if(isReject && !promise._h)onUnhandled(promise);
+	  });
+	};
+	var onUnhandled = function(promise){
+	  task.call(global, function(){
+	    var value = promise._v
+	      , abrupt, handler, console;
+	    if(isUnhandled(promise)){
+	      abrupt = perform(function(){
+	        if(isNode){
+	          process.emit('unhandledRejection', value, promise);
+	        } else if(handler = global.onunhandledrejection){
+	          handler({promise: promise, reason: value});
+	        } else if((console = global.console) && console.error){
+	          console.error('Unhandled promise rejection', value);
+	        }
+	      });
+	      // Browsers should not trigger `rejectionHandled` event if it was handled here, NodeJS - should
+	      promise._h = isNode || isUnhandled(promise) ? 2 : 1;
+	    } promise._a = undefined;
+	    if(abrupt)throw abrupt.error;
+	  });
+	};
+	var isUnhandled = function(promise){
+	  if(promise._h == 1)return false;
+	  var chain = promise._a || promise._c
+	    , i     = 0
+	    , reaction;
+	  while(chain.length > i){
+	    reaction = chain[i++];
+	    if(reaction.fail || !isUnhandled(reaction.promise))return false;
+	  } return true;
+	};
+	var onHandleUnhandled = function(promise){
+	  task.call(global, function(){
+	    var handler;
+	    if(isNode){
+	      process.emit('rejectionHandled', promise);
+	    } else if(handler = global.onrejectionhandled){
+	      handler({promise: promise, reason: promise._v});
+	    }
+	  });
+	};
+	var $reject = function(value){
+	  var promise = this;
+	  if(promise._d)return;
+	  promise._d = true;
+	  promise = promise._w || promise; // unwrap
+	  promise._v = value;
+	  promise._s = 2;
+	  if(!promise._a)promise._a = promise._c.slice();
+	  notify(promise, true);
+	};
+	var $resolve = function(value){
+	  var promise = this
+	    , then;
+	  if(promise._d)return;
+	  promise._d = true;
+	  promise = promise._w || promise; // unwrap
+	  try {
+	    if(promise === value)throw TypeError("Promise can't be resolved itself");
+	    if(then = isThenable(value)){
+	      microtask(function(){
+	        var wrapper = {_w: promise, _d: false}; // wrap
+	        try {
+	          then.call(value, ctx($resolve, wrapper, 1), ctx($reject, wrapper, 1));
+	        } catch(e){
+	          $reject.call(wrapper, e);
+	        }
+	      });
+	    } else {
+	      promise._v = value;
+	      promise._s = 1;
+	      notify(promise, false);
+	    }
+	  } catch(e){
+	    $reject.call({_w: promise, _d: false}, e); // wrap
+	  }
+	};
+	
+	// constructor polyfill
+	if(!USE_NATIVE){
+	  // 25.4.3.1 Promise(executor)
+	  $Promise = function Promise(executor){
+	    anInstance(this, $Promise, PROMISE, '_h');
+	    aFunction(executor);
+	    Internal.call(this);
+	    try {
+	      executor(ctx($resolve, this, 1), ctx($reject, this, 1));
+	    } catch(err){
+	      $reject.call(this, err);
+	    }
+	  };
+	  Internal = function Promise(executor){
+	    this._c = [];             // <- awaiting reactions
+	    this._a = undefined;      // <- checked in isUnhandled reactions
+	    this._s = 0;              // <- state
+	    this._d = false;          // <- done
+	    this._v = undefined;      // <- value
+	    this._h = 0;              // <- rejection state, 0 - default, 1 - handled, 2 - unhandled
+	    this._n = false;          // <- notify
+	  };
+	  Internal.prototype = __webpack_require__(/*! ./_redefine-all */ 361)($Promise.prototype, {
+	    // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
+	    then: function then(onFulfilled, onRejected){
+	      var reaction    = newPromiseCapability(speciesConstructor(this, $Promise));
+	      reaction.ok     = typeof onFulfilled == 'function' ? onFulfilled : true;
+	      reaction.fail   = typeof onRejected == 'function' && onRejected;
+	      reaction.domain = isNode ? process.domain : undefined;
+	      this._c.push(reaction);
+	      if(this._a)this._a.push(reaction);
+	      if(this._s)notify(this, false);
+	      return reaction.promise;
+	    },
+	    // 25.4.5.1 Promise.prototype.catch(onRejected)
+	    'catch': function(onRejected){
+	      return this.then(undefined, onRejected);
+	    }
+	  });
+	  PromiseCapability = function(){
+	    var promise  = new Internal;
+	    this.promise = promise;
+	    this.resolve = ctx($resolve, promise, 1);
+	    this.reject  = ctx($reject, promise, 1);
+	  };
+	}
+	
+	$export($export.G + $export.W + $export.F * !USE_NATIVE, {Promise: $Promise});
+	__webpack_require__(/*! ./_set-to-string-tag */ 225)($Promise, PROMISE);
+	__webpack_require__(/*! ./_set-species */ 362)(PROMISE);
+	Wrapper = __webpack_require__(/*! ./_core */ 8)[PROMISE];
+	
+	// statics
+	$export($export.S + $export.F * !USE_NATIVE, PROMISE, {
+	  // 25.4.4.5 Promise.reject(r)
+	  reject: function reject(r){
+	    var capability = newPromiseCapability(this)
+	      , $$reject   = capability.reject;
+	    $$reject(r);
+	    return capability.promise;
+	  }
+	});
+	$export($export.S + $export.F * (LIBRARY || !USE_NATIVE), PROMISE, {
+	  // 25.4.4.6 Promise.resolve(x)
+	  resolve: function resolve(x){
+	    // instanceof instead of internal slot check because we should fix it without replacement native Promise core
+	    if(x instanceof $Promise && sameConstructor(x.constructor, this))return x;
+	    var capability = newPromiseCapability(this)
+	      , $$resolve  = capability.resolve;
+	    $$resolve(x);
+	    return capability.promise;
+	  }
+	});
+	$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(/*! ./_iter-detect */ 234)(function(iter){
+	  $Promise.all(iter)['catch'](empty);
+	})), PROMISE, {
+	  // 25.4.4.1 Promise.all(iterable)
+	  all: function all(iterable){
+	    var C          = this
+	      , capability = newPromiseCapability(C)
+	      , resolve    = capability.resolve
+	      , reject     = capability.reject;
+	    var abrupt = perform(function(){
+	      var values    = []
+	        , index     = 0
+	        , remaining = 1;
+	      forOf(iterable, false, function(promise){
+	        var $index        = index++
+	          , alreadyCalled = false;
+	        values.push(undefined);
+	        remaining++;
+	        C.resolve(promise).then(function(value){
+	          if(alreadyCalled)return;
+	          alreadyCalled  = true;
+	          values[$index] = value;
+	          --remaining || resolve(values);
+	        }, reject);
+	      });
+	      --remaining || resolve(values);
+	    });
+	    if(abrupt)reject(abrupt.error);
+	    return capability.promise;
+	  },
+	  // 25.4.4.4 Promise.race(iterable)
+	  race: function race(iterable){
+	    var C          = this
+	      , capability = newPromiseCapability(C)
+	      , reject     = capability.reject;
+	    var abrupt = perform(function(){
+	      forOf(iterable, false, function(promise){
+	        C.resolve(promise).then(capability.resolve, reject);
+	      });
+	    });
+	    if(abrupt)reject(abrupt.error);
+	    return capability.promise;
+	  }
+	});
+
+/***/ },
+/* 355 */
+/*!*******************************************************************!*\
+  !*** ./~/babel-runtime/~/core-js/library/modules/_an-instance.js ***!
+  \*******************************************************************/
+/***/ function(module, exports) {
+
+	module.exports = function(it, Constructor, name, forbiddenField){
+	  if(!(it instanceof Constructor) || (forbiddenField !== undefined && forbiddenField in it)){
+	    throw TypeError(name + ': incorrect invocation!');
+	  } return it;
+	};
+
+/***/ },
+/* 356 */
+/*!**************************************************************!*\
+  !*** ./~/babel-runtime/~/core-js/library/modules/_for-of.js ***!
+  \**************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var ctx         = __webpack_require__(/*! ./_ctx */ 9)
+	  , call        = __webpack_require__(/*! ./_iter-call */ 229)
+	  , isArrayIter = __webpack_require__(/*! ./_is-array-iter */ 230)
+	  , anObject    = __webpack_require__(/*! ./_an-object */ 13)
+	  , toLength    = __webpack_require__(/*! ./_to-length */ 30)
+	  , getIterFn   = __webpack_require__(/*! ./core.get-iterator-method */ 232)
+	  , BREAK       = {}
+	  , RETURN      = {};
+	var exports = module.exports = function(iterable, entries, fn, that, ITERATOR){
+	  var iterFn = ITERATOR ? function(){ return iterable; } : getIterFn(iterable)
+	    , f      = ctx(fn, that, entries ? 2 : 1)
+	    , index  = 0
+	    , length, step, iterator, result;
+	  if(typeof iterFn != 'function')throw TypeError(iterable + ' is not iterable!');
+	  // fast case for arrays with default iterator
+	  if(isArrayIter(iterFn))for(length = toLength(iterable.length); length > index; index++){
+	    result = entries ? f(anObject(step = iterable[index])[0], step[1]) : f(iterable[index]);
+	    if(result === BREAK || result === RETURN)return result;
+	  } else for(iterator = iterFn.call(iterable); !(step = iterator.next()).done; ){
+	    result = call(iterator, f, step.value, entries);
+	    if(result === BREAK || result === RETURN)return result;
+	  }
+	};
+	exports.BREAK  = BREAK;
+	exports.RETURN = RETURN;
+
+/***/ },
+/* 357 */
+/*!***************************************************************************!*\
+  !*** ./~/babel-runtime/~/core-js/library/modules/_species-constructor.js ***!
+  \***************************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	// 7.3.20 SpeciesConstructor(O, defaultConstructor)
+	var anObject  = __webpack_require__(/*! ./_an-object */ 13)
+	  , aFunction = __webpack_require__(/*! ./_a-function */ 10)
+	  , SPECIES   = __webpack_require__(/*! ./_wks */ 226)('species');
+	module.exports = function(O, D){
+	  var C = anObject(O).constructor, S;
+	  return C === undefined || (S = anObject(C)[SPECIES]) == undefined ? D : aFunction(S);
+	};
+
+/***/ },
+/* 358 */
+/*!************************************************************!*\
+  !*** ./~/babel-runtime/~/core-js/library/modules/_task.js ***!
+  \************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var ctx                = __webpack_require__(/*! ./_ctx */ 9)
+	  , invoke             = __webpack_require__(/*! ./_invoke */ 359)
+	  , html               = __webpack_require__(/*! ./_html */ 224)
+	  , cel                = __webpack_require__(/*! ./_dom-create */ 18)
+	  , global             = __webpack_require__(/*! ./_global */ 7)
+	  , process            = global.process
+	  , setTask            = global.setImmediate
+	  , clearTask          = global.clearImmediate
+	  , MessageChannel     = global.MessageChannel
+	  , counter            = 0
+	  , queue              = {}
+	  , ONREADYSTATECHANGE = 'onreadystatechange'
+	  , defer, channel, port;
+	var run = function(){
+	  var id = +this;
+	  if(queue.hasOwnProperty(id)){
+	    var fn = queue[id];
+	    delete queue[id];
+	    fn();
+	  }
+	};
+	var listener = function(event){
+	  run.call(event.data);
+	};
+	// Node.js 0.9+ & IE10+ has setImmediate, otherwise:
+	if(!setTask || !clearTask){
+	  setTask = function setImmediate(fn){
+	    var args = [], i = 1;
+	    while(arguments.length > i)args.push(arguments[i++]);
+	    queue[++counter] = function(){
+	      invoke(typeof fn == 'function' ? fn : Function(fn), args);
+	    };
+	    defer(counter);
+	    return counter;
+	  };
+	  clearTask = function clearImmediate(id){
+	    delete queue[id];
+	  };
+	  // Node.js 0.8-
+	  if(__webpack_require__(/*! ./_cof */ 27)(process) == 'process'){
+	    defer = function(id){
+	      process.nextTick(ctx(run, id, 1));
+	    };
+	  // Browsers with MessageChannel, includes WebWorkers
+	  } else if(MessageChannel){
+	    channel = new MessageChannel;
+	    port    = channel.port2;
+	    channel.port1.onmessage = listener;
+	    defer = ctx(port.postMessage, port, 1);
+	  // Browsers with postMessage, skip WebWorkers
+	  // IE8 has postMessage, but it's sync & typeof its postMessage is 'object'
+	  } else if(global.addEventListener && typeof postMessage == 'function' && !global.importScripts){
+	    defer = function(id){
+	      global.postMessage(id + '', '*');
+	    };
+	    global.addEventListener('message', listener, false);
+	  // IE8-
+	  } else if(ONREADYSTATECHANGE in cel('script')){
+	    defer = function(id){
+	      html.appendChild(cel('script'))[ONREADYSTATECHANGE] = function(){
+	        html.removeChild(this);
+	        run.call(id);
+	      };
+	    };
+	  // Rest old browsers
+	  } else {
+	    defer = function(id){
+	      setTimeout(ctx(run, id, 1), 0);
+	    };
+	  }
+	}
+	module.exports = {
+	  set:   setTask,
+	  clear: clearTask
+	};
+
+/***/ },
+/* 359 */
+/*!**************************************************************!*\
+  !*** ./~/babel-runtime/~/core-js/library/modules/_invoke.js ***!
+  \**************************************************************/
+/***/ function(module, exports) {
+
+	// fast apply, http://jsperf.lnkit.com/fast-apply/5
+	module.exports = function(fn, args, that){
+	  var un = that === undefined;
+	  switch(args.length){
+	    case 0: return un ? fn()
+	                      : fn.call(that);
+	    case 1: return un ? fn(args[0])
+	                      : fn.call(that, args[0]);
+	    case 2: return un ? fn(args[0], args[1])
+	                      : fn.call(that, args[0], args[1]);
+	    case 3: return un ? fn(args[0], args[1], args[2])
+	                      : fn.call(that, args[0], args[1], args[2]);
+	    case 4: return un ? fn(args[0], args[1], args[2], args[3])
+	                      : fn.call(that, args[0], args[1], args[2], args[3]);
+	  } return              fn.apply(that, args);
+	};
+
+/***/ },
+/* 360 */
+/*!*****************************************************************!*\
+  !*** ./~/babel-runtime/~/core-js/library/modules/_microtask.js ***!
+  \*****************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var global    = __webpack_require__(/*! ./_global */ 7)
+	  , macrotask = __webpack_require__(/*! ./_task */ 358).set
+	  , Observer  = global.MutationObserver || global.WebKitMutationObserver
+	  , process   = global.process
+	  , Promise   = global.Promise
+	  , isNode    = __webpack_require__(/*! ./_cof */ 27)(process) == 'process';
+	
+	module.exports = function(){
+	  var head, last, notify;
+	
+	  var flush = function(){
+	    var parent, fn;
+	    if(isNode && (parent = process.domain))parent.exit();
+	    while(head){
+	      fn   = head.fn;
+	      head = head.next;
+	      try {
+	        fn();
+	      } catch(e){
+	        if(head)notify();
+	        else last = undefined;
+	        throw e;
+	      }
+	    } last = undefined;
+	    if(parent)parent.enter();
+	  };
+	
+	  // Node.js
+	  if(isNode){
+	    notify = function(){
+	      process.nextTick(flush);
+	    };
+	  // browsers with MutationObserver
+	  } else if(Observer){
+	    var toggle = true
+	      , node   = document.createTextNode('');
+	    new Observer(flush).observe(node, {characterData: true}); // eslint-disable-line no-new
+	    notify = function(){
+	      node.data = toggle = !toggle;
+	    };
+	  // environments with maybe non-completely correct, but existent Promise
+	  } else if(Promise && Promise.resolve){
+	    var promise = Promise.resolve();
+	    notify = function(){
+	      promise.then(flush);
+	    };
+	  // for other environments - macrotask based on:
+	  // - setImmediate
+	  // - MessageChannel
+	  // - window.postMessag
+	  // - onreadystatechange
+	  // - setTimeout
+	  } else {
+	    notify = function(){
+	      // strange IE + webpack dev server bug - use .call(global)
+	      macrotask.call(global, flush);
+	    };
+	  }
+	
+	  return function(fn){
+	    var task = {fn: fn, next: undefined};
+	    if(last)last.next = task;
+	    if(!head){
+	      head = task;
+	      notify();
+	    } last = task;
+	  };
+	};
+
+/***/ },
+/* 361 */
+/*!********************************************************************!*\
+  !*** ./~/babel-runtime/~/core-js/library/modules/_redefine-all.js ***!
+  \********************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	var hide = __webpack_require__(/*! ./_hide */ 11);
+	module.exports = function(target, src, safe){
+	  for(var key in src){
+	    if(safe && target[key])target[key] = src[key];
+	    else hide(target, key, src[key]);
+	  } return target;
+	};
+
+/***/ },
+/* 362 */
+/*!*******************************************************************!*\
+  !*** ./~/babel-runtime/~/core-js/library/modules/_set-species.js ***!
+  \*******************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	var global      = __webpack_require__(/*! ./_global */ 7)
+	  , core        = __webpack_require__(/*! ./_core */ 8)
+	  , dP          = __webpack_require__(/*! ./_object-dp */ 12)
+	  , DESCRIPTORS = __webpack_require__(/*! ./_descriptors */ 16)
+	  , SPECIES     = __webpack_require__(/*! ./_wks */ 226)('species');
+	
+	module.exports = function(KEY){
+	  var C = typeof core[KEY] == 'function' ? core[KEY] : global[KEY];
+	  if(DESCRIPTORS && C && !C[SPECIES])dP.f(C, SPECIES, {
+	    configurable: true,
+	    get: function(){ return this; }
+	  });
+	};
+
+/***/ },
+/* 363 */
+/*!**************************************************!*\
+  !*** ./backend/useradmin/userinfo/teethgraph.js ***!
+  \**************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = exports.asyncEvent = undefined;
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 282);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 286);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 287);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 291);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 292);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _promise = __webpack_require__(/*! babel-runtime/core-js/promise */ 352);
+	
+	var _promise2 = _interopRequireDefault(_promise);
+	
+	var _dec, _dec2, _class;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _auth = __webpack_require__(/*! ../../redux/reducers/auth.js */ 241);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	var _nav = __webpack_require__(/*! ./nav.js */ 348);
+	
+	var _nav2 = _interopRequireDefault(_nav);
+	
+	var _header = __webpack_require__(/*! ./view/header.js */ 349);
+	
+	var _auth2 = __webpack_require__(/*! ../../redux/reducers/auth */ 241);
+	
+	var _mteeth_status = __webpack_require__(/*! ../../redux/reducers/mteeth_status */ 350);
+	
+	var _cteeth_status = __webpack_require__(/*! ../../redux/reducers/cteeth_status */ 351);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	var _teethshow = __webpack_require__(/*! ./view/teethshow.js */ 364);
+	
+	var _teethedit = __webpack_require__(/*! ./view/teethedit.js */ 365);
+	
+	var _teethheader = __webpack_require__(/*! ./view/teethheader.js */ 366);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var __asyncEvent = function __asyncEvent(_ref) {
+	    var dispatch = _ref.dispatch;
+	    var getState = _ref.getState;
+	
+	
+	    var state = getState();
+	    var user = state.getIn(['auth', 'user']).toJS();
+	    var index = state.getIn(['user_patient', 'frontuserinfo', 'idx']);
+	    var patient = state.getIn(['user_patient', 'users']).get(index).toJS();
+	    if (patient.teethtype == 'M') return dispatch((0, _mteeth_status.load)({ user: user, patient: patient, index: index, refresh: { flag: true } }));else if (patient.teethtype == 'C') return dispatch((0, _cteeth_status.load)({ user: user, patient: patient, index: index, refresh: { flag: true } }));else {
+	        return _promise2.default.all([dispatch((0, _mteeth_status.load)({ user: user, patient: patient, index: index, refresh: { flag: true } })), dispatch((0, _cteeth_status.load)({ user: user, patient: patient, index: index, refresh: { flag: true } }))]);
+	    }
+	};
+	
+	var asyncEvent = exports.asyncEvent = [{
+	    promise: function promise(_ref2) {
+	        var _ref2$store = _ref2.store;
+	        var dispatch = _ref2$store.dispatch;
+	        var getState = _ref2$store.getState;
+	        var params = _ref2.params;
+	
+	        console.log('WWWWWWWQQQ1111QQQQQWWW!!!!!!!!');
+	        if (!(0, _auth2.isLoaded)(getState())) {
+	            return dispatch((0, _auth2.load)(params)).then(function () {
+	                if (!((0, _mteeth_status.LoadedorLoading)(getState()) || (0, _cteeth_status.LoadedorLoading)(getState()))) {
+	                    return __asyncEvent({ dispatch: dispatch, getState: getState });
+	                } else return _promise2.default.resolve();
+	            });
+	        } else {
+	            if (!((0, _mteeth_status.LoadedorLoading)(getState()) || (0, _cteeth_status.LoadedorLoading)(getState()))) {
+	                console.log('WWWWWWWQQQ1111QQQQQWWW');
+	                return __asyncEvent({ dispatch: dispatch, getState: getState });
+	            } else return _promise2.default.resolve();
+	        }
+	    }
+	}];
+	
+	var TeethGraph = (_dec = (0, _reduxConnect.asyncConnect)(asyncEvent), _dec2 = (0, _reactRedux.connect)(function (state) {
+	    return {
+	        auth: state.get('auth'),
+	        mteeth_status: state.get('mteeth_status'),
+	        cteeth_status: state.get('cteeth_status')
+	    };
+	}, { pushState: _reactRouterRedux.push, switchteethm: _mteeth_status.switchteeth, switchteethc: _cteeth_status.switchteeth, switchachem: _mteeth_status.switchache, switchachec: _cteeth_status.switchache, switchtoothm: _mteeth_status.switchtooth, switchtoothc: _cteeth_status.switchtooth }), _dec(_class = _dec2(_class = function (_Component) {
+	    (0, _inherits3.default)(TeethGraph, _Component);
+	
+	    function TeethGraph(props) {
+	        (0, _classCallCheck3.default)(this, TeethGraph);
+	
+	        var _this = (0, _possibleConstructorReturn3.default)(this, (TeethGraph.__proto__ || (0, _getPrototypeOf2.default)(TeethGraph)).call(this, props));
+	        // code
+	
+	
+	        _this.state = { check: true, edit: false, add: false };
+	        return _this;
+	    }
+	
+	    (0, _createClass3.default)(TeethGraph, [{
+	        key: 'toMteeth',
+	        value: function toMteeth() {}
+	    }, {
+	        key: 'toCteeth',
+	        value: function toCteeth() {}
+	    }, {
+	        key: 'toAdd',
+	        value: function toAdd() {
+	            var teeth_status = this.props.teethtype == 'M' ? this.props.mteeth_status : this.props.cteeth_status;
+	            var addtime = teeth_status.getIn(['teeth_ui', 'time']);
+	            this.setState((0, _extends3.default)({}, this.state, { check: false, edit: false, add: true, addtime: addtime }));
+	        }
+	    }, {
+	        key: 'toEdit',
+	        value: function toEdit() {
+	            console.log('edit!!!!');
+	            this.setState((0, _extends3.default)({}, this.state, { check: false, edit: true, add: false }));
+	        }
+	    }, {
+	        key: 'toCheck',
+	        value: function toCheck() {
+	
+	            this.setState((0, _extends3.default)({}, this.state, { check: true, edit: false, add: false }));
+	        }
+	    }, {
+	        key: 'changeEditTime',
+	        value: function changeEditTime(ev) {
+	            console.log('changeEditTime')(this.state.teethtype == 'M') ? this.props.switchteethm({ idx: ev.target.value }) : this.props.switchteethc({ idx: ev.target.value });
+	        }
+	    }, {
+	        key: 'changeCheckTime',
+	        value: function changeCheckTime(ev) {
+	            console.log('changeCheckTime')(this.state.teethtype == 'M') ? this.props.switchteethm({ idx: ev.target.value }) : this.props.switchteethc({ idx: ev.target.value });
+	        }
+	    }, {
+	        key: 'componentWillMount',
+	        value: function componentWillMount() {
+	
+	            var teethtype = this.props.mteeth_status.get('allUserTeeth').size >= 0 ? 'M' : 'C';
+	            this.setState((0, _extends3.default)({}, this.state, { teethtype: teethtype }));
+	        }
+	    }, {
+	        key: 'componentWillUpdate',
+	        value: function componentWillUpdate() {}
+	    }, {
+	        key: 'componentWillReceiveProps',
+	        value: function componentWillReceiveProps(nextProps) {
+	            var teethtype = nextProps.mteeth_status.get('allUserTeeth').size >= 0 ? 'M' : 'C';
+	            var curToothName = nextProps.mteeth_status.get('allUserTeeth').size >= 0 ? nextProps.mteeth_status.getIn(['teeth_ui', 'toothname']) : nextProps.cteeth_status.getIn(['teeth_ui', 'toothname']);
+	            if (curToothName) this.setState((0, _extends3.default)({}, this.state, { teethtype: teethtype, curToothName: curToothName }));else this.setState((0, _extends3.default)({}, this.state, { teethtype: teethtype }));
+	        }
+	    }, {
+	        key: 'clickOnTooth',
+	        value: function clickOnTooth(ev, toothname) {
+	            console.log('clickOnTooth!!!!!!!!!!!!');
+	            console.log(toothname);
+	            console.log(this.state.teethtype);
+	            if (this.state.teethtype == 'M') {
+	                this.props.switchtoothm({ toothname: toothname });
+	            } else {
+	                this.props.switchtoothc({ toothname: toothname });
+	            }
+	            //this.setState({...this.state, curToothName: toothname })
+	        }
+	    }, {
+	        key: 'clickOnMAche',
+	        value: function clickOnMAche(ev, acheidx, curToothName, status) {
+	            console.log('aaaaaa');
+	            console.log(curToothName);
+	            console.log(acheidx);
+	            console.log(status);
+	            this.props.switchachem({ acheidx: acheidx, curToothName: curToothName, status: status });
+	        }
+	    }, {
+	        key: 'clickOnCAche',
+	        value: function clickOnCAche(ev, acheidx, curToothName, status) {
+	            this.props.switchachec({ acheidx: acheidx, curToothName: curToothName, status: status });
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	
+	            if (this.props.auth.get('user')) {
+	                console.log("ssssssss");
+	                console.log(this.state.teethtype);
+	                console.log(this.props.mteeth_status.toJS());
+	                console.log("ssssssss");
+	                return _react2.default.createElement(
+	                    'div',
+	                    null,
+	                    (0, _teethheader.TeethHeader)({
+	                        edit: this.state.edit,
+	                        check: this.state.check,
+	                        add: this.state.add,
+	                        addTime: this.state.addtime,
+	                        teeth_status: this.state.teethtype == 'M' ? this.props.mteeth_status.toJS() : this.props.cteeth_status.toJS(),
+	                        toAdd: this.toAdd.bind(this),
+	                        toEdit: this.toEdit.bind(this),
+	                        toCheck: this.toCheck.bind(this),
+	                        changeCheckTime: this.changeCheckTime.bind(this),
+	                        changeEditTime: this.changeEditTime.bind(this)
+	                    }),
+	                    ' ',
+	                    this.state.check ? (0, _teethshow.TeethShow)({
+	                        teethtype: this.state.teethtype,
+	                        mteeth_status: this.props.mteeth_status ? this.props.mteeth_status.toJS() : [],
+	                        cteeth_status: this.props.cteeth_status ? this.props.cteeth_status.toJS() : [],
+	                        toMteeth: this.toMteeth.bind(this),
+	                        toCteeth: this.toCteeth.bind(this)
+	                    }) : (0, _teethedit.TeethEdit)({
+	                        teethtype: this.state.teethtype,
+	                        mteeth_status: this.props.mteeth_status ? this.props.mteeth_status.toJS() : [],
+	                        cteeth_status: this.props.cteeth_status ? this.props.cteeth_status.toJS() : [],
+	                        toMteeth: this.toMteeth.bind(this),
+	                        toCteeth: this.toCteeth.bind(this),
+	                        clickOnTooth: this.clickOnTooth.bind(this),
+	                        curToothName: this.state.curToothName,
+	                        clickOnMAche: this.clickOnMAche.bind(this),
+	                        clickOnCAche: this.clickOnCAche.bind(this)
+	                    })
+	                );
+	            }
+	        }
+	    }]);
+	    return TeethGraph;
+	}(_react.Component)) || _class) || _class);
+	exports.default = TeethGraph;
+
+/***/ },
+/* 364 */
+/*!******************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/teethshow.js ***!
+  \******************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.TeethShow = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 313);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var ToothAche = function ToothAche(_ref) {
+	    var tooth = _ref.tooth;
+	    var ache_list = _ref.ache_list;
+	
+	
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'H_teeth_position_list_margin_bottom' },
+	        _react2.default.createElement(
+	            'label',
+	            null,
+	            '牙齿' + tooth.name + ':'
+	        ),
+	        _react2.default.createElement(
+	            'p',
+	            null,
+	            tooth.ache.map(function (idx) {
+	                return _react2.default.createElement(
+	                    'span',
+	                    { className: 'H_teeth_position_list_margin' },
+	                    ache_list[idx].name
+	                );
+	            })
+	        )
+	    );
+	};
+	
+	var TeethAche = function TeethAche(_ref2) {
+	    var teeth_status = _ref2.teeth_status;
+	
+	    var teethui = [];
+	    teeth_status.teeth_ui.teeth.forEach(function (tooth) {
+	        if (tooth.ache.length) teethui.push(ToothAche({ tooth: tooth, ache_list: teeth_status.teeth_ui.ache_list }));
+	    });
+	    return teethui;
+	};
+	
+	var TeethShow = exports.TeethShow = function TeethShow(_ref3) {
+	    var teethtype = _ref3.teethtype;
+	    var mteeth_status = _ref3.mteeth_status;
+	    var cteeth_status = _ref3.cteeth_status;
+	    var toMteeth = _ref3.toMteeth;
+	    var toCteeth = _ref3.toCteeth;
+	
+	    var height = window.innerHeight || document.documentElement.clientHeight;
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'userContain z_userContain_edit', style: { height: height - 260 + 'px' } },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'z_userContainMain' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'containb_right', style: { paddingBottom: "50px" } },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'H_teeth_position' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_teeth_position_left' },
+	                        _react2.default.createElement(
+	                            'span',
+	                            { onClick: toMteeth, className: 'man active', id: 'mantab' },
+	                            '成人牙位图'
+	                        ),
+	                        _react2.default.createElement(
+	                            'span',
+	                            { onClick: toCteeth, className: 'child', id: 'childtab' },
+	                            '幼儿牙位图'
+	                        )
+	                    ),
+	                    teethtype == 'M' ? _react2.default.createElement(
+	                        'div',
+	                        null,
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_pic' },
+	                            mteeth_status.teeth_ui.teeth.map(function (tooth) {
+	                                return _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name, style: tooth.ache.length > 0 ? { backgroundColor: '#cc6060' } : { backgroundColor: '#fafcff' } },
+	                                    tooth.name
+	                                );
+	                            })
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_list' },
+	                            TeethAche({ teeth_status: mteeth_status })
+	                        )
+	                    ) : _react2.default.createElement(
+	                        'div',
+	                        null,
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_pic H_teeth_position_pic_son' },
+	                            cteeth_status.teeth_ui.teeth.map(function (tooth) {
+	                                return _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name },
+	                                    tooth.name
+	                                );
+	                            })
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_list' },
+	                            TeethAche({ teeth_status: cteeth_status })
+	                        )
+	                    )
+	                )
+	            )
+	        )
+	    );
+	};
+
+/***/ },
+/* 365 */
+/*!******************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/teethedit.js ***!
+  \******************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.TeethEdit = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 313);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var TeethEdit = exports.TeethEdit = function TeethEdit(_ref) {
+	    var teethtype = _ref.teethtype;
+	    var mteeth_status = _ref.mteeth_status;
+	    var cteeth_status = _ref.cteeth_status;
+	    var toMteeth = _ref.toMteeth;
+	    var toCteeth = _ref.toCteeth;
+	    var clickOnTooth = _ref.clickOnTooth;
+	    var curToothName = _ref.curToothName;
+	    var clickOnMAche = _ref.clickOnMAche;
+	    var clickOnCAche = _ref.clickOnCAche;
+	
+	    var height = window.innerHeight || document.documentElement.clientHeight;
+	    var macheidx = 0;
+	    var cacheidx = 0;
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'userContain z_userContain_edit', style: { height: height - 260 + 'px' } },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'z_userContainMain' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'containb_right', style: { paddingBottom: "50px" } },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'H_teeth_position' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_teeth_position_left' },
+	                        _react2.default.createElement(
+	                            'span',
+	                            { onClick: toMteeth, className: 'man active', id: 'mantab' },
+	                            '成人牙位图'
+	                        ),
+	                        _react2.default.createElement(
+	                            'span',
+	                            { onClick: toCteeth, className: 'child', id: 'childtab' },
+	                            '幼儿牙位图'
+	                        )
+	                    ),
+	                    teethtype == 'M' ? _react2.default.createElement(
+	                        'div',
+	                        null,
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_pic' },
+	                            mteeth_status.teeth_ui.teeth.map(function (tooth) {
+	                                return _react2.default.createElement(
+	                                    'div',
+	                                    { onClick: function onClick(ev) {
+	                                            clickOnTooth(ev, tooth.name);
+	                                        }, className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name, style: curToothName == tooth.name ? { backgroundColor: '#c1d5f2' } : tooth.ache.length > 0 ? { backgroundColor: '#cc6060' } : { backgroundColor: '#fafcff' } },
+	                                    tooth.name
+	                                );
+	                            })
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_list' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'H_teeth_position_list_title' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    { style: { fontSize: '18px' } },
+	                                    curToothName ? '牙齿：' + curToothName : '请选择左图的牙齿，进行添加'
+	                                )
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'H_teeth_position_list_item', style: curToothName ? {} : { pointerEvents: 'none' } },
+	                                mteeth_status.teeth_ui.ache_list.map(function (ache) {
+	                                    var _marchidx = macheidx++;
+	                                    return _react2.default.createElement(
+	                                        'div',
+	                                        { className: 'wrap' },
+	                                        _react2.default.createElement('input', { type: 'checkbox', id: _marchidx, checked: ache.bool }),
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { onClick: function onClick(ev) {
+	                                                    clickOnMAche(ev, _marchidx, curToothName, !ache.bool);
+	                                                }, htmlFor: _marchidx },
+	                                            _react2.default.createElement(
+	                                                'i',
+	                                                null,
+	                                                ' ',
+	                                                ache.name
+	                                            )
+	                                        )
+	                                    );
+	                                })
+	                            )
+	                        )
+	                    ) : _react2.default.createElement(
+	                        'div',
+	                        null,
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_pic H_teeth_position_pic_son' },
+	                            cteeth_status.teeth_ui.teeth.map(function (tooth) {
+	                                return _react2.default.createElement(
+	                                    'div',
+	                                    { onClick: function onClick(ev) {
+	                                            clickOnTooth(ev, tooth.name);
+	                                        }, className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name, style: curToothName == tooth.name ? { backgroundColor: '#c1d5f2' } : tooth.ache.length > 0 ? { backgroundColor: '#cc6060' } : { backgroundColor: '#fafcff' } },
+	                                    tooth.name
+	                                );
+	                            })
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_list' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'H_teeth_position_list_title' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    { style: { fontSize: '18px' } },
+	                                    curToothName ? '牙齿：' + curToothName : '请选择左图的牙齿，进行添加'
+	                                )
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'H_teeth_position_list_item', style: curToothName ? {} : { pointerEvents: 'none' } },
+	                                cteeth_status.teeth_ui.ache_list.map(function (ache) {
+	                                    cacheidx++;
+	                                    return _react2.default.createElement(
+	                                        'div',
+	                                        { className: 'wrap' },
+	                                        _react2.default.createElement('input', { type: 'checkbox', id: cacheidx, checked: ache.bool }),
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { onClick: function onClick(ev) {
+	                                                    clickOnCAche(ev, cacheidx - 1, curToothName, !ache.bool);
+	                                                }, htmlFor: cacheidx },
+	                                            _react2.default.createElement(
+	                                                'i',
+	                                                null,
+	                                                ' ',
+	                                                ache.name
+	                                            )
+	                                        )
+	                                    );
+	                                })
+	                            )
+	                        )
+	                    )
+	                )
+	            )
+	        )
+	    );
+	};
+
+/***/ },
+/* 366 */
+/*!********************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/teethheader.js ***!
+  \********************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.TeethHeader = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 313);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var TeethHeader = exports.TeethHeader = function TeethHeader(_ref) {
+	    var edit = _ref.edit;
+	    var check = _ref.check;
+	    var add = _ref.add;
+	    var addTime = _ref.addTime;
+	    var teeth_status = _ref.teeth_status;
+	    var toAdd = _ref.toAdd;
+	    var toEdit = _ref.toEdit;
+	    var toCheck = _ref.toCheck;
+	    var changeCheckTime = _ref.changeCheckTime;
+	    var changeEditTime = _ref.changeEditTime;
+	
+	    if (check) {
+	        var index = 0;
+	        return _react2.default.createElement(
+	            'div',
+	            { className: 'time z_time_edit', style: { top: '215px' } },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'z_time_btn', style: { border: 'none' } },
+	                _react2.default.createElement(
+	                    'p',
+	                    null,
+	                    _react2.default.createElement(
+	                        'b',
+	                        null,
+	                        '更新记录：'
+	                    ),
+	                    _react2.default.createElement(
+	                        'select',
+	                        { onChange: changeCheckTime },
+	                        teeth_status.allUserTeeth[teeth_status.teeth_ui.useridx].map(function (teeth) {
+	                            index++;
+	                            return _react2.default.createElement(
+	                                'option',
+	                                { value: index },
+	                                teeth.time
+	                            );
+	                        })
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'label',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        { onClick: toAdd, className: 'default_inputbtn z_add_btn' },
+	                        '添加'
+	                    ),
+	                    _react2.default.createElement(
+	                        'span',
+	                        { onClick: toEdit, className: 'default_inputbtn z_edit_btn' },
+	                        '编辑'
+	                    )
+	                )
+	            )
+	        );
+	    } else if (edit) {
+	        return _react2.default.createElement(
+	            'div',
+	            { className: 'time z_time_edit' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'z_time_btn' },
+	                _react2.default.createElement(
+	                    'p',
+	                    null,
+	                    _react2.default.createElement(
+	                        'b',
+	                        null,
+	                        '更新记录：'
+	                    ),
+	                    _react2.default.createElement(
+	                        'select',
+	                        { onChange: changeEditTime },
+	                        teeth_status.allUserTeeth[teeth_status.teeth_ui.useridx].map(function (teeth) {
+	                            return _react2.default.createElement(
+	                                'option',
+	                                { value: index },
+	                                teeth.time
+	                            );
+	                        })
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'label',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        { onClick: toCheck, className: 'default_inputbtn z_save_btn' },
+	                        '保存'
+	                    )
+	                )
+	            )
+	        );
+	    } else if (add) {
+	        return _react2.default.createElement(
+	            'div',
+	            { className: 'time z_time_edit' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'z_time_btn' },
+	                _react2.default.createElement(
+	                    'p',
+	                    null,
+	                    _react2.default.createElement(
+	                        'em',
+	                        { className: 'see_page_em' },
+	                        '基于最新（',
+	                        _react2.default.createElement(
+	                            'font',
+	                            { className: 'new_time' },
+	                            addTime
+	                        ),
+	                        '）信息上进行添加'
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'label',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        { onClick: toCheck, className: 'default_inputbtn z_save_btn' },
+	                        '保存'
+	                    )
+	                )
+	            )
+	        );
+	    }
+	};
 
 /***/ }
 /******/ ]);

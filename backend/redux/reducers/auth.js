@@ -26,9 +26,9 @@ export default function reducer(state = initialState, action = {}) {
         case LOGIN:
             return state.merge({ loggingIn: true })
         case LOGIN_SUCCESS:
-            return state.merge({ loggingIn: false, user: action.result })
+            return state.merge({ loaded: true,  loggingIn: false, user: action.result })
         case LOGIN_FAIL:
-            return state.merge({ loggingIn: false, user: null, loginError: action.error })
+            return state.merge({ loaded: false, loggingIn: false, user: null, loginError: action.error })
 
         case LOGOUT:
             return state.merge({ loggingOut: true })

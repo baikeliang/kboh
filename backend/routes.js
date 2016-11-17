@@ -4,7 +4,7 @@ import React from 'react';
 import { Router, DefaultRoute, Route, NotFoundRoute, Redirect,IndexRoute} from 'react-router';
 
 
-import DashBoard  from 'backend/useradmin/main.js'
+import DashBoard  from 'backend/index.js'
 
 import Login from 'backend/login.js'
 

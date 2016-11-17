@@ -23,6 +23,12 @@ import case_patient from 'backend/redux/reducers/case_patient'
 
 import wxjdk from 'backend/redux/reducers/wxjdk'
 
+import user_patient from  'backend/redux/reducers/user_patient'
+
+import mteeth_status from 'backend/redux/reducers/mteeth_status'
+
+import cteeth_status from 'backend/redux/reducers/cteeth_status'
+
 import clientMiddleware from 'backend/redux/middleware/clientMiddleware'
 
 import { routerMiddleware } from 'react-router-redux'
@@ -48,7 +54,10 @@ export function configureStore(history, client, initialState = {},mocker) {
         order_patient,
         case_patient,
         bill_patient,
-        wxjdk
+        wxjdk,
+        user_patient,
+        mteeth_status,
+        cteeth_status
     })
 
     let devTools = []

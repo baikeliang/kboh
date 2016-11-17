@@ -24,7 +24,7 @@
 .z_save_btn:hover{
 	color: #fff;
 	background: #3a91d4 url(../images/savebut.png) no-repeat 15px center;
-	
+
 }
 input.z_save_btn{
 	width:90px;
@@ -39,7 +39,7 @@ input.z_save_btn{
 .see-but:hover{
 	color: #fff;
 	background: #3a91d4 url(../images/seebtn2.png) no-repeat 10px center;
-	
+
 }
 .z_add_btn{
 	color: #3a91d4;
@@ -53,7 +53,7 @@ input.z_save_btn{
 .z_add_btn:hover,.z_add_btn2:hover{
 	color: #fff;
 	background: #3a91d4 url(../images/add.png) no-repeat 15px center;
-	
+
 }
 .z_edit_btn{
 	color: #3a91d4;
@@ -63,7 +63,7 @@ input.z_save_btn{
 .z_edit_btn:hover{
 	color: #fff;
 	background: #3a91d4 url(../images/edit.png) no-repeat 15px center;
-	
+
 }
 .z_left_box{
 	width:25%;
