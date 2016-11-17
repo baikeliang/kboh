@@ -26761,10 +26761,6 @@ module.exports =
 	    case LOAD_SUCCESS:
 	      var _data = {};
 	      var teethlist = action.result;
-	      console.log("RRRRRRRRR!");
-	      console.log(teethlist);
-	      console.log(action.index);
-	      console.log("RRRRRRRRR!");
 	      _data[action.index] = teethlist;
 	
 	      var teethui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
@@ -27088,10 +27084,6 @@ module.exports =
 	        case LOAD_SUCCESS:
 	            var _data = {};
 	            var teethlist = action.result;
-	            console.log("RRRRRRRRR!");
-	            console.log(teethlist);
-	            console.log(action.index);
-	            console.log("RRRRRRRRR!");
 	            _data[action.index] = teethlist;
 	
 	            var teethui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
@@ -27969,7 +27961,6 @@ module.exports =
 	        var getState = _ref2$store.getState;
 	        var params = _ref2.params;
 	
-	        console.log('WWWWWWWQQQ1111QQQQQWWW!!!!!!!!');
 	        if (!(0, _auth2.isLoaded)(getState())) {
 	            return dispatch((0, _auth2.load)(params)).then(function () {
 	                if (!((0, _mteeth_status.LoadedorLoading)(getState()) || (0, _cteeth_status.LoadedorLoading)(getState()))) {
@@ -27978,7 +27969,6 @@ module.exports =
 	            });
 	        } else {
 	            if (!((0, _mteeth_status.LoadedorLoading)(getState()) || (0, _cteeth_status.LoadedorLoading)(getState()))) {
-	                console.log('WWWWWWWQQQ1111QQQQQWWW');
 	                return __asyncEvent({ dispatch: dispatch, getState: getState });
 	            } else return _promise2.default.resolve();
 	        }
@@ -28021,7 +28011,6 @@ module.exports =
 	    }, {
 	        key: 'toEdit',
 	        value: function toEdit() {
-	            console.log('edit!!!!');
 	            this.setState((0, _extends3.default)({}, this.state, { check: false, edit: true, add: false }));
 	        }
 	    }, {
@@ -28033,12 +28022,12 @@ module.exports =
 	    }, {
 	        key: 'changeEditTime',
 	        value: function changeEditTime(ev) {
-	            console.log('changeEditTime')(this.state.teethtype == 'M') ? this.props.switchteethm({ idx: ev.target.value }) : this.props.switchteethc({ idx: ev.target.value });
+	            this.state.teethtype == 'M' ? this.props.switchteethm({ idx: ev.target.value }) : this.props.switchteethc({ idx: ev.target.value });
 	        }
 	    }, {
 	        key: 'changeCheckTime',
 	        value: function changeCheckTime(ev) {
-	            console.log('changeCheckTime')(this.state.teethtype == 'M') ? this.props.switchteethm({ idx: ev.target.value }) : this.props.switchteethc({ idx: ev.target.value });
+	            this.state.teethtype == 'M' ? this.props.switchteethm({ idx: ev.target.value }) : this.props.switchteethc({ idx: ev.target.value });
 	        }
 	    }, {
 	        key: 'componentWillMount',
@@ -28060,9 +28049,6 @@ module.exports =
 	    }, {
 	        key: 'clickOnTooth',
 	        value: function clickOnTooth(ev, toothname) {
-	            console.log('clickOnTooth!!!!!!!!!!!!');
-	            console.log(toothname);
-	            console.log(this.state.teethtype);
 	            if (this.state.teethtype == 'M') {
 	                this.props.switchtoothm({ toothname: toothname });
 	            } else {
@@ -28073,10 +28059,6 @@ module.exports =
 	    }, {
 	        key: 'clickOnMAche',
 	        value: function clickOnMAche(ev, acheidx, curToothName, status) {
-	            console.log('aaaaaa');
-	            console.log(curToothName);
-	            console.log(acheidx);
-	            console.log(status);
 	            this.props.switchachem({ acheidx: acheidx, curToothName: curToothName, status: status });
 	        }
 	    }, {
@@ -28089,10 +28071,6 @@ module.exports =
 	        value: function render() {
 	
 	            if (this.props.auth.get('user')) {
-	                console.log("ssssssss");
-	                console.log(this.state.teethtype);
-	                console.log(this.props.mteeth_status.toJS());
-	                console.log("ssssssss");
 	                return _react2.default.createElement(
 	                    'div',
 	                    null,
