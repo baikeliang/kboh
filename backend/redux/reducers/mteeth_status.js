@@ -10,6 +10,8 @@ const SWITCH_TEETH = 'bohe/mteeth_status/SWITCHTEETH';
 const SWITCH_ACHE = 'bohe/mteeth_status/SWITCHACHE';
 const SWITCH_TOOTH = 'bohe/mteeth_status/SWITCHTOOTH';
 
+const  FLUSH_GRAPHY_DATA = 'bohe/mteeth_status/FLUSHGRAPHYDATA';
+
 var teeth_ui = {
 	        size: 0,
 	        ache_list:[
@@ -297,15 +299,26 @@ export default function reducer(state = initialState, action = {}) {
         case LOAD_SUCCESS:
             var _data = {};
             var teethlist = action.result;
-            _data[action.index] = teethlist;
 
-            var teethui = (teethlist.length > 0) ? teethlist[teethlist.length - 1] : {}
+            _data[action.index.toString()] = teethlist;
 
-            var latest_data = { idx: teethlist.length - 1, useridx: action.index, size: teethlist.length, ...teethui }
-                //return state.merge({ loading: false, loaded: true, teeth: action.result })
-            return state.mergeDeep({ loading: false, loaded: true, teeth_ui: latest_data, allUserTeeth: _data })
+            var tooth_ui = (teethlist.length > 0) ? teethlist[teethlist.length - 1] : {}
+
+            var timelist =  teethlist.map( (teeth) => {
+                return  teeth.time;
+            })
+            console.log(timelist)
+            var teeth_ui = { idx: teethlist.length - 1, useridx: action.index.toString(), timelist, size: teethlist.length, ...tooth_ui }
+
+            return state.mergeDeep({ loading: false, loaded: true, teeth_ui, allUserTeeth: _data })
         case LOAD_FAIL:
             return state.merge({ loading: false, loaded: false, error: action.error })
+        case FLUSH_GRAPHY_DATA:
+            var useridx = state.getIn(['teeth_ui', 'useridx'])
+            var idx = state.getIn(['teeth_ui', 'idx'])
+            var metateeth = state.getIn(['allUserTeeth',useridx,idx]);
+            var newteeth  = state.getIn(['teeth_ui','teeth']).toJS();
+            return  state.setIn(['allUserTeeth',useridx,idx,'teeth'],metateeth.merge(newteeth))
         case SWITCH_TEETH:
             var pos = action.result;
             var teeth;
@@ -356,6 +369,11 @@ export default function reducer(state = initialState, action = {}) {
     }
 }
 
+export function flushgraphydata(){
+   return {
+      type: FLUSH_GRAPHY_DATA
+   }
+}
 export function switchtooth({ toothname }) {
     return {
         type: SWITCH_TOOTH,

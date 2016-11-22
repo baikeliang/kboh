@@ -24,7 +24,8 @@ import {
     load as loadMteeth,
     switchteeth as switchteethm,
     switchache as switchachem,
-    switchtooth as switchtoothm
+    switchtooth as switchtoothm,
+    flushgraphydata
 } from 'backend/redux/reducers/mteeth_status';
 
 import {
@@ -94,10 +95,10 @@ export const asyncEvent =  [{
     state => {
         return {
         	  auth : state.get('auth'),
-            mteeth_status: state.get('mteeth_status'),
-            cteeth_status: state.get('cteeth_status')
+            mteeth_ui: state.getIn(['mteeth_status','teeth_ui']),
+            cteeth_ui: state.getIn(['cteeth_status','teeth_ui'])
         }
-    }, { pushState: push ,switchteethm,switchteethc,switchachem,switchachec,switchtoothm,switchtoothc })
+    }, { pushState: push ,switchteethm,switchteethc,switchachem,switchachec,switchtoothm,switchtoothc,flushgraphydata })
 export default  class TeethGraph extends Component{
    constructor(props) {
        // code
@@ -111,9 +112,13 @@ export default  class TeethGraph extends Component{
 
    }
    toAdd() {
-       var teeth_status = (this.props.teethtype == 'M') ? this.props.mteeth_status : this.props.cteeth_status;
-       var addtime = teeth_status.getIn(['teeth_ui', 'time']);
+       var teeth_ui = (this.props.teethtype == 'M') ? this.props.mteeth_ui : this.props.cteeth_ui;
+       var addtime = teeth_ui.get('time');
        this.setState({...this.state, check: false, edit: false, add: true, addtime })
+   }
+   save(){
+      this.props.flushgraphydata()
+      this.toCheck();
    }
    toEdit() {
        this.setState({...this.state, check: false, edit: true, add: false })
@@ -132,15 +137,15 @@ export default  class TeethGraph extends Component{
    }
    componentWillMount() {
 
-       var teethtype = ((this.props.mteeth_status.get('allUserTeeth').size >= 0) ? 'M' : 'C');
+       var teethtype = ((this.props.mteeth_ui.get('size') >= 0) ? 'M' : 'C');
        this.setState({...this.state, teethtype })
    }
    componentWillUpdate() {
 
    }
    componentWillReceiveProps(nextProps){
-       var teethtype = ((nextProps.mteeth_status.get('allUserTeeth').size >= 0) ? 'M' : 'C');
-       var curToothName = (nextProps.mteeth_status.get('allUserTeeth').size >= 0)? nextProps.mteeth_status.getIn(['teeth_ui','toothname']):nextProps.cteeth_status.getIn(['teeth_ui','toothname'])
+       var teethtype = ((nextProps.mteeth_ui.get('size') >= 0) ? 'M' : 'C');
+       var curToothName = (nextProps.mteeth_ui.get('size') >= 0)? nextProps.mteeth_ui.get('toothname'):nextProps.cteeth_ui.get('toothname')
        if(curToothName)
          this.setState({...this.state, teethtype,curToothName })
        else
@@ -172,24 +177,25 @@ export default  class TeethGraph extends Component{
                            check: (this.state.check),
                            add: (this.state.add),
                            addTime: (this.state.addtime),
-                           teeth_status: ((this.state.teethtype == 'M') ? this.props.mteeth_status.toJS() : this.props.cteeth_status.toJS()),
+                           teeth_ui: ((this.state.teethtype == 'M') ? this.props.mteeth_ui.toJS() : this.props.cteeth_ui.toJS()),
                            toAdd: (::this.toAdd),
                            toEdit: (::this.toEdit),
                            toCheck: (::this.toCheck),
+                           saveTeethGraph: (::this.save),
                            changeCheckTime: (::this.changeCheckTime),
                            changeEditTime: (::this.changeEditTime)
                        })
                    } {
                        this.state.check ? TeethShow({
                            teethtype: this.state.teethtype,
-                           mteeth_status: this.props.mteeth_status ? this.props.mteeth_status.toJS() : [],
-                           cteeth_status: this.props.cteeth_status ? this.props.cteeth_status.toJS() : [],
+                           mteeth_ui: this.props.mteeth_ui ? this.props.mteeth_ui.toJS() : {},
+                           cteeth_ui: this.props.cteeth_ui ? this.props.cteeth_ui.toJS() : {},
                            toMteeth: (::this.toMteeth),
                            toCteeth: (::this.toCteeth)
                        }) : TeethEdit({
                            teethtype: this.state.teethtype,
-                           mteeth_status: this.props.mteeth_status ? this.props.mteeth_status.toJS() : [],
-                           cteeth_status: this.props.cteeth_status ? this.props.cteeth_status.toJS() : [],
+                           mteeth_ui: this.props.mteeth_ui ? this.props.mteeth_ui.toJS() : {},
+                           cteeth_ui: this.props.cteeth_ui ? this.props.cteeth_ui.toJS() : {},
                            toMteeth: (::this.toMteeth),
                            toCteeth: (::this.toCteeth),
                            clickOnTooth:(::this.clickOnTooth),
@@ -199,13 +205,9 @@ export default  class TeethGraph extends Component{
                        })
 
                    }
-
-
                 </div>)
-
-    }
-   }
-
-}
+            }
+          }
+       }
 
 

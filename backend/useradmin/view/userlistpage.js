@@ -6,14 +6,18 @@ import Hammer from 'react-hammerjs'
 
 import { UserData as UserRow } from './userdata.js'
 
+import ReactPaginate from 'react-paginate';
+
 export const UserList = ({
 	   data,
 	   nodata,
-       length,
-       toAddUser,
-       toDeleteUser,
-       toEditUser,
-       toUserInfo
+     length,
+     toAddUser,
+     toDeleteUser,
+     toEditUser,
+     toUserInfo,
+     handlePageClick,
+     pageNum
      }) => {
 	  var  rowidx=0;
       return (<div>
@@ -62,6 +66,17 @@ export const UserList = ({
                   })}
                </tbody>
                </table>
+               <ReactPaginate previousLabel={"previous"}
+                       nextLabel={"next"}
+                       breakLabel={<a>...</a>}
+                       breakClassName={"break-me"}
+                       pageNum={110}
+                       marginPagesDisplayed={2}
+                       pageRangeDisplayed={5}
+                       clickCallback={ handlePageClick }
+                       containerClassName={"pagination"}
+                       subContainerClassName={"pages pagination"}
+                       activeClassName={"active"} />
                </div>
                </div>)
 }

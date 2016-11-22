@@ -24969,6 +24969,7 @@ module.exports =
 	
 	exports.default = reducer;
 	exports.frontUserForInfo = frontUserForInfo;
+	exports.nextGroupUsers = nextGroupUsers;
 	exports.LoadedorLoading = LoadedorLoading;
 	exports.load = load;
 	exports.load_detail = load_detail;
@@ -24993,9 +24994,12 @@ module.exports =
 	
 	var SET_USER_TOSHOWINFO = 'bohe/user_patient/SHOWINFO';
 	
+	var NEXT_GROUP_USERS = 'bohe/user_patient/NEXTGROUPUSERS';
+	
 	var initialState = _immutable2.default.Map({
 	    loaded: false,
-	    loading: false
+	    loading: false,
+	    showbegin: 0
 	});
 	
 	function reducer() {
@@ -25011,19 +25015,18 @@ module.exports =
 	            if (_immutable2.default.List.isList(state.get('users'))) {
 	                if (!action.refresh) {
 	
-	                    allres = state.get('users').pop().toJS().concat(action.result);
+	                    allres = state.get('users').toJS().concat(action.result);
 	                } else if (action.refresh.resolve) {
 	
 	                    action.refresh.resolve();
 	                }
 	            }
+	            console.log(allres);
+	            console.log('TTTTTTTTT');
 	            if (allres) {
-	                allres.push({ flag: true });
-	                return state.merge({ loading: false, loaded: true, users: allres });
+	                if (action.showUsersBegin) return state.merge({ showbegin: action.showUsersBegin, loading: false, loaded: true, users: allres });else return state.merge({ loading: false, loaded: true, users: allres });
 	            } else {
-	                console.log('DDDDDDDDDD!!!!!');
-	                action.result.push({ flag: true });
-	                return state.merge({ loading: false, loaded: true, users: action.result });
+	                if (action.showUsersBegin) return state.merge({ showbegin: action.showUsersBegin, loading: false, loaded: true, users: action.result });else return state.merge({ loading: false, loaded: true, users: action.result });
 	            }
 	        case LOAD_FAIL:
 	            if (action.refresh && action.refresh.reject) {
@@ -25060,6 +25063,8 @@ module.exports =
 	            });
 	        case SET_USER_TOSHOWINFO:
 	            return state.merge({ frontuserinfo: action.result });
+	        case NEXT_GROUP_USERS:
+	            return state.merge({ showbegin: action.result });
 	        default:
 	            return state;
 	    }
@@ -25072,6 +25077,13 @@ module.exports =
 	    return {
 	        type: SET_USER_TOSHOWINFO,
 	        result: { idx: idx, id: id }
+	    };
+	}
+	
+	function nextGroupUsers(begin) {
+	    return {
+	        type: NEXT_GROUP_USERS,
+	        result: begin
 	    };
 	}
 	
@@ -25097,6 +25109,7 @@ module.exports =
 	    var begin = _ref2.begin;
 	    var req = _ref2.req;
 	    var refresh = _ref2.refresh;
+	    var showUsersBegin = _ref2.showUsersBegin;
 	
 	    var params = {};
 	
@@ -25148,7 +25161,8 @@ module.exports =
 	                }
 	            });
 	        },
-	        refresh: refresh
+	        refresh: refresh,
+	        showUsersBegin: showUsersBegin
 	    };
 	}
 	
@@ -25370,7 +25384,6 @@ module.exports =
 	    }, {
 	        key: 'onClick',
 	        value: function onClick(ev, itemid) {
-	
 	            this.showRight({
 	                asyncProcess: _userlist.asyncEvent,
 	                itemid: itemid,
@@ -25560,7 +25573,6 @@ module.exports =
 	        var getState = _ref$store.getState;
 	        var params = _ref.params;
 	
-	        console.log("EEEEEEEEEEEEEEEEEEEE111111");
 	        if (!(0, _auth.isLoaded)(getState())) {
 	            return dispatch((0, _auth.load)(params)).then(function () {
 	                if (!(0, _user_patient.LoadedorLoading)(getState())) {
@@ -25570,9 +25582,7 @@ module.exports =
 	                } else return _bluebird2.default.resolve();
 	            });
 	        } else {
-	            console.log("EEEEEEEEEEEEEEEEEEEE");
 	            if (!(0, _user_patient.LoadedorLoading)(getState())) {
-	                console.log("EEEEEEEEEEEEEEEEEEEE2");
 	                var state = getState();
 	                var user = state.getIn(['auth', 'user']).toJS();
 	                return dispatch((0, _user_patient.load)({ user: user, num: 10, begin: 0, refresh: { flag: true } }));
@@ -25586,7 +25596,7 @@ module.exports =
 	        auth: state.get('auth'),
 	        userRepo: state.get('user_patient')
 	    };
-	}, { pushState: _reactRouterRedux.push, load: _user_patient.load, toDetail: _user_patient.frontUserForInfo }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
+	}, { pushState: _reactRouterRedux.push, load: _user_patient.load, toDetail: _user_patient.frontUserForInfo, nextGroupUsers: _user_patient.nextGroupUsers }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
 	    (0, _inherits3.default)(UserListCom, _Component);
 	
 	    function UserListCom() {
@@ -25645,6 +25655,18 @@ module.exports =
 	            });
 	        }
 	    }, {
+	        key: 'handlePageClick',
+	        value: function handlePageClick(data) {
+	            var selected = data.selected;
+	            console.log("handlePageClick!!!!!!!!!!");
+	            console.log(selected);
+	            if (selected * 10 + 10 >= this.props.userRepo.get('users').size) {
+	                this.props.load({ num: 10, begin: this.props.userRepo.get('users').size, showbegin: selected * 10 });
+	            } else {
+	                this.props.nextGroupUsers(selected * 10);
+	            }
+	        }
+	    }, {
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {}
 	    }, {
@@ -25652,19 +25674,24 @@ module.exports =
 	        value: function render() {
 	            console.log(this.props.userRepo.toJS());
 	            if (this.props.auth.has('user')) {
-	
+	                console.log("PPPPPPPPPPPPPPPPPPPPPPPPPP");
 	                var size = this.props.userRepo.get('users').size;
+	                var showbegin = this.props.userRepo.get('showbegin');
+	                console.log("PPPPPPPPPPPPPPPPPPPPPPPPPP1");
 	                var nodata = size == 0 ? true : false;
-	                console.log(size);
-	                console.log("sssssssrrr");
 	                var options = {
 	                    touchAction: 'pan-y'
 	                };
 	                var height = window.innerHeight || document.documentElement.clientHeight;
-	                var data = nodata ? [] : this.props.userRepo.get('users').toJS();
+	                var data = [];
+	                console.log("LLLLLRRRRRRRR");
+	                for (var i = 0; i < 10 && showbegin + i < size; i++) {
+	                    data.push(this.props.userRepo.getIn(['users', showbegin + i]).toJS());
+	                }
+	
 	                console.log("ffffggg");
 	                console.log(data);
-	                return (0, _userlistpage.UserList)({ toUserInfo: this.toUserInfo.bind(this), toSearch: this.toSearch.bind(this), toAddUser: this.toAddUser.bind(this), toDeleteUser: this.toDeleteUser.bind(this), toEditUser: this.toEditUser.bind(this), data: data, nodata: nodata, options: options, length: size, handlePan: this.handlePan.bind(this), handleRefresh: this.handleRefresh.bind(this) });
+	                return (0, _userlistpage.UserList)({ handlePageClick: this.handlePageClick.bind(this), toUserInfo: this.toUserInfo.bind(this), toSearch: this.toSearch.bind(this), toAddUser: this.toAddUser.bind(this), toDeleteUser: this.toDeleteUser.bind(this), toEditUser: this.toEditUser.bind(this), data: data, nodata: nodata, options: options, length: size, handlePan: this.handlePan.bind(this), handleRefresh: this.handleRefresh.bind(this) });
 	            } else {
 	                return _react2.default.createElement('div', null);
 	            }
@@ -25973,6 +26000,10 @@ module.exports =
 	
 	var _userdata = __webpack_require__(/*! ./userdata.js */ 343);
 	
+	var _reactPaginate = __webpack_require__(/*! react-paginate */ 367);
+	
+	var _reactPaginate2 = _interopRequireDefault(_reactPaginate);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var UserList = exports.UserList = function UserList(_ref) {
@@ -25983,6 +26014,8 @@ module.exports =
 	  var toDeleteUser = _ref.toDeleteUser;
 	  var toEditUser = _ref.toEditUser;
 	  var toUserInfo = _ref.toUserInfo;
+	  var handlePageClick = _ref.handlePageClick;
+	  var pageNum = _ref.pageNum;
 	
 	  var rowidx = 0;
 	  return _react2.default.createElement(
@@ -26134,7 +26167,22 @@ module.exports =
 	            return ret;
 	          })
 	        )
-	      )
+	      ),
+	      _react2.default.createElement(_reactPaginate2.default, { previousLabel: "previous",
+	        nextLabel: "next",
+	        breakLabel: _react2.default.createElement(
+	          'a',
+	          null,
+	          '...'
+	        ),
+	        breakClassName: "break-me",
+	        pageNum: 110,
+	        marginPagesDisplayed: 2,
+	        pageRangeDisplayed: 5,
+	        clickCallback: handlePageClick,
+	        containerClassName: "pagination",
+	        subContainerClassName: "pages pagination",
+	        activeClassName: "active" })
 	    )
 	  );
 	};
@@ -26563,6 +26611,7 @@ module.exports =
 	var _extends3 = _interopRequireDefault(_extends2);
 	
 	exports.default = reducer;
+	exports.flushgraphydata = flushgraphydata;
 	exports.switchtooth = switchtooth;
 	exports.switchteeth = switchteeth;
 	exports.switchache = switchache;
@@ -26586,6 +26635,8 @@ module.exports =
 	var SWITCH_TEETH = 'bohe/mteeth_status/SWITCHTEETH';
 	var SWITCH_ACHE = 'bohe/mteeth_status/SWITCHACHE';
 	var SWITCH_TOOTH = 'bohe/mteeth_status/SWITCHTOOTH';
+	
+	var FLUSH_GRAPHY_DATA = 'bohe/mteeth_status/FLUSHGRAPHYDATA';
 	
 	var teeth_ui = {
 	  size: 0,
@@ -26761,15 +26812,26 @@ module.exports =
 	    case LOAD_SUCCESS:
 	      var _data = {};
 	      var teethlist = action.result;
-	      _data[action.index] = teethlist;
 	
-	      var teethui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
+	      _data[action.index.toString()] = teethlist;
 	
-	      var latest_data = (0, _extends3.default)({ idx: teethlist.length - 1, useridx: action.index, size: teethlist.length }, teethui);
-	      //return state.merge({ loading: false, loaded: true, teeth: action.result })
-	      return state.mergeDeep({ loading: false, loaded: true, teeth_ui: latest_data, allUserTeeth: _data });
+	      var tooth_ui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
+	
+	      var timelist = teethlist.map(function (teeth) {
+	        return teeth.time;
+	      });
+	      console.log(timelist);
+	      var teeth_ui = (0, _extends3.default)({ idx: teethlist.length - 1, useridx: action.index.toString(), timelist: timelist, size: teethlist.length }, tooth_ui);
+	
+	      return state.mergeDeep({ loading: false, loaded: true, teeth_ui: teeth_ui, allUserTeeth: _data });
 	    case LOAD_FAIL:
 	      return state.merge({ loading: false, loaded: false, error: action.error });
+	    case FLUSH_GRAPHY_DATA:
+	      var useridx = state.getIn(['teeth_ui', 'useridx']);
+	      var idx = state.getIn(['teeth_ui', 'idx']);
+	      var metateeth = state.getIn(['allUserTeeth', useridx, idx]);
+	      var newteeth = state.getIn(['teeth_ui', 'teeth']).toJS();
+	      return state.setIn(['allUserTeeth', useridx, idx, 'teeth'], metateeth.merge(newteeth));
 	    case SWITCH_TEETH:
 	      var pos = action.result;
 	      var teeth;
@@ -26831,6 +26893,11 @@ module.exports =
 	  }
 	}
 	
+	function flushgraphydata() {
+	  return {
+	    type: FLUSH_GRAPHY_DATA
+	  };
+	}
 	function switchtooth(_ref) {
 	  var toothname = _ref.toothname;
 	
@@ -27084,13 +27151,18 @@ module.exports =
 	        case LOAD_SUCCESS:
 	            var _data = {};
 	            var teethlist = action.result;
+	
 	            _data[action.index] = teethlist;
 	
-	            var teethui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
+	            var tooth_ui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
 	
-	            var latest_data = (0, _extends3.default)({ idx: teethlist.length - 1, useridx: action.index, size: teethlist.length }, teethui);
-	            //return state.merge({ loading: false, loaded: true, teeth: action.result })
-	            return state.mergeDeep({ loading: false, loaded: true, teeth_ui: latest_data, allUserTeeth: _data });
+	            var timelist = teethlist.map(function (teeth) {
+	                return teeth.time;
+	            });
+	
+	            var teeth_ui = (0, _extends3.default)({ idx: teethlist.length - 1, useridx: action.index, timelist: timelist, size: teethlist.length }, tooth_ui);
+	
+	            return state.mergeDeep({ loading: false, loaded: true, teeth_ui: teeth_ui, allUserTeeth: _data });
 	        case LOAD_FAIL:
 	            return state.merge({ loading: false, loaded: false, error: action.error });
 	        case SWITCH_TEETH:
@@ -27978,10 +28050,10 @@ module.exports =
 	var TeethGraph = (_dec = (0, _reduxConnect.asyncConnect)(asyncEvent), _dec2 = (0, _reactRedux.connect)(function (state) {
 	    return {
 	        auth: state.get('auth'),
-	        mteeth_status: state.get('mteeth_status'),
-	        cteeth_status: state.get('cteeth_status')
+	        mteeth_ui: state.getIn(['mteeth_status', 'teeth_ui']),
+	        cteeth_ui: state.getIn(['cteeth_status', 'teeth_ui'])
 	    };
-	}, { pushState: _reactRouterRedux.push, switchteethm: _mteeth_status.switchteeth, switchteethc: _cteeth_status.switchteeth, switchachem: _mteeth_status.switchache, switchachec: _cteeth_status.switchache, switchtoothm: _mteeth_status.switchtooth, switchtoothc: _cteeth_status.switchtooth }), _dec(_class = _dec2(_class = function (_Component) {
+	}, { pushState: _reactRouterRedux.push, switchteethm: _mteeth_status.switchteeth, switchteethc: _cteeth_status.switchteeth, switchachem: _mteeth_status.switchache, switchachec: _cteeth_status.switchache, switchtoothm: _mteeth_status.switchtooth, switchtoothc: _cteeth_status.switchtooth, flushgraphydata: _mteeth_status.flushgraphydata }), _dec(_class = _dec2(_class = function (_Component) {
 	    (0, _inherits3.default)(TeethGraph, _Component);
 	
 	    function TeethGraph(props) {
@@ -28004,9 +28076,15 @@ module.exports =
 	    }, {
 	        key: 'toAdd',
 	        value: function toAdd() {
-	            var teeth_status = this.props.teethtype == 'M' ? this.props.mteeth_status : this.props.cteeth_status;
-	            var addtime = teeth_status.getIn(['teeth_ui', 'time']);
+	            var teeth_ui = this.props.teethtype == 'M' ? this.props.mteeth_ui : this.props.cteeth_ui;
+	            var addtime = teeth_ui.get('time');
 	            this.setState((0, _extends3.default)({}, this.state, { check: false, edit: false, add: true, addtime: addtime }));
+	        }
+	    }, {
+	        key: 'save',
+	        value: function save() {
+	            this.props.flushgraphydata();
+	            this.toCheck();
 	        }
 	    }, {
 	        key: 'toEdit',
@@ -28033,7 +28111,7 @@ module.exports =
 	        key: 'componentWillMount',
 	        value: function componentWillMount() {
 	
-	            var teethtype = this.props.mteeth_status.get('allUserTeeth').size >= 0 ? 'M' : 'C';
+	            var teethtype = this.props.mteeth_ui.get('size') >= 0 ? 'M' : 'C';
 	            this.setState((0, _extends3.default)({}, this.state, { teethtype: teethtype }));
 	        }
 	    }, {
@@ -28042,8 +28120,8 @@ module.exports =
 	    }, {
 	        key: 'componentWillReceiveProps',
 	        value: function componentWillReceiveProps(nextProps) {
-	            var teethtype = nextProps.mteeth_status.get('allUserTeeth').size >= 0 ? 'M' : 'C';
-	            var curToothName = nextProps.mteeth_status.get('allUserTeeth').size >= 0 ? nextProps.mteeth_status.getIn(['teeth_ui', 'toothname']) : nextProps.cteeth_status.getIn(['teeth_ui', 'toothname']);
+	            var teethtype = nextProps.mteeth_ui.get('size') >= 0 ? 'M' : 'C';
+	            var curToothName = nextProps.mteeth_ui.get('size') >= 0 ? nextProps.mteeth_ui.get('toothname') : nextProps.cteeth_ui.get('toothname');
 	            if (curToothName) this.setState((0, _extends3.default)({}, this.state, { teethtype: teethtype, curToothName: curToothName }));else this.setState((0, _extends3.default)({}, this.state, { teethtype: teethtype }));
 	        }
 	    }, {
@@ -28079,24 +28157,25 @@ module.exports =
 	                        check: this.state.check,
 	                        add: this.state.add,
 	                        addTime: this.state.addtime,
-	                        teeth_status: this.state.teethtype == 'M' ? this.props.mteeth_status.toJS() : this.props.cteeth_status.toJS(),
+	                        teeth_ui: this.state.teethtype == 'M' ? this.props.mteeth_ui.toJS() : this.props.cteeth_ui.toJS(),
 	                        toAdd: this.toAdd.bind(this),
 	                        toEdit: this.toEdit.bind(this),
 	                        toCheck: this.toCheck.bind(this),
+	                        saveTeethGraph: this.save.bind(this),
 	                        changeCheckTime: this.changeCheckTime.bind(this),
 	                        changeEditTime: this.changeEditTime.bind(this)
 	                    }),
 	                    ' ',
 	                    this.state.check ? (0, _teethshow.TeethShow)({
 	                        teethtype: this.state.teethtype,
-	                        mteeth_status: this.props.mteeth_status ? this.props.mteeth_status.toJS() : [],
-	                        cteeth_status: this.props.cteeth_status ? this.props.cteeth_status.toJS() : [],
+	                        mteeth_ui: this.props.mteeth_ui ? this.props.mteeth_ui.toJS() : {},
+	                        cteeth_ui: this.props.cteeth_ui ? this.props.cteeth_ui.toJS() : {},
 	                        toMteeth: this.toMteeth.bind(this),
 	                        toCteeth: this.toCteeth.bind(this)
 	                    }) : (0, _teethedit.TeethEdit)({
 	                        teethtype: this.state.teethtype,
-	                        mteeth_status: this.props.mteeth_status ? this.props.mteeth_status.toJS() : [],
-	                        cteeth_status: this.props.cteeth_status ? this.props.cteeth_status.toJS() : [],
+	                        mteeth_ui: this.props.mteeth_ui ? this.props.mteeth_ui.toJS() : {},
+	                        cteeth_ui: this.props.cteeth_ui ? this.props.cteeth_ui.toJS() : {},
 	                        toMteeth: this.toMteeth.bind(this),
 	                        toCteeth: this.toCteeth.bind(this),
 	                        clickOnTooth: this.clickOnTooth.bind(this),
@@ -28166,19 +28245,19 @@ module.exports =
 	};
 	
 	var TeethAche = function TeethAche(_ref2) {
-	    var teeth_status = _ref2.teeth_status;
+	    var teeth_ui = _ref2.teeth_ui;
 	
 	    var teethui = [];
-	    teeth_status.teeth_ui.teeth.forEach(function (tooth) {
-	        if (tooth.ache.length) teethui.push(ToothAche({ tooth: tooth, ache_list: teeth_status.teeth_ui.ache_list }));
+	    teeth_ui.teeth.forEach(function (tooth) {
+	        if (tooth.ache.length) teethui.push(ToothAche({ tooth: tooth, ache_list: teeth_ui.ache_list }));
 	    });
 	    return teethui;
 	};
 	
 	var TeethShow = exports.TeethShow = function TeethShow(_ref3) {
 	    var teethtype = _ref3.teethtype;
-	    var mteeth_status = _ref3.mteeth_status;
-	    var cteeth_status = _ref3.cteeth_status;
+	    var mteeth_ui = _ref3.mteeth_ui;
+	    var cteeth_ui = _ref3.cteeth_ui;
 	    var toMteeth = _ref3.toMteeth;
 	    var toCteeth = _ref3.toCteeth;
 	
@@ -28215,7 +28294,7 @@ module.exports =
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'H_teeth_position_pic' },
-	                            mteeth_status.teeth_ui.teeth.map(function (tooth) {
+	                            mteeth_ui.teeth.map(function (tooth) {
 	                                return _react2.default.createElement(
 	                                    'div',
 	                                    { className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name, style: tooth.ache.length > 0 ? { backgroundColor: '#cc6060' } : { backgroundColor: '#fafcff' } },
@@ -28226,7 +28305,7 @@ module.exports =
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'H_teeth_position_list' },
-	                            TeethAche({ teeth_status: mteeth_status })
+	                            TeethAche({ teeth_ui: mteeth_ui })
 	                        )
 	                    ) : _react2.default.createElement(
 	                        'div',
@@ -28234,7 +28313,7 @@ module.exports =
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'H_teeth_position_pic H_teeth_position_pic_son' },
-	                            cteeth_status.teeth_ui.teeth.map(function (tooth) {
+	                            cteeth_ui.teeth.map(function (tooth) {
 	                                return _react2.default.createElement(
 	                                    'div',
 	                                    { className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name },
@@ -28245,7 +28324,7 @@ module.exports =
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'H_teeth_position_list' },
-	                            TeethAche({ teeth_status: cteeth_status })
+	                            TeethAche({ teeth_ui: cteeth_ui })
 	                        )
 	                    )
 	                )
@@ -28282,8 +28361,8 @@ module.exports =
 	
 	var TeethEdit = exports.TeethEdit = function TeethEdit(_ref) {
 	    var teethtype = _ref.teethtype;
-	    var mteeth_status = _ref.mteeth_status;
-	    var cteeth_status = _ref.cteeth_status;
+	    var mteeth_ui = _ref.mteeth_ui;
+	    var cteeth_ui = _ref.cteeth_ui;
 	    var toMteeth = _ref.toMteeth;
 	    var toCteeth = _ref.toCteeth;
 	    var clickOnTooth = _ref.clickOnTooth;
@@ -28326,7 +28405,7 @@ module.exports =
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'H_teeth_position_pic' },
-	                            mteeth_status.teeth_ui.teeth.map(function (tooth) {
+	                            mteeth_ui.teeth.map(function (tooth) {
 	                                return _react2.default.createElement(
 	                                    'div',
 	                                    { onClick: function onClick(ev) {
@@ -28351,7 +28430,7 @@ module.exports =
 	                            _react2.default.createElement(
 	                                'div',
 	                                { className: 'H_teeth_position_list_item', style: curToothName ? {} : { pointerEvents: 'none' } },
-	                                mteeth_status.teeth_ui.ache_list.map(function (ache) {
+	                                mteeth_ui.ache_list.map(function (ache) {
 	                                    var _marchidx = macheidx++;
 	                                    return _react2.default.createElement(
 	                                        'div',
@@ -28379,7 +28458,7 @@ module.exports =
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'H_teeth_position_pic H_teeth_position_pic_son' },
-	                            cteeth_status.teeth_ui.teeth.map(function (tooth) {
+	                            cteeth_ui.teeth.map(function (tooth) {
 	                                return _react2.default.createElement(
 	                                    'div',
 	                                    { onClick: function onClick(ev) {
@@ -28404,7 +28483,7 @@ module.exports =
 	                            _react2.default.createElement(
 	                                'div',
 	                                { className: 'H_teeth_position_list_item', style: curToothName ? {} : { pointerEvents: 'none' } },
-	                                cteeth_status.teeth_ui.ache_list.map(function (ache) {
+	                                cteeth_ui.ache_list.map(function (ache) {
 	                                    cacheidx++;
 	                                    return _react2.default.createElement(
 	                                        'div',
@@ -28464,10 +28543,11 @@ module.exports =
 	    var check = _ref.check;
 	    var add = _ref.add;
 	    var addTime = _ref.addTime;
-	    var teeth_status = _ref.teeth_status;
+	    var teeth_ui = _ref.teeth_ui;
 	    var toAdd = _ref.toAdd;
 	    var toEdit = _ref.toEdit;
 	    var toCheck = _ref.toCheck;
+	    var saveTeethGraph = _ref.saveTeethGraph;
 	    var changeCheckTime = _ref.changeCheckTime;
 	    var changeEditTime = _ref.changeEditTime;
 	
@@ -28490,12 +28570,12 @@ module.exports =
 	                    _react2.default.createElement(
 	                        'select',
 	                        { onChange: changeCheckTime },
-	                        teeth_status.allUserTeeth[teeth_status.teeth_ui.useridx].map(function (teeth) {
+	                        teeth_ui.timelist.map(function (time) {
 	                            index++;
 	                            return _react2.default.createElement(
 	                                'option',
 	                                { value: index },
-	                                teeth.time
+	                                time
 	                            );
 	                        })
 	                    )
@@ -28534,11 +28614,11 @@ module.exports =
 	                    _react2.default.createElement(
 	                        'select',
 	                        { onChange: changeEditTime },
-	                        teeth_status.allUserTeeth[teeth_status.teeth_ui.useridx].map(function (teeth) {
+	                        teeth_ui.timelist.map(function (time) {
 	                            return _react2.default.createElement(
 	                                'option',
 	                                { value: index },
-	                                teeth.time
+	                                time
 	                            );
 	                        })
 	                    )
@@ -28548,7 +28628,7 @@ module.exports =
 	                    null,
 	                    _react2.default.createElement(
 	                        'span',
-	                        { onClick: toCheck, className: 'default_inputbtn z_save_btn' },
+	                        { onClick: saveTeethGraph, className: 'default_inputbtn z_save_btn' },
 	                        '保存'
 	                    )
 	                )
@@ -28589,6 +28669,15 @@ module.exports =
 	        );
 	    }
 	};
+
+/***/ },
+/* 367 */
+/*!*********************************!*\
+  !*** external "react-paginate" ***!
+  \*********************************/
+/***/ function(module, exports) {
+
+	module.exports = require("react-paginate");
 
 /***/ }
 /******/ ]);

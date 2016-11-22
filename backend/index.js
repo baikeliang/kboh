@@ -121,7 +121,6 @@ export default class UserAdmin extends Component {
 
     }
     onClick(ev,itemid){
-
         this.showRight({
             asyncProcess:userListAsync,
             itemid,
@@ -175,9 +174,9 @@ export default class UserAdmin extends Component {
                  {LeftList({onClick:(::this.onClick),onClickToExpand:(::this.onClickToExpand),table})}
                  <div className="container-right">
                      <div className="container-right-main">
-	                    {this.state.toShowRight()}
+	                    { this.state.toShowRight() }
                      </div>
-                  </div>
+                 </div>
                </div>)
         }else{
 	    return <div/>;

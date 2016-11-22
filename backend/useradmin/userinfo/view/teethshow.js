@@ -24,11 +24,11 @@ var ToothAche = ({ tooth,ache_list }) => {
 }
 
 
-var  TeethAche = ({ teeth_status }) => {
+var  TeethAche = ({ teeth_ui }) => {
         var  teethui = [];
-        teeth_status.teeth_ui.teeth.forEach((tooth)=>{
+        teeth_ui.teeth.forEach((tooth)=>{
               if(tooth.ache.length)
-                teethui.push(ToothAche({ tooth,ache_list:teeth_status.teeth_ui.ache_list}))
+                teethui.push(ToothAche({ tooth,ache_list:teeth_ui.ache_list}))
         });
         return  teethui;
 
@@ -36,8 +36,8 @@ var  TeethAche = ({ teeth_status }) => {
 
 export const TeethShow = ({
     teethtype,
-    mteeth_status,
-    cteeth_status,
+    mteeth_ui,
+    cteeth_ui,
     toMteeth,
     toCteeth
 }) => {
@@ -54,7 +54,7 @@ export const TeethShow = ({
                  {
                    (teethtype=='M')?(<div>
                    <div className="H_teeth_position_pic">
-                       {  mteeth_status.teeth_ui.teeth.map((tooth)=>{
+                       {  mteeth_ui.teeth.map((tooth)=>{
                              return (<div className={'H_teeth_position_pic_same '+ 'H_teeth_position_pic_'+tooth.name} style={tooth.ache.length>0?{backgroundColor:'#cc6060'}:{backgroundColor:'#fafcff'}}>
                                           {tooth.name}
                                      </div>
@@ -62,11 +62,11 @@ export const TeethShow = ({
                        })}
                    </div>
                    <div className="H_teeth_position_list">
-                       {  TeethAche({teeth_status:mteeth_status}) }
+                       {  TeethAche({teeth_ui:mteeth_ui}) }
                    </div>
                    </div>):(<div>
                    <div className="H_teeth_position_pic H_teeth_position_pic_son">
-                        {  cteeth_status.teeth_ui.teeth.map((tooth)=>{
+                        {  cteeth_ui.teeth.map((tooth)=>{
                              return (<div className={'H_teeth_position_pic_same '+ 'H_teeth_position_pic_'+tooth.name}>
                                           {tooth.name}
                                      </div>
@@ -74,7 +74,7 @@ export const TeethShow = ({
                        })}
                    </div>
                    <div className="H_teeth_position_list">
-                        {  TeethAche({teeth_status:cteeth_status}) }
+                        {  TeethAche({teeth_ui:cteeth_ui}) }
                    </div>
                    </div>)
                }

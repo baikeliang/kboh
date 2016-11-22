@@ -6,14 +6,15 @@ import {
 } from 'redux-connect'
 
 export const TeethHeader = ({
-	edit,
-	check,
-	add,
-	addTime,
-    teeth_status,
+	  edit,
+	  check,
+	  add,
+	  addTime,
+    teeth_ui,
     toAdd,
     toEdit,
     toCheck,
+    saveTeethGraph,
     changeCheckTime,
     changeEditTime
 }) => {
@@ -24,9 +25,9 @@ export const TeethHeader = ({
                               <p>
                                 <b>更新记录：</b>
                                   <select onChange={ changeCheckTime }>
-                                     {teeth_status.allUserTeeth[teeth_status.teeth_ui.useridx].map((teeth)=>{
+                                     { teeth_ui.timelist.map((time)=>{
                                      	index++;
-                                     	return (<option value={ index }>{teeth.time}</option>)
+                                     	return (<option value={ index }>{ time }</option>)
                                      })}
                                   </select>
                               </p>
@@ -44,13 +45,13 @@ export const TeethHeader = ({
                             <p>
                                 <b>更新记录：</b>
                                 <select onChange={ changeEditTime }>
-                                     {teeth_status.allUserTeeth[teeth_status.teeth_ui.useridx].map((teeth)=>{
-                                     	return (<option value={ index }>{teeth.time}</option>)
+                                     { teeth_ui.timelist.map(( time )=>{
+                                     	return (<option value={ index }>{ time }</option>)
                                      })}
                                 </select>
                             </p>
                             <label>
-                                <span onClick={ toCheck } className="default_inputbtn z_save_btn">保存</span>
+                                <span onClick={ saveTeethGraph } className="default_inputbtn z_save_btn">保存</span>
                             </label>
                           </div>
                         </div>)

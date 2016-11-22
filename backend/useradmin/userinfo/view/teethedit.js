@@ -7,8 +7,8 @@ import {
 
 export const TeethEdit = ({
     teethtype,
-    mteeth_status,
-    cteeth_status,
+    mteeth_ui,
+    cteeth_ui,
     toMteeth,
     toCteeth,
     clickOnTooth,
@@ -30,7 +30,7 @@ export const TeethEdit = ({
                  {
                    (teethtype=='M')?(<div>
                    <div className="H_teeth_position_pic">
-                       {  mteeth_status.teeth_ui.teeth.map((tooth)=>{
+                       {  mteeth_ui.teeth.map((tooth)=>{
                              return (<div onClick={(ev) => {clickOnTooth(ev,tooth.name)}} className={'H_teeth_position_pic_same '+ 'H_teeth_position_pic_'+tooth.name} style={(curToothName==tooth.name)?{backgroundColor:'#c1d5f2'}:(tooth.ache.length>0?{backgroundColor:'#cc6060'}:{backgroundColor:'#fafcff'})}>
                                           {tooth.name}
                                      </div>
@@ -42,7 +42,7 @@ export const TeethEdit = ({
                        <span style={{fontSize: '18px'}}>{curToothName?('牙齿：' + curToothName):'请选择左图的牙齿，进行添加'}</span>
                       </div>
                         <div className="H_teeth_position_list_item" style={curToothName?{}:{pointerEvents:'none'}}>
-                          {mteeth_status.teeth_ui.ache_list.map((ache)=>{
+                          { mteeth_ui.ache_list.map((ache)=>{
                               var _marchidx = macheidx++;
                               return (<div className="wrap">
                                          <input type="checkbox"  id={_marchidx}  checked={ache.bool}/>
@@ -53,7 +53,7 @@ export const TeethEdit = ({
                    </div>
                    </div>):(<div>
                    <div className="H_teeth_position_pic H_teeth_position_pic_son">
-                        {  cteeth_status.teeth_ui.teeth.map((tooth)=>{
+                        {  cteeth_ui.teeth.map((tooth)=>{
                              return (<div onClick={(ev) => {clickOnTooth(ev,tooth.name)}} className={'H_teeth_position_pic_same '+ 'H_teeth_position_pic_'+tooth.name} style={(curToothName==tooth.name)?{backgroundColor:'#c1d5f2'}:(tooth.ache.length>0?{backgroundColor:'#cc6060'}:{backgroundColor:'#fafcff'})}>
                                           {tooth.name}
                                      </div>
@@ -65,7 +65,7 @@ export const TeethEdit = ({
                        <span style={{fontSize: '18px'}}>{curToothName?('牙齿：' + curToothName):'请选择左图的牙齿，进行添加'}</span>
                       </div>
                         <div className="H_teeth_position_list_item" style={curToothName?{}:{pointerEvents:'none'}}>
-                          {cteeth_status.teeth_ui.ache_list.map((ache)=>{
+                          { cteeth_ui.ache_list.map((ache)=>{
                               cacheidx++;
                               return (<div className="wrap">
                                          <input type="checkbox"  id={cacheidx}  checked={ache.bool}/>
