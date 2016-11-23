@@ -11,7 +11,7 @@ import {
 } from 'react-redux';
 
 import Nav from './nav.js'
-import { Header } from './view/header.js'
+import { Header } from './view/baseinfo/header.js'
 
 
 export default  class Container extends Component{

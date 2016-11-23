@@ -82,7 +82,7 @@ render(
 );
 })
 
-/*
+
 render(
     <Provider store={store} key="provider">
       <div>
@@ -92,7 +92,7 @@ render(
     </Provider>,
     document.getElementById('devtools')
   );
-*/
+
 
 /*
 match({history,routes}, (error, redirectLocation, renderProps) => {

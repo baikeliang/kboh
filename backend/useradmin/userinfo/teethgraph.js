@@ -11,7 +11,7 @@ import {
 } from 'react-redux';
 
 import Nav from './nav.js'
-import { Header } from './view/header.js'
+import { Header } from './view/baseinfo/header.js'
 
 import {
 	isLoaded as isAuthLoaded,
@@ -43,15 +43,15 @@ import {
 
 import {
 	TeethShow
-}  from './view/teethshow.js'
+}  from './view/teeth/teethshow.js'
 
 import {
 	TeethEdit
-}  from './view/teethedit.js'
+}  from './view/teeth/teethedit.js'
 
 import {
 	TeethHeader
-}  from './view/teethheader.js'
+}  from './view/teeth/teethheader.js'
 
 var __asyncEvent = function({ dispatch, getState }) {
 
@@ -119,7 +119,6 @@ export default  class TeethGraph extends Component{
        this.setState({...this.state, check: false, edit: true, add: false })
    }
    toCheck() {
-
        this.setState({...this.state, check: true, edit: false, add: false })
    }
    changeEditTime(ev) {
@@ -199,8 +198,6 @@ export default  class TeethGraph extends Component{
                        })
 
                    }
-
-
                 </div>)
 
     }

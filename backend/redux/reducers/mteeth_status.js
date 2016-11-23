@@ -414,7 +414,7 @@ export function load({ user,patient,index,req,refresh}) {
 
     return {
         types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
-        promise: (client) => client.GET('http://192.168.10.10/patient/mteeth/rest?', { params }, {
+        promise: (client) => client.GET('http://172.16.34.59/patient/mteeth/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
