@@ -1,3 +1,3 @@
 export default function getApiIp(){
-	return '172.16.36.222';
-} 
+	return '192.168.10.10';
+}
