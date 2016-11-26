@@ -24,6 +24,9 @@ import routes from './routes.js'
 
 import ApiClient from 'backend/isomorphic-api/ApiClient'
 
+
+import $ from "jquery";
+
 window.__SERVER__=false
 window.__CLIENT__=true
 
@@ -42,6 +45,20 @@ const history = syncHistoryWithStore(browserHistory, store,{
   }
 })
 
+
+window.$ = $;
+
+window.jQuery = $;
+
+require.ensure(['./modules/diyUploader/js/webuploader.html5only.js','./modules/diyUploader/js/diyUpload.js'], function(require){
+
+      window.WebUploader = require('./modules/diyUploader/js/webuploader.html5only.js');
+
+      require('./modules/diyUploader/js/diyUpload.js');
+
+      require('./modules/imageUploader/upPic.js')
+
+})
 
 /*
 render(
@@ -82,7 +99,7 @@ render(
 );
 })
 
-/*
+
 render(
     <Provider store={store} key="provider">
       <div>
@@ -92,7 +109,7 @@ render(
     </Provider>,
     document.getElementById('devtools')
   );
-*/
+
 
 /*
 match({history,routes}, (error, redirectLocation, renderProps) => {

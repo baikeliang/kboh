@@ -24,7 +24,6 @@ var NavPage = ({
   toTeethGraph,
   tab
 }) => {
-
     return (<div className="user_topmenu user_topmenu_edit">
                 <ul id='routeUl'>
                     <li><a className={(tab==BASIC)?"active":''} onClick={ toBasic }>基础信息</a></li>
@@ -58,9 +57,11 @@ export default class Nav extends Component {
 
   }
   toTeethGraph(){
+     var WebUploader = window.webuploader;
+     console.log(WebUploader)
   	 this.setState({tab:TEETHGRAPH});
      this.context.showUserData({ asyncProcess:teethgraphAsync,comCreater:function(){
-     	return  <TeethGraph/>
+     return  <TeethGraph/>
      }});
   }
   toTeethStatus(){

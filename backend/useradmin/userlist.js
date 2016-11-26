@@ -126,13 +126,8 @@ export default class UserListCom extends Component {
     }
     handlePageClick(data){
        let selected = data.selected;
-       console.log("handlePageClick!!!!!!!!!!")
-       console.log(selected)
-       if((selected*10+10) >= this.props.userRepo.get('users').size){
-           this.props.load( { num: 10, begin: this.props.userRepo.get('users').size, showbegin:(selected*10)  })
-       }else{
-           this.props.nextGroupUsers(selected*10)
-       }
+
+       this.props.load( { num: 10, begin: (selected*10), showbegin:(selected*10)  })
 
     }
     componentDidMount() {

@@ -25,6 +25,10 @@ module.exports = {
             }
         }),
         new webpack.optimize.CommonsChunkPlugin('vendor',  'vendor.js'),
+        /*new webpack.ProvidePlugin({
+           $: 'jquery',
+           jQuery: "jquery"
+        }),*/
         new ExtractTextPlugin("[name].css")
         /*
         new HtmlwebpackPlugin({
@@ -48,14 +52,16 @@ module.exports = {
             test: /\.jsx?$/,
             query: {
                 plugins: ['transform-runtime',"transform-decorators-legacy"],
-                presets: ['es2015', 'stage-0', 'react']
+                presets: ['es2015', 'stage-0', 'react'],
+                compact: false
                 //"env": {
                 //    "development": {
                 //        "presets": ["react-hmre"]
                 //    }
                 //}
             }
-        },{ test: /\.less$/, loader: 'style!css?modules&localIdentName=[name]__[local]!less' },
+        },{ test: /\.scss$/, loader: 'style!css?modules&localIdentName=[local]!sass'},
+        { test: /\.less$/, loader: 'style!css?modules&localIdentName=[name]__[local]!less' },
         {
           test: /\.css$/,
           exclude:/(common\.css|font-awesome\.min\.css|account\.css|table\.css|pagination\.css|z_user\.css|user\.css|H_user1\.css)/,

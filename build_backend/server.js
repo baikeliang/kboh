@@ -25010,24 +25010,7 @@ module.exports =
 	        case LOAD:
 	            return state.merge({ loading: true });
 	        case LOAD_SUCCESS:
-	            var allres;
-	            console.log('111DDDDDDDDDD!!!!!');
-	            if (_immutable2.default.List.isList(state.get('users'))) {
-	                if (!action.refresh) {
-	
-	                    allres = state.get('users').toJS().concat(action.result);
-	                } else if (action.refresh.resolve) {
-	
-	                    action.refresh.resolve();
-	                }
-	            }
-	            console.log(allres);
-	            console.log('TTTTTTTTT');
-	            if (allres) {
-	                if (action.showUsersBegin) return state.merge({ showbegin: action.showUsersBegin, loading: false, loaded: true, users: allres });else return state.merge({ loading: false, loaded: true, users: allres });
-	            } else {
-	                if (action.showUsersBegin) return state.merge({ showbegin: action.showUsersBegin, loading: false, loaded: true, users: action.result });else return state.merge({ loading: false, loaded: true, users: action.result });
-	            }
+	            if (action.showUsersBegin) return state.merge({ showbegin: action.showUsersBegin, loading: false, loaded: true, users: action.result });else return state.merge({ loading: false, loaded: true, users: action.result });
 	        case LOAD_FAIL:
 	            if (action.refresh && action.refresh.reject) {
 	                action.refresh.reject();
@@ -25658,13 +25641,8 @@ module.exports =
 	        key: 'handlePageClick',
 	        value: function handlePageClick(data) {
 	            var selected = data.selected;
-	            console.log("handlePageClick!!!!!!!!!!");
-	            console.log(selected);
-	            if (selected * 10 + 10 >= this.props.userRepo.get('users').size) {
-	                this.props.load({ num: 10, begin: this.props.userRepo.get('users').size, showbegin: selected * 10 });
-	            } else {
-	                this.props.nextGroupUsers(selected * 10);
-	            }
+	
+	            this.props.load({ num: 10, begin: selected * 10, showbegin: selected * 10 });
 	        }
 	    }, {
 	        key: 'componentDidMount',
@@ -26402,7 +26380,6 @@ module.exports =
 	    var toTeethGraph = _ref.toTeethGraph;
 	    var tab = _ref.tab;
 	
-	
 	    return _react2.default.createElement(
 	        'div',
 	        { className: 'user_topmenu user_topmenu_edit' },
@@ -26478,6 +26455,8 @@ module.exports =
 	    }, {
 	        key: 'toTeethGraph',
 	        value: function toTeethGraph() {
+	            var WebUploader = window.webuploader;
+	            console.log(WebUploader);
 	            this.setState({ tab: TEETHGRAPH });
 	            this.context.showUserData({ asyncProcess: _teethgraph.asyncEvent, comCreater: function comCreater() {
 	                    return _react2.default.createElement(_teethgraph2.default, null);
@@ -27950,6 +27929,10 @@ module.exports =
 	});
 	exports.default = exports.asyncEvent = undefined;
 	
+	var _defineProperty2 = __webpack_require__(/*! babel-runtime/helpers/defineProperty */ 369);
+	
+	var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+	
 	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
 	
 	var _extends3 = _interopRequireDefault(_extends2);
@@ -28143,6 +28126,23 @@ module.exports =
 	        key: 'clickOnCAche',
 	        value: function clickOnCAche(ev, acheidx, curToothName, status) {
 	            this.props.switchachec({ acheidx: acheidx, curToothName: curToothName, status: status });
+	        }
+	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            var _window$$$diyUpload;
+	
+	            window.$("#pick").diyUpload((_window$$$diyUpload = {
+	                url: '',
+	                success: function success(data) {},
+	                error: function error(err) {
+	                    console.log(err);
+	                },
+	                buttonText: '上传图片'
+	            }, (0, _defineProperty3.default)(_window$$$diyUpload, 'buttonText', '上传图片'), (0, _defineProperty3.default)(_window$$$diyUpload, 'chunked', false), (0, _defineProperty3.default)(_window$$$diyUpload, 'auto', true), (0, _defineProperty3.default)(_window$$$diyUpload, 'chunkSize', 1048576 * 15), (0, _defineProperty3.default)(_window$$$diyUpload, 'fileNumLimit', 1), (0, _defineProperty3.default)(_window$$$diyUpload, 'fileSizeLimit', 1048576 * 100), (0, _defineProperty3.default)(_window$$$diyUpload, 'fileSingleSizeLimit', 1048576 * 15), (0, _defineProperty3.default)(_window$$$diyUpload, 'accept', {
+	                mimeTypes: 'image/*',
+	                extensions: 'gif,jpg,jpeg,png'
+	            }), _window$$$diyUpload));
 	        }
 	    }, {
 	        key: 'render',
@@ -28592,6 +28592,11 @@ module.exports =
 	                        'span',
 	                        { onClick: toEdit, className: 'default_inputbtn z_edit_btn' },
 	                        '编辑'
+	                    ),
+	                    _react2.default.createElement(
+	                        'span',
+	                        { id: 'pick', className: 'default_inputbtn z_add_btn' },
+	                        'test'
 	                    )
 	                )
 	            )
@@ -28669,6 +28674,7 @@ module.exports =
 	        );
 	    }
 	};
+	//import WebUploader from 'backend/modules/uploader/Components/WebUploader.jsx';
 
 /***/ },
 /* 367 */
@@ -28678,6 +28684,39 @@ module.exports =
 /***/ function(module, exports) {
 
 	module.exports = require("react-paginate");
+
+/***/ },
+/* 368 */,
+/* 369 */
+/*!***************************************************!*\
+  !*** ./~/babel-runtime/helpers/defineProperty.js ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	exports.__esModule = true;
+	
+	var _defineProperty = __webpack_require__(/*! ../core-js/object/define-property */ 288);
+	
+	var _defineProperty2 = _interopRequireDefault(_defineProperty);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	exports.default = function (obj, key, value) {
+	  if (key in obj) {
+	    (0, _defineProperty2.default)(obj, key, {
+	      value: value,
+	      enumerable: true,
+	      configurable: true,
+	      writable: true
+	    });
+	  } else {
+	    obj[key] = value;
+	  }
+	
+	  return obj;
+	};
 
 /***/ }
 /******/ ]);

@@ -24,33 +24,10 @@ export default function reducer(state = initialState, action = {}) {
         case LOAD:
             return state.merge({ loading: true })
         case LOAD_SUCCESS:
-            var allres;
-            console.log('111DDDDDDDDDD!!!!!')
-            if(Immutable.List.isList(state.get('users'))){
-                if(!action.refresh){
-
-                    allres = state.get('users').toJS().concat(action.result)
-
-                }else if(action.refresh.resolve){
-
-                    action.refresh.resolve()
-
-                }
-            }
-            console.log(allres)
-            console.log('TTTTTTTTT')
-            if(allres){
-              if(action.showUsersBegin)
-                return state.merge({showbegin:action.showUsersBegin ,loading: false, loaded: true, users: allres })
-              else
-                return state.merge({loading: false, loaded: true, users: allres })
-            }
-            else{
               if(action.showUsersBegin)
                 return state.merge({showbegin:action.showUsersBegin , loading: false, loaded: true, users: action.result })
               else
                 return state.merge({loading: false, loaded: true, users: action.result })
-            }
         case LOAD_FAIL:
             if(action.refresh && action.refresh.reject){
                 action.refresh.reject()
