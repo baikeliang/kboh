@@ -1,1 +1,0 @@
-webpackJsonp([1],[function(n,o,a){!function(){throw new Error('Cannot find module "/home/vagrant/Code/bohepro/app/main.js"')}()}]);
