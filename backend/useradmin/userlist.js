@@ -111,11 +111,11 @@ export default class UserListCom extends Component {
     toSearch(){
 
     }
-    toUserInfo(ev,idx){
+    toUserInfo(ev,idx,id){
         console.log(idx);
         console.log(this.context)
 
-        this.props.toDetail({ idx })
+        this.props.toDetail({ idx,id })
 
         this.context.showRight({
             asyncProcess:[],

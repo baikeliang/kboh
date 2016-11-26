@@ -11,11 +11,14 @@ import {
 } from 'react-redux';
 
 import TeethGraph, { asyncEvent as teethgraphAsync } from  './teethgraph.js';
+import BasicInfo,  { asyncEvent as basicinfoAsync }  from './basicinfo.js';
+import History,  { asyncEvent as historyAsync }  from './history.js';
 
 const BASIC = 'BASIC';
 const ILLHISTORY = 'ILLHISTORY';
 const TEETHSTATUS = 'TEETHSTATUS';
 const TEETHGRAPH = 'TEETHGRAPH';
+
 
 var NavPage = ({
   toBasic,
@@ -49,12 +52,16 @@ export default class Nav extends Component {
 
   toBasic(){
   	 this.setState({tab:BASIC});
-
+     this.context.showUserData({ asyncProcess:basicinfoAsync,comCreater:function(){
+      return  <BasicInfo/>
+     }});
   }
 
   toillHistory(){
   	 this.setState({tab:ILLHISTORY});
-
+     this.context.showUserData({ asyncProcess:historyAsync,comCreater:function(){
+      return  <History/>
+     }});
   }
   toTeethGraph(){
      var WebUploader = window.webuploader;
