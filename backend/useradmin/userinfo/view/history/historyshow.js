@@ -12,7 +12,7 @@ export const HistoryShow = ({
       var height = window.innerHeight || document.documentElement.clientHeight
       return (
           		<div className="userContain z_userContain_edit z_userContain_see" style={{height : "523px;"}}>
-                            
+
                     <div className="z_userContainMain">
                         <div className="containb_right" style={{ minHeight: "520px;" }}>
                             <div className="z_no_past_data" style={{ display:"none" }}>
@@ -30,7 +30,7 @@ export const HistoryShow = ({
                                 			historyedit.history.body_condition.map((item)=>{
 		                                      return ( <span><span>{item.name}</span><span>{item.date}</span></span>)
 		                                    })
-                                    	}                                	
+                                    	}
                                     </div>
                                     <div className="clear"></div>
                                 </div>

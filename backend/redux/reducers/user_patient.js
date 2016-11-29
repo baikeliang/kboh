@@ -15,6 +15,10 @@ const LOAD_DETAIL_HISTORY = 'bohe/user_patient/LOAD_DETAIL_HISTORY';
 const LOAD_DETAIL_HISTORY_SUCCESS = 'bohe/user_patient/LOAD_DETAIL_HISTORY_SUCCESS';
 const LOAD_DETAIL_HISTORY_FAIL = 'bohe/user_patient/LOAD_DETAIL_HISTORY_FAIL';
 
+const LOAD_DETAIL_ORAL = 'bohe/user_patient/LOAD_DETAIL_ORAL';
+const LOAD_DETAIL_ORAL_SUCCESS = 'bohe/user_patient/LOAD_DETAIL_ORAL_SUCCESS';
+const LOAD_DETAIL_ORAL_FAIL = 'bohe/user_patient/LOAD_DETAIL_ORAL_FAIL';
+
 
 const BASICINFO_SAVE = 'bohe/user_patient/BASICINFO_SAVE';
 const BASICINFO_EDIT = 'bohe/user_patient/BASICINFO_EDIT';
@@ -26,6 +30,10 @@ const HISTORY_FLUSH = 'bohe/user_patient/HISTORY_FLUSH';
 const HISTORY_CHANGE_TIME = 'bohe/user_patient/HISTORY_CHANGE_TIME';
 
 
+const ORAL_EDIT_ADD = 'bohe/user_patient/ORAL_EDIT_ADD';
+const ORAL_FLUSH = 'bohe/user_patient/ORAL_FLUSH';
+const ORAL_CHANGE_TIME = 'bohe/user_patient/ORAL_CHANGE_TIME';
+const ORAL_EDIT_DEL = 'bohe/user_patient/ORAL_EDIT_DEL';
 
 const SET_USER_TOSHOWINFO = 'bohe/user_patient/SHOWINFO'
 
@@ -119,9 +127,9 @@ export default function reducer(state = initialState, action = {}) {
                     var metahistory = action.result.allhistory?action.result.allhistory[action.result.allhistory.length-1]:undefined;
 
                     if(metahistory){
-                       
+
                        historyedit.history = {...historyedit.history, ...metahistory.history}
-                    
+
                        historyedit.time = metahistory.time;
 
                        var timelist = action.result.allhistory.map((history) => { return history.time })
@@ -209,7 +217,115 @@ export default function reducer(state = initialState, action = {}) {
             } else {
                 return state
             }
+        case LOAD_DETAIL_ORAL:
+            return state.updateIn(['users'], list => list.map(user => {
+                    if(user.get('id') == action.id){
+                      return user.merge({oralloading: true,oraledit:{}})
+                    }
+                    return user
+            }))
+        case LOAD_DETAIL_ORAL_SUCCESS:
+            return state.updateIn(['users'], list => list.map(user => {
+                    if(user.get('id') == action.result.id){
 
+                    var oraledit = {oral:{teetharound:[],mucosa:[],surgery:[],repairhis:[]},time:'',timelist:[]};
+
+                    var metaoral = action.result.alloral?action.result.alloral[action.result.alloral.length-1]:undefined;
+
+                    if(metaoral){
+
+                       oraledit.oral = {...oraledit.oral, ...metaoral.oral}
+
+                       oraledit.time = metaoral.time;
+
+                       var timelist = action.result.alloral.map((oral) => { return oral.time })
+                       console.log('AAAAAACCCCCCCC');
+                       console.log(timelist);
+                       console.log(oraledit);
+                       oraledit.timelist = timelist;
+                       oraledit.idx = action.result.alloral.length-1;
+                    }
+                    return user.merge({oralloading:false,oralloaded:true,oraledit,alloral:action.result.alloral})
+                    }
+                    return user
+            }))
+        case LOAD_DETAIL_ORAL_FAIL:
+            return state.updateIn(['users'], list => list.map(user => {
+                    if(user.get('id') == action.error.id){
+                    return user.merge({oralloading:false,oralloaded:false, error: action.error.info})
+                    }
+                    return user
+            }))
+        case ORAL_EDIT_ADD:
+            var idx = state.getIn(['frontuserinfo','idx']);
+            var pair = action.result;
+            console.log('OOOOOOOOOPPPPPPPPP');
+            console.log(pair.key);
+            console.log(state.getIn(['users',idx,'oraledit','oral',pair.key]));
+            var index = state.getIn(['users',idx,'oraledit','oral',pair.key]).findIndex( value => value.get('name') == pair.val.name)
+
+            if(index>=0){
+                console.log(index);
+              let i=0;
+              console.log(state.getIn(['users',idx,'oraledit','oral',pair.key]));
+              return state.updateIn(['users',idx,'oraledit','oral',pair.key], list => list.map(item => {
+                    i++;
+                    console.log('ADD!!!!!!')
+                    console.log(pair.val);
+                    if(i==(index+1)){
+                        var _item_ = item.toJS();
+                        let item_val = _item_.val;
+                        let _item_val = pair.val.val;
+                        _item_.val = {...item_val, ..._item_val}
+                        return Immutable.Map(_item_);
+                    }else{
+                        return item;
+                    }
+               }))
+            }
+            else{
+              console.log('111111111111111111!!!!!!!!!!!');
+              console.log(pair.val);
+              return state.setIn(['users',idx,'oraledit','oral',pair.key],state.getIn(['users',idx,'oraledit','oral',pair.key]).push(Immutable.Map(pair.val)));
+            }
+        case ORAL_FLUSH:
+            var idx = state.getIn(['frontuserinfo','idx']); 
+
+            var oraltomerge = state.getIn(['users',idx,'oraledit','oral']);
+
+            var oralidx = state.getIn(['users',idx,'oraledit','idx']);
+            console.log('WWWWWWWWWWWWWW');
+            console.log(oralidx);
+            if(oralidx>=0){
+              console.log("TTTTTTTTTTTTTTRRRRRRR")
+              return state.setIn(['users',idx,'alloral',oralidx,'oral'],oraltomerge);
+            }
+            else
+              return state
+        case ORAL_CHANGE_TIME:
+            var pos = action.result;
+            var idx = state.getIn(['frontuserinfo','idx']); 
+            var timelist = state.getIn(['users',idx,'oraledit','timelist']);
+            if (pos.idx>=0) {
+                console.log('PpPPPPPPPP');
+                console.log(pos.idx);
+                console.log(timelist);
+                console.log(state.getIn(['users',idx,'alloral',pos.idx]).toJS())
+                return  state.setIn(['users',idx,'oraledit'],state.getIn(['users',idx,'alloral',pos.idx])).setIn(['users',idx,'oraledit','timelist'],timelist).setIn(['users',idx,'oraledit','idx'],pos.idx);
+            } else {
+                return state
+            }
+        case ORAL_EDIT_DEL:
+            var idx = state.getIn(['frontuserinfo','idx']);
+            var pair = action.result;
+            console.log("UUU3")
+            console.log(pair)
+            var index = state.getIn(['users',idx,'oraledit','oral',pair.key]).findIndex( value => value.get('name') == pair.val.name)
+            console.log(index)
+            if(index>=0)
+              return state.setIn(['users',idx,'oraledit','oral',pair.key],state.getIn(['users',idx,'oraledit','oral',pair.key]).remove(index));
+            else
+              return state
         default:
             return state
     }
@@ -217,7 +333,7 @@ export default function reducer(state = initialState, action = {}) {
 export function basicInfoSave(){
 
     return {
-        type: BASICINFO_SAVE       
+        type: BASICINFO_SAVE
     }
 
 }
@@ -226,7 +342,7 @@ export function basicInfoEdit(pairs){
 
     return {
         type: BASICINFO_EDIT,
-        result: pairs       
+        result: pairs
     }
 
 }
@@ -234,7 +350,7 @@ export function basicInfoEdit(pairs){
 export function historyFlush(){
 
     return {
-        type: HISTORY_FLUSH       
+        type: HISTORY_FLUSH
     }
 
 }
@@ -243,7 +359,7 @@ export function historyEditADD(pair){
 
     return {
         type: HISTORY_EDIT_ADD,
-        result: pair      
+        result: pair
     }
 
 }
@@ -252,7 +368,33 @@ export function historyEditDEL(pair){
 
     return {
         type: HISTORY_EDIT_DEL,
-        result: pair     
+        result: pair
+    }
+
+}
+
+export function oralEditDEL(pair){
+
+    return {
+        type: ORAL_EDIT_DEL,
+        result: pair
+    }
+
+}
+
+export function oralEditADD(pair){
+
+    return {
+        type: ORAL_EDIT_ADD,
+        result: pair
+    }
+
+}
+
+export function oralFlush(){
+
+    return {
+        type: ORAL_FLUSH
     }
 
 }
@@ -303,9 +445,29 @@ export function LoadedorLoadingUser_History(state){
     return loaded || loading
 }
 
+export function LoadedorLoadingUser_Oral(state){
+    var loaded = false
+    var loading = false
+    var idx = state.getIn(['user_patient',"frontuserinfo",'idx']);
+    if(state.hasIn(['user_patient','users',idx,'loaded'])){
+        loaded = state.getIn(['user_patient','users',idx,'oralloaded'])
+    }
+    if(state.hasIn(['user_patient','users',idx,'loading'])){
+        loading = state.getIn(['user_patient','users',idx,'oralloading'])
+    }
+    return loaded || loading
+}
+
 export function changeTime(pos){
      return {
         type: HISTORY_CHANGE_TIME,
+        result:pos
+     }
+}
+
+export function changeOralTime(pos){
+     return {
+        type: ORAL_CHANGE_TIME,
         result:pos
      }
 }
@@ -432,6 +594,47 @@ export function load_detail_history({ id }) {
 
                 if (res.valid == 1) {
                     console.log(res.allhistory)
+                    return Promise.resolve(res)
+
+                } else {
+                    //var err = { info: 'auth' }
+                    return Promise.reject({id, info:'notvalid'})
+                }
+            },
+            error: function(err) {
+                console.log(err)
+                console.log('GGGGGGGGGGGGGG1')
+                return Promise.reject({id, info: 'wire' })
+            }
+        }),
+        id
+    };
+
+}
+
+//口腔情况。。。。。。。。。。。。
+export function load_detail_oral({ id }) {
+    var params = {}
+    params.id = id
+
+    console.log('load_detail!!!!!!!!!!!')
+    console.log(id)
+    return {
+        types: [ LOAD_DETAIL_ORAL, LOAD_DETAIL_ORAL_SUCCESS, LOAD_DETAIL_ORAL_FAIL ],
+        promise: (client) => client.GET('http://'+getApiIp()+'/user_patient/oral/rest?', { params }, {
+            format: function(response) {
+                if (response.status >= 400) {
+                    throw new Error("Bad response from server");
+                }
+                console.log('>>>>>>>>>>>>>>>>')
+                return response.json();
+            },
+            done: function(res) {
+
+                console.log(res);
+
+                if (res.valid == 1) {
+                    console.log(res.alloral)
                     return Promise.resolve(res)
 
                 } else {

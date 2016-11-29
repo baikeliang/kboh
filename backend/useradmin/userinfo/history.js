@@ -9,7 +9,6 @@ import {
     connect
 } from 'react-redux';
 
-import Nav from './nav.js'
 
 import {
   isLoaded as isAuthLoaded,
@@ -79,7 +78,7 @@ export const asyncEvent =  [{
             auth : state.get('auth'),
             historyedit:  state.getIn(['user_patient','users',idx,'historyedit'])
         }
-    }, { pushState: push,historyFlush,historyEditADD,historyEditDEL,changeTime})    
+    }, { pushState: push,historyFlush,historyEditADD,historyEditDEL,changeTime})
 export default  class History extends Component{
    constructor(props) {
        // code
@@ -108,7 +107,7 @@ export default  class History extends Component{
     var value = { name:val.name, describe:ev.target.value}
     this.props.historyEditADD( {key,val:value} )
    }
-   onClickInfo(key,val) { 
+   onClickInfo(key,val) {
       var value = { name:val.name };
       if(val.check==0){
         console.log("onClickInfo!!!!")
@@ -116,7 +115,6 @@ export default  class History extends Component{
       }else{
         this.props.historyEditDEL( {key,val:value} )
       }
-      
    }
    changeCheckTime(e) {
     console.log('zdhzdhzdhzdh');
@@ -130,23 +128,19 @@ export default  class History extends Component{
       item.dateUI.display == 'none'?item.dateUI.display='block':item.dateUI.display='none';
       this.setState({...this.state,refresh:0});
    }
-   handleSelectDateBodyCon(item,date){  
+   handleSelectDateBodyCon(item,date){
         item.dateUI.display == 'none'?item.dateUI.display='block':item.dateUI.display='none';
         console.log("handleSelectDateBodyCon!!!!!!")
         console.log(item)
         item.date = date.format('DD/MM/YY').toString();
         this.setState({...this.state,refresh:0});
-        this.props.historyEditADD( {key:'body_condition',val:item } )      
+        this.props.historyEditADD( {key:'body_condition',val:item } )
    }
-
-
    render(){
 
       if(this.props.auth.get('user')){
 
         var historyedit=this.props.historyedit.toJS();
-        console.log(historyedit);
-        console.log("cccccccccc")
         return  (
             <div>
               { HistoryHead({
@@ -173,12 +167,12 @@ export default  class History extends Component{
                               handleSelectDateBodyCon:(::this.handleSelectDateBodyCon),
                               showDateModalBodyCon:(::this.showDateModalBodyCon),
                               dateModalBodyTest:(this.state.dateModalBodyTest),
-                              dateModalToothWash:(this.state.dateModalToothWash)                        
+                              dateModalToothWash:(this.state.dateModalToothWash)
                               //dateToothWash:
                            })
               }
 
-            </div> 
+            </div>
           )
       }
     }

@@ -22806,14 +22806,20 @@ module.exports =
 	exports.historyFlush = historyFlush;
 	exports.historyEditADD = historyEditADD;
 	exports.historyEditDEL = historyEditDEL;
+	exports.oralEditDEL = oralEditDEL;
+	exports.oralEditADD = oralEditADD;
+	exports.oralFlush = oralFlush;
 	exports.frontUserForInfo = frontUserForInfo;
 	exports.LoadedorLoading = LoadedorLoading;
 	exports.LoadedorLoadingUser = LoadedorLoadingUser;
 	exports.LoadedorLoadingUser_History = LoadedorLoadingUser_History;
+	exports.LoadedorLoadingUser_Oral = LoadedorLoadingUser_Oral;
 	exports.changeTime = changeTime;
+	exports.changeOralTime = changeOralTime;
 	exports.load = load;
 	exports.load_detail_baseinfo = load_detail_baseinfo;
 	exports.load_detail_history = load_detail_history;
+	exports.load_detail_oral = load_detail_oral;
 	
 	var _immutable = __webpack_require__(/*! immutable */ 46);
 	
@@ -22841,6 +22847,10 @@ module.exports =
 	var LOAD_DETAIL_HISTORY_SUCCESS = 'bohe/user_patient/LOAD_DETAIL_HISTORY_SUCCESS';
 	var LOAD_DETAIL_HISTORY_FAIL = 'bohe/user_patient/LOAD_DETAIL_HISTORY_FAIL';
 	
+	var LOAD_DETAIL_ORAL = 'bohe/user_patient/LOAD_DETAIL_ORAL';
+	var LOAD_DETAIL_ORAL_SUCCESS = 'bohe/user_patient/LOAD_DETAIL_ORAL_SUCCESS';
+	var LOAD_DETAIL_ORAL_FAIL = 'bohe/user_patient/LOAD_DETAIL_ORAL_FAIL';
+	
 	var BASICINFO_SAVE = 'bohe/user_patient/BASICINFO_SAVE';
 	var BASICINFO_EDIT = 'bohe/user_patient/BASICINFO_EDIT';
 	
@@ -22849,6 +22859,11 @@ module.exports =
 	var HISTORY_EDIT_DEL = 'bohe/user_patient/HISTORY_EDIT_DEL';
 	var HISTORY_FLUSH = 'bohe/user_patient/HISTORY_FLUSH';
 	var HISTORY_CHANGE_TIME = 'bohe/user_patient/HISTORY_CHANGE_TIME';
+	
+	var ORAL_EDIT_ADD = 'bohe/user_patient/ORAL_EDIT_ADD';
+	var ORAL_FLUSH = 'bohe/user_patient/ORAL_FLUSH';
+	var ORAL_CHANGE_TIME = 'bohe/user_patient/ORAL_CHANGE_TIME';
+	var ORAL_EDIT_DEL = 'bohe/user_patient/ORAL_EDIT_DEL';
 	
 	var SET_USER_TOSHOWINFO = 'bohe/user_patient/SHOWINFO';
 	
@@ -23051,7 +23066,129 @@ module.exports =
 	            } else {
 	                return state;
 	            }
+	        case LOAD_DETAIL_ORAL:
+	            return state.updateIn(['users'], function (list) {
+	                return list.map(function (user) {
+	                    if (user.get('id') == action.id) {
+	                        return user.merge({ oralloading: true, oraledit: {} });
+	                    }
+	                    return user;
+	                });
+	            });
+	        case LOAD_DETAIL_ORAL_SUCCESS:
+	            return state.updateIn(['users'], function (list) {
+	                return list.map(function (user) {
+	                    if (user.get('id') == action.result.id) {
 	
+	                        var oraledit = { oral: { teetharound: [], mucosa: [], surgery: [], repairhis: [] }, time: '', timelist: [] };
+	
+	                        var metaoral = action.result.alloral ? action.result.alloral[action.result.alloral.length - 1] : undefined;
+	
+	                        if (metaoral) {
+	
+	                            oraledit.oral = (0, _extends3.default)({}, oraledit.oral, metaoral.oral);
+	
+	                            oraledit.time = metaoral.time;
+	
+	                            var timelist = action.result.alloral.map(function (oral) {
+	                                return oral.time;
+	                            });
+	                            console.log('AAAAAACCCCCCCC');
+	                            console.log(timelist);
+	                            console.log(oraledit);
+	                            oraledit.timelist = timelist;
+	                            oraledit.idx = action.result.alloral.length - 1;
+	                        }
+	                        return user.merge({ oralloading: false, oralloaded: true, oraledit: oraledit, alloral: action.result.alloral });
+	                    }
+	                    return user;
+	                });
+	            });
+	        case LOAD_DETAIL_ORAL_FAIL:
+	            return state.updateIn(['users'], function (list) {
+	                return list.map(function (user) {
+	                    if (user.get('id') == action.error.id) {
+	                        return user.merge({ oralloading: false, oralloaded: false, error: action.error.info });
+	                    }
+	                    return user;
+	                });
+	            });
+	        case ORAL_EDIT_ADD:
+	            var idx = state.getIn(['frontuserinfo', 'idx']);
+	            var pair = action.result;
+	            console.log('OOOOOOOOOPPPPPPPPP');
+	            console.log(pair.key);
+	            console.log(state.getIn(['users', idx, 'oraledit', 'oral', pair.key]));
+	            var index = state.getIn(['users', idx, 'oraledit', 'oral', pair.key]).findIndex(function (value) {
+	                return value.get('name') == pair.val.name;
+	            });
+	
+	            if (index >= 0) {
+	                var _ret2 = function () {
+	                    console.log(index);
+	                    var i = 0;
+	                    console.log(state.getIn(['users', idx, 'oraledit', 'oral', pair.key]));
+	                    return {
+	                        v: state.updateIn(['users', idx, 'oraledit', 'oral', pair.key], function (list) {
+	                            return list.map(function (item) {
+	                                i++;
+	                                console.log('ADD!!!!!!');
+	                                console.log(pair.val);
+	                                if (i == index + 1) {
+	                                    var _item_ = item.toJS();
+	                                    var item_val = _item_.val;
+	                                    var _item_val = pair.val.val;
+	                                    _item_.val = (0, _extends3.default)({}, item_val, _item_val);
+	                                    return _immutable2.default.Map(_item_);
+	                                } else {
+	                                    return item;
+	                                }
+	                            });
+	                        })
+	                    };
+	                }();
+	
+	                if ((typeof _ret2 === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret2)) === "object") return _ret2.v;
+	            } else {
+	                console.log('111111111111111111!!!!!!!!!!!');
+	                console.log(pair.val);
+	                return state.setIn(['users', idx, 'oraledit', 'oral', pair.key], state.getIn(['users', idx, 'oraledit', 'oral', pair.key]).push(_immutable2.default.Map(pair.val)));
+	            }
+	        case ORAL_FLUSH:
+	            var idx = state.getIn(['frontuserinfo', 'idx']);
+	
+	            var oraltomerge = state.getIn(['users', idx, 'oraledit', 'oral']);
+	
+	            var oralidx = state.getIn(['users', idx, 'oraledit', 'idx']);
+	            console.log('WWWWWWWWWWWWWW');
+	            console.log(oralidx);
+	            if (oralidx >= 0) {
+	                console.log("TTTTTTTTTTTTTTRRRRRRR");
+	                return state.setIn(['users', idx, 'alloral', oralidx, 'oral'], oraltomerge);
+	            } else return state;
+	        case ORAL_CHANGE_TIME:
+	            var pos = action.result;
+	            var idx = state.getIn(['frontuserinfo', 'idx']);
+	            var timelist = state.getIn(['users', idx, 'oraledit', 'timelist']);
+	            if (pos.idx >= 0) {
+	                console.log('PpPPPPPPPP');
+	                console.log(pos.idx);
+	                console.log(timelist);
+	                console.log(state.getIn(['users', idx, 'alloral', pos.idx]).toJS());
+	                return state.setIn(['users', idx, 'oraledit'], state.getIn(['users', idx, 'alloral', pos.idx])).setIn(['users', idx, 'oraledit', 'timelist'], timelist).setIn(['users', idx, 'oraledit', 'idx'], pos.idx);
+	            } else {
+	                return state;
+	            }
+	        case ORAL_EDIT_DEL:
+	            var idx = state.getIn(['frontuserinfo', 'idx']);
+	            var pair = action.result;
+	            console.log("UUU3");
+	            console.log(pair);
+	            var index = state.getIn(['users', idx, 'oraledit', 'oral', pair.key]).findIndex(function (value) {
+	                return value.get('name') == pair.val.name;
+	            });
+	            console.log(index);
+	            if (index >= 0) return state.setIn(['users', idx, 'oraledit', 'oral', pair.key], state.getIn(['users', idx, 'oraledit', 'oral', pair.key]).remove(index));else return state;
 	        default:
 	            return state;
 	    }
@@ -23091,6 +23228,29 @@ module.exports =
 	    return {
 	        type: HISTORY_EDIT_DEL,
 	        result: pair
+	    };
+	}
+	
+	function oralEditDEL(pair) {
+	
+	    return {
+	        type: ORAL_EDIT_DEL,
+	        result: pair
+	    };
+	}
+	
+	function oralEditADD(pair) {
+	
+	    return {
+	        type: ORAL_EDIT_ADD,
+	        result: pair
+	    };
+	}
+	
+	function oralFlush() {
+	
+	    return {
+	        type: ORAL_FLUSH
 	    };
 	}
 	
@@ -23141,9 +23301,29 @@ module.exports =
 	    return loaded || loading;
 	}
 	
+	function LoadedorLoadingUser_Oral(state) {
+	    var loaded = false;
+	    var loading = false;
+	    var idx = state.getIn(['user_patient', "frontuserinfo", 'idx']);
+	    if (state.hasIn(['user_patient', 'users', idx, 'loaded'])) {
+	        loaded = state.getIn(['user_patient', 'users', idx, 'oralloaded']);
+	    }
+	    if (state.hasIn(['user_patient', 'users', idx, 'loading'])) {
+	        loading = state.getIn(['user_patient', 'users', idx, 'oralloading']);
+	    }
+	    return loaded || loading;
+	}
+	
 	function changeTime(pos) {
 	    return {
 	        type: HISTORY_CHANGE_TIME,
+	        result: pos
+	    };
+	}
+	
+	function changeOralTime(pos) {
+	    return {
+	        type: ORAL_CHANGE_TIME,
 	        result: pos
 	    };
 	}
@@ -23281,6 +23461,49 @@ module.exports =
 	
 	                    if (res.valid == 1) {
 	                        console.log(res.allhistory);
+	                        return _bluebird2.default.resolve(res);
+	                    } else {
+	                        //var err = { info: 'auth' }
+	                        return _bluebird2.default.reject({ id: id, info: 'notvalid' });
+	                    }
+	                },
+	                error: function error(err) {
+	                    console.log(err);
+	                    console.log('GGGGGGGGGGGGGG1');
+	                    return _bluebird2.default.reject({ id: id, info: 'wire' });
+	                }
+	            });
+	        },
+	        id: id
+	    };
+	}
+	
+	//口腔情况。。。。。。。。。。。。
+	function load_detail_oral(_ref5) {
+	    var id = _ref5.id;
+	
+	    var params = {};
+	    params.id = id;
+	
+	    console.log('load_detail!!!!!!!!!!!');
+	    console.log(id);
+	    return {
+	        types: [LOAD_DETAIL_ORAL, LOAD_DETAIL_ORAL_SUCCESS, LOAD_DETAIL_ORAL_FAIL],
+	        promise: function promise(client) {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/user_patient/oral/rest?', { params: params }, {
+	                format: function format(response) {
+	                    if (response.status >= 400) {
+	                        throw new Error("Bad response from server");
+	                    }
+	                    console.log('>>>>>>>>>>>>>>>>');
+	                    return response.json();
+	                },
+	                done: function done(res) {
+	
+	                    console.log(res);
+	
+	                    if (res.valid == 1) {
+	                        console.log(res.alloral);
 	                        return _bluebird2.default.resolve(res);
 	                    } else {
 	                        //var err = { info: 'auth' }
@@ -27164,6 +27387,10 @@ module.exports =
 	
 	var _history2 = _interopRequireDefault(_history);
 	
+	var _teethstatus = __webpack_require__(/*! ./teethstatus.js */ 380);
+	
+	var _teethstatus2 = _interopRequireDefault(_teethstatus);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var BASIC = 'BASIC';
@@ -27269,6 +27496,9 @@ module.exports =
 	        key: 'toTeethStatus',
 	        value: function toTeethStatus() {
 	            this.setState({ tab: TEETHSTATUS });
+	            this.context.showUserData({ asyncProcess: _teethstatus.asyncEvent, comCreater: function comCreater() {
+	                    return _react2.default.createElement(_teethstatus2.default, null);
+	                } });
 	        }
 	    }, {
 	        key: 'render',
@@ -30036,7 +30266,7 @@ module.exports =
 	});
 	exports.default = getApiIp;
 	function getApiIp() {
-		return '172.16.36.222';
+		return '172.16.37.45';
 	}
 
 /***/ },
@@ -30094,10 +30324,6 @@ module.exports =
 	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
 	
 	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
-	
-	var _nav = __webpack_require__(/*! ./nav.js */ 323);
-	
-	var _nav2 = _interopRequireDefault(_nav);
 	
 	var _auth = __webpack_require__(/*! ../../redux/reducers/auth */ 241);
 	
@@ -30245,8 +30471,6 @@ module.exports =
 	            if (this.props.auth.get('user')) {
 	
 	                var historyedit = this.props.historyedit.toJS();
-	                console.log(historyedit);
-	                console.log("cccccccccc");
 	                return _react2.default.createElement(
 	                    'div',
 	                    null,
@@ -30528,7 +30752,7 @@ module.exports =
 	                                    count++;
 	                                    return _react2.default.createElement(
 	                                        'span',
-	                                        { className: 'W120' },
+	                                        { className: 'W120', style: item.dateUI ? { height: '30px', width: '300px' } : {} },
 	                                        function (item) {
 	                                            var metaitem = historyedit.history && historyedit.history.body_condition ? infoGet(historyedit.history.body_condition, item.name) : undefined;
 	                                            return item.dateUI ? _react2.default.createElement(
@@ -30684,7 +30908,7 @@ module.exports =
 	                                    return _react2.default.createElement(
 	                                        'span',
 	                                        null,
-	                                        _react2.default.createElement('input', { type: 'checkbox', className: 'checkbox', id: "checkboxd_" + count, checked: metaitem ? 'checked' : '' }),
+	                                        _react2.default.createElement('input', { type: 'checkbox', className: 'checkbox', id: 'checkboxd_' + count, checked: metaitem ? 'checked' : '' }),
 	                                        _react2.default.createElement(
 	                                            'label',
 	                                            { htmlFor: "checkboxd_" + count, onClick: function onClick() {
@@ -30799,7 +31023,6 @@ module.exports =
 	                                historytable.infection.map(function (item) {
 	                                    count++;
 	                                    var metaitem = historyedit.history && historyedit.history.infection ? infoGet(historyedit.history.infection, item.name) : undefined;
-	
 	                                    return _react2.default.createElement(
 	                                        'span',
 	                                        { className: 'W120' },
@@ -31211,6 +31434,1144 @@ module.exports =
 	        ),
 	        _react2.default.createElement('div', { className: 'clear' })
 	    );
+	};
+
+/***/ },
+/* 379 */,
+/* 380 */
+/*!***************************************************!*\
+  !*** ./backend/useradmin/userinfo/teethstatus.js ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.TeethStatusHead = exports.default = exports.asyncEvent = undefined;
+	
+	var _typeof2 = __webpack_require__(/*! babel-runtime/helpers/typeof */ 251);
+	
+	var _typeof3 = _interopRequireDefault(_typeof2);
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 284);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 288);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 289);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 293);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 294);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _promise = __webpack_require__(/*! babel-runtime/core-js/promise */ 312);
+	
+	var _promise2 = _interopRequireDefault(_promise);
+	
+	var _dec, _dec2, _class;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	var _auth = __webpack_require__(/*! ../../redux/reducers/auth */ 241);
+	
+	var _user_patient = __webpack_require__(/*! ../../redux/reducers/user_patient */ 247);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	var _oraledit = __webpack_require__(/*! ./view/oral/oraledit.js */ 381);
+	
+	var _oralshow = __webpack_require__(/*! ./view/oral/oralshow.js */ 383);
+	
+	var _oraltable = __webpack_require__(/*! ./config/oraltable.js */ 382);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var __asyncEvent = function __asyncEvent(_ref) {
+	    var dispatch = _ref.dispatch,
+	        getState = _ref.getState;
+	
+	    var state = getState();
+	    var id = state.getIn(['user_patient', 'frontuserinfo', 'id']);
+	    return dispatch((0, _user_patient.load_detail_oral)({ id: id }));
+	};
+	var asyncEvent = exports.asyncEvent = [{
+	    promise: function promise(_ref2) {
+	        var _ref2$store = _ref2.store,
+	            dispatch = _ref2$store.dispatch,
+	            getState = _ref2$store.getState,
+	            params = _ref2.params;
+	
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            console.log("his login!!!!!!!!!!!!!!!!!!11");
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                if (!(0, _user_patient.LoadedorLoadingUser_Oral)(getState())) {
+	                    console.log("his login!!!!!!!!!!!!!!!!!!22");
+	                    return __asyncEvent({ dispatch: dispatch, getState: getState });
+	                } else return _promise2.default.resolve();
+	            });
+	        } else {
+	            console.log("his login!!!!!!!!!!!!!!!!!!33");
+	            if (!(0, _user_patient.LoadedorLoadingUser_Oral)(getState())) {
+	                console.log("his login!!!!!!!!!!!!!!!!!!44");
+	                return __asyncEvent({ dispatch: dispatch, getState: getState });
+	            } else return _promise2.default.resolve();
+	        }
+	    }
+	}];
+	
+	var TeethStatus = (_dec = (0, _reduxConnect.asyncConnect)(asyncEvent), _dec2 = (0, _reactRedux.connect)(function (state) {
+	    var idx = state.getIn(['user_patient', 'frontuserinfo', 'idx']);
+	    return {
+	        auth: state.get('auth'),
+	        oraledit: state.getIn(['user_patient', 'users', idx, 'oraledit'])
+	    };
+	}, { pushState: _reactRouterRedux.push, oralEditADD: _user_patient.oralEditADD, oralFlush: _user_patient.oralFlush, changeOralTime: _user_patient.changeOralTime, oralEditDEL: _user_patient.oralEditDEL }), _dec(_class = _dec2(_class = function (_Component) {
+	    (0, _inherits3.default)(TeethStatus, _Component);
+	
+	    function TeethStatus(props) {
+	        (0, _classCallCheck3.default)(this, TeethStatus);
+	
+	        var _this = (0, _possibleConstructorReturn3.default)(this, (TeethStatus.__proto__ || (0, _getPrototypeOf2.default)(TeethStatus)).call(this, props));
+	        // code
+	
+	
+	        _this.state = { check: true, edit: false, add: false, refresh: 0 };
+	        return _this;
+	    }
+	
+	    (0, _createClass3.default)(TeethStatus, [{
+	        key: 'toAdd',
+	        value: function toAdd() {
+	            var addtime = this.props.oraledit.get('time');
+	            this.setState((0, _extends3.default)({}, this.state, { check: false, edit: false, add: true, addTime: addtime }));
+	        }
+	    }, {
+	        key: 'toEdit',
+	        value: function toEdit() {
+	            this.setState((0, _extends3.default)({}, this.state, { check: false, edit: true, add: false }));
+	        }
+	    }, {
+	        key: 'toCheck',
+	        value: function toCheck() {
+	            this.toSave();
+	            this.setState((0, _extends3.default)({}, this.state, { check: true, edit: false, add: false }));
+	        }
+	    }, {
+	        key: 'toSave',
+	        value: function toSave() {
+	            this.props.oralFlush();
+	        }
+	    }, {
+	        key: 'changeCheckTime',
+	        value: function changeCheckTime(e) {
+	            this.props.changeOralTime({ idx: e.target.value - 1 });
+	        }
+	    }, {
+	        key: 'changeEditTime',
+	        value: function changeEditTime(e) {
+	            this.props.changeOralTime({ idx: e.target.value - 1 });
+	        }
+	    }, {
+	        key: 'onClickInfo',
+	        value: function onClickInfo(key, val, id) {
+	            var tmp = {};
+	            tmp[id] = val.name;
+	            var value = { name: val.title, val: tmp };
+	            console.log("onClickInfo!!!!");
+	            console.log(tmp);
+	            console.log(value);
+	            if (val.check == 0) {
+	                this.props.oralEditADD({ key: key, val: value });
+	            } else {
+	                this.props.oralEditDEL({ key: key, val: value });
+	            }
+	        }
+	    }, {
+	        key: 'onChangeInfo',
+	        value: function onChangeInfo(name, e) {
+	            var value = { name: name, val: { content: e.target.value } };
+	            this.props.oralEditADD({ key: 'repairhis', val: value });
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var oraledit = this.props.oraledit.toJS();
+	            return _react2.default.createElement(
+	                'div',
+	                null,
+	                TeethStatusHead({
+	                    oraledit: oraledit,
+	                    edit: this.state.edit,
+	                    check: this.state.check,
+	                    add: this.state.add,
+	                    addTime: this.state.addTime,
+	                    toEdit: this.toEdit.bind(this),
+	                    toAdd: this.toAdd.bind(this),
+	                    toCheck: this.toCheck.bind(this),
+	                    changeCheckTime: this.changeCheckTime.bind(this),
+	                    changeEditTime: this.changeEditTime.bind(this)
+	                }),
+	                this.state.check ? (0, _oralshow.OralShow)({
+	                    oraledit: oraledit
+	                }) : (0, _oraledit.OralEdit)({
+	                    oraltable: _oraltable.table,
+	                    oraledit: oraledit,
+	                    click: this.onClickInfo.bind(this),
+	                    change: this.onChangeInfo.bind(this)
+	                })
+	            );
+	        }
+	    }]);
+	    return TeethStatus;
+	}(_react.Component)) || _class) || _class);
+	exports.default = TeethStatus;
+	var TeethStatusHead = exports.TeethStatusHead = function TeethStatusHead(_ref3) {
+	    var oraledit = _ref3.oraledit,
+	        edit = _ref3.edit,
+	        check = _ref3.check,
+	        add = _ref3.add,
+	        addTime = _ref3.addTime,
+	        toAdd = _ref3.toAdd,
+	        toEdit = _ref3.toEdit,
+	        toCheck = _ref3.toCheck,
+	        changeCheckTime = _ref3.changeCheckTime,
+	        changeEditTime = _ref3.changeEditTime;
+	
+	    if (check) {
+	        var _ret = function () {
+	            var index = 0;
+	            return {
+	                v: _react2.default.createElement(
+	                    'div',
+	                    { className: 'time z_time_edit', style: { top: '215px' } },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_time_btn', style: { border: 'none' } },
+	                        _react2.default.createElement(
+	                            'p',
+	                            null,
+	                            _react2.default.createElement(
+	                                'b',
+	                                null,
+	                                '\u66F4\u65B0\u8BB0\u5F55\uFF1A'
+	                            ),
+	                            _react2.default.createElement(
+	                                'select',
+	                                { onChange: function onChange(e) {
+	                                        changeCheckTime(e);
+	                                    } },
+	                                oraledit.timelist.map(function (time) {
+	                                    index++;
+	                                    if (oraledit.idx + 1 == index) return _react2.default.createElement(
+	                                        'option',
+	                                        { selected: 'selected', value: index },
+	                                        time
+	                                    );else return _react2.default.createElement(
+	                                        'option',
+	                                        { value: index },
+	                                        time
+	                                    );
+	                                })
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'label',
+	                            null,
+	                            _react2.default.createElement(
+	                                'span',
+	                                { onClick: toAdd, className: 'default_inputbtn z_add_btn' },
+	                                '\u6DFB\u52A0'
+	                            ),
+	                            _react2.default.createElement(
+	                                'span',
+	                                { onClick: toEdit, className: 'default_inputbtn z_edit_btn' },
+	                                '\u7F16\u8F91'
+	                            )
+	                        )
+	                    )
+	                )
+	            };
+	        }();
+	
+	        if ((typeof _ret === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret)) === "object") return _ret.v;
+	    } else if (edit) {
+	        var _ret2 = function () {
+	            var index = 0;
+	            return {
+	                v: _react2.default.createElement(
+	                    'div',
+	                    { className: 'time z_time_edit' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_time_btn' },
+	                        _react2.default.createElement(
+	                            'p',
+	                            null,
+	                            _react2.default.createElement(
+	                                'b',
+	                                null,
+	                                '\u66F4\u65B0\u8BB0\u5F55\uFF1A'
+	                            ),
+	                            _react2.default.createElement(
+	                                'select',
+	                                { onChange: function onChange(e) {
+	                                        changeEditTime(e);
+	                                    } },
+	                                oraledit.timelist.map(function (time) {
+	                                    index++;
+	                                    if (oraledit.idx + 1 == index) return _react2.default.createElement(
+	                                        'option',
+	                                        { selected: 'selected', value: index },
+	                                        time
+	                                    );else return _react2.default.createElement(
+	                                        'option',
+	                                        { value: index },
+	                                        time
+	                                    );
+	                                })
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'label',
+	                            null,
+	                            _react2.default.createElement(
+	                                'span',
+	                                { onClick: toCheck, className: 'default_inputbtn z_save_btn' },
+	                                '\u4FDD\u5B58'
+	                            )
+	                        )
+	                    )
+	                )
+	            };
+	        }();
+	
+	        if ((typeof _ret2 === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret2)) === "object") return _ret2.v;
+	    } else if (add) {
+	        return _react2.default.createElement(
+	            'div',
+	            { className: 'time z_time_edit' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'z_time_btn' },
+	                _react2.default.createElement(
+	                    'p',
+	                    null,
+	                    _react2.default.createElement(
+	                        'em',
+	                        { className: 'see_page_em' },
+	                        '\u57FA\u4E8E\u6700\u65B0\uFF08',
+	                        _react2.default.createElement(
+	                            'font',
+	                            { className: 'new_time' },
+	                            addTime
+	                        ),
+	                        '\uFF09\u4FE1\u606F\u4E0A\u8FDB\u884C\u6DFB\u52A0'
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'label',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        { onClick: toCheck, className: 'default_inputbtn z_save_btn' },
+	                        '\u4FDD\u5B58'
+	                    )
+	                )
+	            )
+	        );
+	    }
+	};
+
+/***/ },
+/* 381 */
+/*!**********************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/oral/oraledit.js ***!
+  \**********************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.OralEdit = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/* item_lv2 is group  item_lv0_name 'surgery'*/
+	function infoGet(datalv0, item_lv3, item_lv2, item_lv1) {
+	    var retdata;
+	    datalv0.map(function (data) {
+	
+	        if (data.name == item_lv1.name) {
+	
+	            if (item_lv2.type == 'm') {
+	                if (data.val[item_lv3.id] && item_lv3.name == data.val[item_lv3.id]) {
+	                    retdata = true;
+	                }
+	            } else {
+	                if (data.val[item_lv2.id] && item_lv3.name == data.val[item_lv2.id]) {
+	                    retdata = true;
+	                }
+	            }
+	        }
+	    });
+	    return retdata;
+	}
+	
+	/* item_lv1 '面型'' item_lv0_name 'surgery' */
+	function oral(item_lv1, item_lv0_name, click, oraledit) {
+	    return _react2.default.createElement(
+	        'div',
+	        { style: { marginTop: '10px' } },
+	        item_lv0_name != 'mucosa' ? _react2.default.createElement(
+	            'span',
+	            { className: 'H_content_radio_title' },
+	            item_lv1.name
+	        ) : '',
+	
+	        /*item_lv2  group has no name */
+	        item_lv1.groups.map(function (item_lv2) {
+	            if (item_lv0_name != 'mucosa') {
+	                return _react2.default.createElement(
+	                    'div',
+	                    { style: { marginTop: '10px', marginLeft: '129px' } },
+	                    group(item_lv2, item_lv1, item_lv0_name, click, oraledit)
+	                );
+	            } else {
+	                return _react2.default.createElement(
+	                    'div',
+	                    null,
+	                    group(item_lv2, item_lv1, item_lv0_name, click, oraledit)
+	                );
+	            }
+	        })
+	    );
+	}
+	/*item_lv2 is a group has no name */
+	function group(item_lv2, item_lv1, item_lv0_name, click, oraledit) {
+	    console.log(oraledit);
+	    if (item_lv2.type == 's') {
+	        return item_lv2.group.map(function (item_lv3) {
+	            var metaitem = oraledit.oral && oraledit.oral[item_lv0_name] ? infoGet(oraledit.oral[item_lv0_name], item_lv3, item_lv2, item_lv1) : undefined;
+	            return _react2.default.createElement(
+	                'span',
+	                { className: 'H_content_list_item H_content_list_item_radio' },
+	                _react2.default.createElement('input', { type: 'radio', className: 'radio radio2', id: item_lv0_name + item_lv3.id, name: item_lv0_name + item_lv2.id, checked: metaitem ? 'checked' : '' }),
+	                _react2.default.createElement(
+	                    'label',
+	                    { htmlFor: item_lv0_name + item_lv3.id, onClick: function onClick() {
+	                            metaitem ? item_lv3.check = 1 : item_lv3.check = 0;click(item_lv0_name, item_lv3, item_lv2.id);
+	                        } },
+	                    _react2.default.createElement(
+	                        'i',
+	                        null,
+	                        '\xA0',
+	                        item_lv3.name
+	                    )
+	                )
+	            );
+	        });
+	    } else {
+	        return item_lv2.group.map(function (item_lv3) {
+	            var metaitem = oraledit.oral && oraledit.oral[item_lv0_name] ? infoGet(oraledit.oral[item_lv0_name], item_lv3, item_lv2, item_lv1) : undefined;
+	            return _react2.default.createElement(
+	                'span',
+	                { className: 'H_content_list_item H_content_list_item_radio' },
+	                _react2.default.createElement('input', { type: 'checkbox', id: item_lv0_name + item_lv3.id, checked: metaitem ? 'checked' : '' }),
+	                _react2.default.createElement(
+	                    'label',
+	                    { htmlFor: item_lv0_name + item_lv3.id, onClick: function onClick() {
+	                            metaitem ? item_lv3.check = 1 : item_lv3.check = 0;click(item_lv0_name, item_lv3, item_lv3.id);
+	                        } },
+	                    _react2.default.createElement(
+	                        'i',
+	                        null,
+	                        '\xA0',
+	                        item_lv3.name
+	                    )
+	                )
+	            );
+	        });
+	    }
+	}
+	var OralEdit = exports.OralEdit = function OralEdit(_ref) {
+	    var oraltable = _ref.oraltable,
+	        oraledit = _ref.oraledit,
+	        click = _ref.click,
+	        change = _ref.change;
+	
+	    var height = window.innerHeight || document.documentElement.clientHeight;
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'userContain z_userContain_edit', style: { height: height - 260 + 'px' } },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'z_userContainMain' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'containb_right', id: 'edit_page' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'H_content' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_title' },
+	                        _react2.default.createElement(
+	                            'span',
+	                            { className: 'H_title_span H_title_color2' },
+	                            '\u7259\u5468'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_list', id: 'teeth_around' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_small_box H_margin_bottom20' },
+	                            oraltable.teetharound.map(function (item_lv1) {
+	                                return oral(item_lv1, "teetharound", click, oraledit);
+	                            })
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_title' },
+	                        _react2.default.createElement(
+	                            'span',
+	                            { className: 'H_title_span H_title_color2' },
+	                            '\u7C98\u819C'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_list', id: 'teeth_around' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_small_box H_margin_bottom20' },
+	                            oraltable.mucosa.map(function (item_lv1) {
+	                                return oral(item_lv1, "mucosa", click, oraledit);
+	                            })
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_title' },
+	                        _react2.default.createElement(
+	                            'span',
+	                            { className: 'H_title_span H_title_color2' },
+	                            '\u5916\u79D1'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_list', id: 'teeth_around' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_small_box H_margin_bottom20' },
+	                            oraltable.surgery.map(function (item_lv1) {
+	                                return oral(item_lv1, "surgery", click, oraledit);
+	                            })
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_title' },
+	                        _react2.default.createElement(
+	                            'span',
+	                            { className: 'H_title_span H_title_color2' },
+	                            '\u7259\u75C5\u6CBB\u7597\u53CA\u4FEE\u590D\u53F2'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_list', id: 'teeth_around' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_small_box H_margin_bottom20' },
+	                            _react2.default.createElement(
+	                                'span',
+	                                { className: 'H_content_list_item H_margin_bottom_none padding_left0' },
+	                                '\u6CBB\u7597\u53CA\u4FEE\u590D\u53F2',
+	                                _react2.default.createElement('textarea', { className: 'teeth_repair_textarea', style: { border: '1px solid rgb(204, 204, 204' }, value: oraledit.oral.repairhis[0] && oraledit.oral.repairhis[0].val ? oraledit.oral.repairhis[0].val.content : '', onChange: function onChange(e) {
+	                                        change('治疗及修复史', e);
+	                                    } })
+	                            )
+	                        )
+	                    )
+	                )
+	            )
+	        )
+	    );
+	};
+
+/***/ },
+/* 382 */
+/*!********************************************************!*\
+  !*** ./backend/useradmin/userinfo/config/oraltable.js ***!
+  \********************************************************/
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	var table = exports.table = {
+	
+		teetharound: [{
+			name: '牙石',
+			id: "0",
+			groups: [{
+				type: 's',
+				id: "00",
+				group: [{
+					name: 'Ⅰ',
+					id: "000",
+					title: '牙石',
+					check: '0'
+				}, {
+					name: 'Ⅱ',
+					id: "001",
+					title: '牙石',
+					check: '0'
+				}, {
+					name: 'Ⅲ',
+					id: "002",
+					title: '牙石',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: '松动',
+			id: "1",
+			groups: [{
+				type: 's',
+				id: '10',
+				group: [{
+					name: 'Ⅰ',
+					id: "010",
+					title: '松动',
+					check: '0'
+				}, {
+					name: 'Ⅱ',
+					id: "011",
+					title: '松动',
+					check: '0'
+				}, {
+					name: 'Ⅲ',
+					id: "012",
+					title: '松动',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: '出血',
+			id: "2",
+			groups: [{
+				type: 's',
+				id: '20',
+				group: [{
+					name: 'Ⅰ',
+					id: "020",
+					title: '出血',
+					check: '0'
+				}, {
+					name: 'Ⅱ',
+					id: "021",
+					title: '出血',
+					check: '0'
+				}, {
+					name: 'Ⅲ',
+					id: "022",
+					title: '出血',
+					check: '0'
+				}, {
+					name: 'Ⅳ',
+					id: "023",
+					title: '出血',
+					check: '0'
+				}, {
+					name: 'Ⅴ',
+					id: "024",
+					title: '出血',
+					check: '0'
+				}]
+			}]
+		}],
+		mucosa: [{
+			name: '粘膜',
+			id: '0',
+			groups: [{
+				type: 'm',
+				id: '00',
+				group: [{
+					name: '正常',
+					id: "000",
+					title: '粘膜',
+					check: '0'
+				}, {
+					name: '白色斑块',
+					id: "001",
+					title: '粘膜',
+					check: '0'
+				}, {
+					name: '红色斑块',
+					id: "002",
+					title: '粘膜',
+					check: '0'
+				}, {
+					name: '扁平苔藓',
+					id: "003",
+					title: '粘膜',
+					check: '0'
+				}, {
+					name: '溃疡',
+					id: "004",
+					title: '粘膜',
+					check: '0'
+				}, {
+					name: '其他',
+					id: "005",
+					title: '粘膜',
+					check: '0',
+					describe: ''
+				}]
+			}]
+		}],
+		surgery: [{
+			name: '开口度',
+			id: "1",
+			groups: [{
+				type: 's',
+				id: "10",
+				group: [{
+					name: '三指宽度',
+					id: "100",
+					title: '开口度',
+					check: '0'
+				}, {
+					name: '两指宽度',
+					id: "101",
+					title: '开口度',
+					check: '0'
+				}, {
+					name: '一指宽度，甚至更小',
+					id: "102",
+					title: '开口度',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: '开口型',
+			id: "2",
+			groups: [{
+				type: 's',
+				id: '20',
+				group: [{
+					name: '直线',
+					id: "200",
+					title: '开口型',
+					check: '0'
+				}, {
+					name: '偏左',
+					id: "201",
+					title: '开口型',
+					check: '0'
+				}, {
+					name: '偏右',
+					id: "202",
+					title: '开口型',
+					check: '0'
+				}]
+			}]
+		}, { /* lv1 */
+			name: '面型',
+			id: "3",
+			groups: [{ /*    lv2 */
+				type: 's',
+				id: '30',
+				group: [{ /*  lv3 */
+					name: '大致对称',
+					id: "300",
+					title: '面型',
+					check: '0'
+				}, { /*  lv3 */
+					name: '中线偏左',
+					id: "301",
+					title: '面型',
+					check: '0'
+				}, { /*  lv3 */
+					name: '中线偏右',
+					id: "302",
+					title: '面型',
+					check: '0'
+				}]
+			}, { /*    lv2 */
+				type: 's',
+				id: '31',
+				group: [{
+					name: '直面型',
+					id: "310",
+					title: '面型',
+					check: '0'
+				}, {
+					name: '凹面型',
+					id: "311",
+					title: '面型',
+					check: '0'
+				}, {
+					name: '凸面型',
+					id: "312",
+					title: '面型',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: '牙列',
+			id: '4',
+			groups: [{
+				type: 's',
+				id: '40',
+				group: [{
+					name: '正常',
+					id: '400',
+					title: '牙列',
+					check: '0'
+				}, {
+					name: '拥挤',
+					id: '401',
+					title: '牙列',
+					check: '0'
+				}, {
+					name: '间隙',
+					id: '402',
+					title: '牙列',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: '磨牙关系',
+			id: '5',
+			groups: [{
+				type: 's',
+				id: '50',
+				group: [{
+					name: 'Ⅰ',
+					id: '500',
+					title: '磨牙关系',
+					check: '0'
+				}, {
+					name: 'Ⅱ',
+					id: '501',
+					title: '磨牙关系',
+					check: '0'
+				}, {
+					name: 'Ⅲ',
+					id: '502',
+					title: '磨牙关系',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: "前牙关系",
+			id: '6',
+			groups: [{
+				type: 's',
+				id: '60',
+				group: [{
+					name: '正常',
+					id: '600',
+					title: '前牙关系',
+					check: '0'
+				}, {
+					name: '反合',
+					id: "601",
+					title: '前牙关系',
+					check: '0'
+				}, {
+					name: '开合',
+					id: "602",
+					title: '前牙关系',
+					check: '0'
+				}, {
+					name: '对刃',
+					id: "603",
+					title: '前牙关系',
+					check: '0'
+				}]
+			}, {
+				type: 'm',
+				id: '61',
+				group: [{
+					name: '深覆盖',
+					id: "610",
+					title: '前牙关系',
+					check: '0'
+				}, {
+					name: '深覆合',
+					id: '611',
+					title: '前牙关系',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: '系带',
+			id: '7',
+			groups: [{
+				type: 'm',
+				id: '70',
+				group: [{
+					name: '唇系带过低',
+					id: "700",
+					title: '系带',
+					check: '0'
+				}, {
+					name: '舌系带过短',
+					id: '701',
+					title: '系带',
+					check: '0'
+				}, {
+					name: '正常',
+					id: '702',
+					title: '系带',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: 'TMG',
+			id: '8',
+			groups: [{
+				type: 'm',
+				id: '80',
+				group: [{
+					name: '关节弹响',
+					id: '800',
+					title: 'TMG',
+					check: '0'
+				}, {
+					name: '关节压痛',
+					id: '801',
+					title: 'TMG',
+					check: '0'
+				}, {
+					name: '关节脱位',
+					id: '802',
+					title: 'TMG',
+					check: '0'
+				}]
+			}]
+		}]
+	};
+
+/***/ },
+/* 383 */
+/*!**********************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/oral/oralshow.js ***!
+  \**********************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.OralShow = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function checkDom(val) {
+		console.log(val);
+		var arr = [];
+		for (var i in val) {
+			arr.push(_react2.default.createElement(
+				'span',
+				{ className: 'H_content_list_item H_content_list_item_radio', style: { lineHeight: "19px" } },
+				_react2.default.createElement(
+					'span',
+					null,
+					val[i]
+				)
+			));
+		}
+		return arr;
+	}
+	var OralShow = exports.OralShow = function OralShow(_ref) {
+		var oraledit = _ref.oraledit;
+	
+		var height = window.innerHeight || document.documentElement.clientHeight;
+		return _react2.default.createElement(
+			'div',
+			{ className: 'userContain z_userContain_edit z_userContain_see', style: { height: height - 260 + 'px' } },
+			_react2.default.createElement(
+				'div',
+				{ className: 'z_userContainMain' },
+				_react2.default.createElement(
+					'div',
+					{ className: 'containb_right', style: { minHeight: "520px;" } },
+					_react2.default.createElement(
+						'div',
+						{ className: 'H_content' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_title' },
+							_react2.default.createElement(
+								'span',
+								{ className: 'H_title_span H_title_color2' },
+								'\u7259\u5468'
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_list' },
+							oraledit.oral.teetharound ? oraledit.oral.teetharound.map(function (item) {
+								console.log('ZZZZZDDDDDDHHHHHH');
+								console.log(item);
+								return _react2.default.createElement(
+									'div',
+									{ className: 'H_small_box H_margin_bottom20' },
+									_react2.default.createElement(
+										'span',
+										{ className: 'H_content_radio_title' },
+										item.name
+									),
+									checkDom(item.val)
+								);
+							}) : ''
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'H_content' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_title' },
+							_react2.default.createElement(
+								'span',
+								{ className: 'H_title_span H_title_color3' },
+								'\u7C98\u819C'
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_list' },
+							oraledit.oral.mucosa ? oraledit.oral.mucosa.map(function (item) {
+								console.log('ZZZZZDDDDDDHHHHHH');
+								console.log(item);
+								return _react2.default.createElement(
+									'div',
+									{ className: 'H_small_box H_margin_bottom20' },
+									checkDom(item.val)
+								);
+							}) : ''
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'H_content' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_title' },
+							_react2.default.createElement(
+								'span',
+								{ className: 'H_title_span H_title_color4' },
+								'\u5916\u79D1'
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_list' },
+							oraledit.oral.surgery ? oraledit.oral.surgery.map(function (item) {
+								console.log('ZZZZZDDDDDDHHHHHH');
+								console.log(item);
+								return _react2.default.createElement(
+									'div',
+									{ className: 'H_small_box H_margin_bottom20' },
+									_react2.default.createElement(
+										'span',
+										{ className: 'H_content_radio_title' },
+										item.name
+									),
+									checkDom(item.val)
+								);
+							}) : ''
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'H_content' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_title' },
+							_react2.default.createElement(
+								'span',
+								{ className: 'H_title_span H_title_color5' },
+								'\u7259\u75C5\u6CBB\u7597\u53CA\u4FEE\u590D\u53F2'
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_list' },
+							oraledit.oral.repairhis ? oraledit.oral.repairhis.map(function (item) {
+								console.log('ZZZZZDDDDDDHHHHHH');
+								console.log(item);
+								return _react2.default.createElement(
+									'div',
+									{ className: 'H_small_box H_margin_bottom20' },
+									_react2.default.createElement(
+										'span',
+										{ className: 'H_content_radio_title' },
+										item.name
+									),
+									checkDom(item.val)
+								);
+							}) : ''
+						)
+					)
+				)
+			)
+		);
 	};
 
 /***/ }

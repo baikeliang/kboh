@@ -48,7 +48,7 @@ export const HistoryEdit = ({
                                                 historytable.body_condition.map((item)=>{
                                                     count++;
                                                         return (
-                                                            <span className="W120">
+                                                            <span className="W120" style={ item.dateUI?{height:'30px',width:'300px'}:{} }>
                                                             {
                                                             (function(item){
                                                                 var metaitem = (historyedit.history&&historyedit.history.body_condition)?infoGet(historyedit.history.body_condition,item.name):undefined;
@@ -60,11 +60,10 @@ export const HistoryEdit = ({
                                                                     </div>):(<div><input type="checkbox" className="checkbox" id={"checkboxa_"+count} checked={(metaitem)?'checked':''}/>
                                                                     <label htmlFor={"checkboxa_"+count} onClick={()=>{ metaitem?(item.check=1):(item.check=0); click('body_condition',item) }} ><i>{item.name}</i></label></div>)})(item)
                                                             }
-                                                            </span>    
+                                                            </span>
                                                         )
-                                                    
                                                 })
-                                            }                       
+                                            }
                                         </div>
                                     </div>
                                     <div className="clear"></div>
@@ -82,11 +81,10 @@ export const HistoryEdit = ({
                                                             <span className="W120">
                                                                 <input type="checkbox" className="checkbox" id={"checkboxb_"+count} checked={metaitem?'checked':''}/>
                                                                 <label htmlFor={"checkboxb_"+count} onClick={ () => { metaitem?(item.check=1):(item.check=0); click('family_history',item) }} ><i>{item.name}</i></label>
-                                                            </span>  
+                                                            </span>
                                                         )
                                                 })
-                                            } 
-                                            
+                                            }
                                         </div>
                                     </div>
                                     <div className="clear"></div>
@@ -96,7 +94,6 @@ export const HistoryEdit = ({
                                     <div className="checkbox-box">
                                         <div className="checkBone clear_checkbox">
                                             {
-                                                
                                                 historytable.medicine.map((item)=>{
                                                     count++;
                                                     var metaitem = (historyedit.history&&historyedit.history.medicine)?infoGet(historyedit.history.medicine,item.name):undefined;
@@ -118,13 +115,12 @@ export const HistoryEdit = ({
                                     <div className="checkbox-box">
                                         <div className="checkBone clear_checkbox">
                                             {
-                                                
                                                 historytable.surgery.map((item)=>{
                                                     count++;
                                                     var metaitem = (historyedit.history&&historyedit.history.surgery)?infoGet(historyedit.history.surgery,item.name):undefined;
                                                     return (
                                                        <span>
-                                                            <input type="checkbox" className="checkbox" id={"checkboxd_"+count} checked={metaitem?'checked':''}/>
+                                                            <input type="checkbox" className="checkbox" id={`checkboxd_${count}`} checked={metaitem?'checked':''}/>
                                                             <label htmlFor={"checkboxd_"+count} onClick={ () => {metaitem?(item.check=1):(item.check=0); click('surgery',item) }}><i>{item.name}</i></label>
                                                             <b>&nbsp;</b>
                                                             {(function (item){
@@ -135,19 +131,16 @@ export const HistoryEdit = ({
                                                                         describe = info.describe;
                                                                     }
                                                                 }):'';
-                                
+
 
                                                                 return item.name=='近期做过手术'?(
                                                                 <input className="Wid480" type="text" value={ describe } onChange={ (ev)=>{ change('surgery',item,ev) } }  style={ (metaitem)?{display:'inline-block'}:{display:'none'} }/>                                       
                                                                 ):'';
                                                             })(item)}
-                                                            
                                                         </span>
                                                     )
-    
-                                                    
                                                 })
-                                            } 
+                                            }
                                         </div>
                                     </div>
                                     <div className="clear"></div>
@@ -158,7 +151,6 @@ export const HistoryEdit = ({
                                     <div className="checkbox-box">
                                         <div className="checkBone">
                                             {
-                                                
                                                 historytable.allergy.map((item)=>{
                                                     count++;
                                                     var metaitem = (historyedit.history&&historyedit.history.allergy)?infoGet(historyedit.history.allergy,item.name):undefined;
@@ -183,8 +175,6 @@ export const HistoryEdit = ({
                                                         </span>
 
                                                     )
-                                                   
-                                                    
                                                 })
                                             } 
                                         </div>
@@ -196,11 +186,9 @@ export const HistoryEdit = ({
                                     <div className="checkbox-box">
                                         <div className="checkBone">
                                             {
-                                                
                                                 historytable.infection.map((item)=>{
                                                     count++;
                                                     var metaitem = (historyedit.history&&historyedit.history.infection)?infoGet(historyedit.history.infection,item.name):undefined;
-                                                    
                                                     return (
                                                         <span className="W120">
                                                             <input type="checkbox" className="checkbox" id={"checkboxf_"+count} checked={(metaitem)?'checked':''}/>
@@ -218,22 +206,18 @@ export const HistoryEdit = ({
                                                                 <input className="Wid480" type="text" value={ describe } onChange={ (ev)=>{ change('infection',item,ev) } } style={ (metaitem)?{display:'inline-block'}:{display:'none'} }/>
                                                                 ):'';
                                                             })(item)}
-                                                           
                                                         </span>
                                                     )
-                                                    
-                                                    
                                                 })
-                                            } 
+                                            }
                                         </div>
                                     </div>
                                     <div className="clear"></div>
                                 </div>
                             </div>
-                            
-                    </div>   
-                </div>              
-                </div>              
+                    </div>
+                </div>
+                </div>
              )
      }
 
