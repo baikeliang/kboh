@@ -83,12 +83,12 @@ export default function reducer(state = initialState, action = {}) {
                  baseinfoedit[pair.key] = pair.val;
              })
              var meta_info = state.getIn(['users',idx,'baseinfoedit']);
-             return state.setIn(['users',idx,'baseinfoedit'],meta_info.merge(baseinfoedit)); 
+             return state.setIn(['users',idx,'baseinfoedit'],meta_info.merge(baseinfoedit));
         case BASICINFO_SAVE:
-             var idx = state.getIn(['frontuserinfo','idx']); 
+             var idx = state.getIn(['frontuserinfo','idx']);
              var infotomerge = state.getIn(['users',idx,'baseinfoedit']);
              var metainfo = state.getIn(['users',idx,'baseinfo']);
-             return state.setIn(['users',idx,'baseinfo'],metainfo.merge(infotomerge)); 
+             return state.setIn(['users',idx,'baseinfo'],metainfo.merge(infotomerge));
         case LOAD_DETAIL_HISTORY:
             return state.updateIn(['users'], list => list.map(user => {
                     if(user.get('id') == action.id){
@@ -106,9 +106,9 @@ export default function reducer(state = initialState, action = {}) {
                     var metahistory = action.result.allhistory?action.result.allhistory[action.result.allhistory.length-1]:undefined;
 
                     if(metahistory){
-                       
+
                        historyedit.history = {...historyedit.history, ...metahistory.history}
-                    
+
                        historyedit.time = metahistory.time;
 
                        var timelist = action.result.allhistory.map((history) => { return history.time })
@@ -135,7 +135,7 @@ export default function reducer(state = initialState, action = {}) {
         case NEXT_GROUP_USERS:
             return state.merge({ showbegin:action.result })
         case HISTORY_FLUSH:
-            var idx = state.getIn(['frontuserinfo','idx']); 
+            var idx = state.getIn(['frontuserinfo','idx']);
 
             var historytomerge = state.getIn(['users',idx,'historyedit','history']);
 
@@ -159,7 +159,7 @@ export default function reducer(state = initialState, action = {}) {
             console.log("UUU2")
             console.log(index)
             if(index>=0){
-              console.log("EEEEEEEEQQQQQQQQ")  
+              console.log("EEEEEEEEQQQQQQQQ")
               let i=0;
               console.log(state.getIn(['users',idx,'historyedit','history',pair.key]).toJS())
               return state.updateIn(['users',idx,'historyedit','history',pair.key], list => list.map(item => {
@@ -175,7 +175,7 @@ export default function reducer(state = initialState, action = {}) {
             }
             else
               return state.setIn(['users',idx,'historyedit','history',pair.key],state.getIn(['users',idx,'historyedit','history',pair.key]).push(Immutable.Map(pair.val)));
-        
+
         case HISTORY_EDIT_DEL:
             var idx = state.getIn(['frontuserinfo','idx']);
             var pair = action.result;
@@ -189,7 +189,7 @@ export default function reducer(state = initialState, action = {}) {
               return state
         case HISTORY_CHANGE_TIME:
             var pos = action.result;
-            var idx = state.getIn(['frontuserinfo','idx']); 
+            var idx = state.getIn(['frontuserinfo','idx']);
             var timelist = state.getIn(['users',idx,'historyedit','timelist']);
             if (pos.idx>=0) {
                 console.log('PpPPPPPPPP');
@@ -207,7 +207,7 @@ export default function reducer(state = initialState, action = {}) {
 export function basicInfoSave(){
 
     return {
-        type: BASICINFO_SAVE       
+        type: BASICINFO_SAVE
     }
 
 }
@@ -216,7 +216,7 @@ export function basicInfoEdit(pairs){
 
     return {
         type: BASICINFO_EDIT,
-        result: pairs       
+        result: pairs
     }
 
 }
@@ -224,7 +224,7 @@ export function basicInfoEdit(pairs){
 export function historyFlush(){
 
     return {
-        type: HISTORY_FLUSH       
+        type: HISTORY_FLUSH
     }
 
 }
@@ -233,7 +233,7 @@ export function historyEditADD(pair){
 
     return {
         type: HISTORY_EDIT_ADD,
-        result: pair      
+        result: pair
     }
 
 }
@@ -242,7 +242,7 @@ export function historyEditDEL(pair){
 
     return {
         type: HISTORY_EDIT_DEL,
-        result: pair     
+        result: pair
     }
 
 }

@@ -6,6 +6,9 @@ import Promise from 'bluebird'
 import { table } from  'backend/common/js/partial/lefttable.js'
 import  UserListCom,{ asyncEvent as userListAsync } from  './useradmin/userlist.js'
 
+import  OrderListCom,{ asyncEvent as orderListAsync } from  './ordertable/orderlist.js'
+
+
 import { LeftList } from  'backend/common/js/partial/left_table.js'
 
 import {
@@ -121,11 +124,26 @@ export default class UserAdmin extends Component {
 
     }
     onClick(ev,itemid){
+        console.log("change___________")
+        console.log(itemid)
+        var asyncProcess =  (function(){
+            if(itemid == '0')
+                return (orderListAsync)
+             else if(itemid == '1')
+                return (userListAsync)
+             else
+                return []
+        })()
         this.showRight({
-            asyncProcess:userListAsync,
+            asyncProcess:asyncProcess,
             itemid,
             comCreater:function(){
-             return (<UserListCom/>)
+             if(itemid == '0')
+                return (<OrderListCom/>)
+             else if(itemid == '1')
+                return (<UserListCom/>)
+             else
+                return <div/>
             }
          })
 

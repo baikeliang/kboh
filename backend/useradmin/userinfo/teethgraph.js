@@ -165,51 +165,6 @@ export default  class TeethGraph extends Component{
    clickOnCAche(ev, acheidx, curToothName,status) {
        this.props.switchachec({ acheidx, curToothName,status })
    }
-   upLoadPhoto() {
-       /*图片头像上传*/
-       var options = {
-           thumbBox: '.thumbBox',
-           spinner: '.spinner',
-           imgSrc: '/mint/images/user.png'
-       }
-       var cropper = $('.imageBox').cropbox(options);
-       $('#pick').on('change', function() {
-           $('.new-create-opcity').show()
-           var reader = new FileReader();
-           reader.onload = function(e) {
-               options.imgSrc = e.target.result;
-               cropper = $('.imageBox').cropbox(options);
-           }
-           reader.readAsDataURL(this.files[0]);
-           this.files = [];
-       })
-       $('#btnCrop').on('click', function() {
-           sessionStorage.setItem('jump_li', 1)
-           var img = cropper.getDataURL();
-           AjaxObj.imgBase64Up(function(result) {
-               if (result.Data.code == 1) {
-                   $('.new-create-opcity').hide()
-                   $('#photo img').attr('src', result.Data.photo_path)
-                   $('#file,#file2').val('');
-               } else {
-                   $('#photo').siblings('p').html(result.Data.msg).show()
-                   $('#file,#file2').val('');
-               }
-           }, img)
-       })
-       $('#btnZoomIn').on('click', function() {
-           cropper.zoomIn();
-       })
-       $('#btnZoomOut').on('click', function() {
-           cropper.zoomOut();
-       })
-
-       $('.close_dialog').click(function() {
-               $('.new-create-opcity').hide();
-       })
-           /*------图片头像上传结束----*/
-   }
-
    componentDidMount() {
        window.$("#pick").diyUpload({
                url: '',

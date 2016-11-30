@@ -40,7 +40,7 @@ import {
 var __asyncEvent = function({ dispatch, getState }) {
 
     let state = getState();
-    let id = state.getIn(['user_patient', 'frontuserinfo','id']); 
+    let id = state.getIn(['user_patient', 'frontuserinfo','id']);
     return dispatch(load_detail_baseinfo({ id }))
 
 }
@@ -99,7 +99,7 @@ export const asyncEvent =  [{
         	  auth : state.get('auth'),
             user:  state.getIn(['user_patient','users',idx])
         }
-    }, { pushState: push,basicInfoEdit,basicInfoSave})    
+    }, { pushState: push,basicInfoEdit,basicInfoSave})
 export default  class BasicInfo extends Component{
    constructor(props) {
        // code
@@ -118,20 +118,89 @@ export default  class BasicInfo extends Component{
    }
    onClickInfo(key,val) {
       console.log(key)
-      console.log(val)      
-       this.props.basicInfoEdit([{key,val}])
+      console.log(val)
+      this.props.basicInfoEdit([{key,val}])
    }
 
    showDateModal(){
       this.state.dateModal.display == 'block'?this.setState({...this.state,dateModal:{display:'none'}}):this.setState({...this.state,dateModal:{display:'block',position:'absolute'}});
    }
-   hangleSelectDate(date){  
+   hangleSelectDate(date){
 
       var dated = new Date();
       var nowYear = dated.getFullYear();
       var age = nowYear-date.format('Y');
       this.props.basicInfoEdit([{key:'birthdate',val:date.format('DD/MM/YY').toString()},{key:'age',val:age}])
 
+   }
+   upLoadPhoto() {
+       /*图片头像上传*/
+       var comself = this;
+       console.log(this.state)
+       console.log("upLoadPhoto!!!!!!!!!!!!!")
+       var options = {
+           thumbBox: '.thumbBox',
+           spinner: '.spinner',
+           imgSrc: require('backend/common/images/user.png')
+       }
+       console.log((window.$._data(window.$("#btnCrop").get(0), "events")));
+       var cropper = window.$('.imageBox').cropbox(options);
+       if((!(window.$._data(window.$("#base_photo_choose").get(0), "events")))||(!(window.$._data(window.$("#base_photo_choose").get(0), "events").change))){
+               console.log("33344444444443333333333333")
+               window.$('#base_photo_rechoose,#base_photo_choose').on('change', function() {
+                   window.$('.new-create-opcity').show()
+                   var reader = new FileReader();
+                   reader.onload = function(e) {
+                       options.imgSrc = e.target.result;
+                       cropper = window.$('.imageBox').cropbox(options);
+                   }
+                   console.log(this.files)
+                   var file = this.files[0];
+                   console.log(this.files)
+                   if(file){
+                     console.log("YYYYYYYY")
+                     console.log(file)
+                     reader.readAsDataURL(file);
+                   }
+                   //this.files = [];
+               })
+
+       }
+       if((!(window.$._data(window.$("#btnCrop").get(0), "events")))||(!(window.$._data(window.$("#btnCrop").get(0), "events").click)))
+               window.$('#btnCrop').on('click', function() {
+                 var img = cropper.getDataURL();
+                 comself.props.basicInfoEdit([{key:'photo',val:img}])
+                 window.$('.new-create-opcity').hide();
+                 console.log("eeeee")
+                 // AjaxObj.imgBase64Up(function(result) {
+                 //     if (result.Data.code == 1) {
+                 //         $('.new-create-opcity').hide()
+                 //         $('#base_photo_show img').attr('src', result.Data.photo_path)
+                 //         $('#file,#file2').val('');
+                 //     } else {
+                 //         $('#base_photo_show').siblings('p').html(result.Data.msg).show()
+                 //         $('#file,#file2').val('');
+                 //     }
+                 // }, img)
+              })
+       if((!(window.$._data(window.$("#btnZoomIn").get(0), "events")))||(!(window.$._data(window.$("#btnZoomIn").get(0), "events").click)))
+               window.$('#btnZoomIn').on('click', function() {
+                   cropper.zoomIn();
+               })
+       if((!(window.$._data(window.$("#btnZoomOut").get(0), "events")))||(!(window.$._data(window.$("#btnZoomOut").get(0), "events").click)))
+               window.$('#btnZoomOut').on('click', function() {
+                   cropper.zoomOut();
+               })
+       if((!(window.$._data(window.$(".close_dialog").get(0), "events")))||(!(window.$._data(window.$(".close_dialog").get(0), "events").click)))
+               window.$('.close_dialog').click(function() {
+                       window.$('.new-create-opcity').hide();
+               })
+           /*------图片头像上传结束----*/
+   }
+   componentDidUpdate(){
+     if(this.state.edit){
+        this.upLoadPhoto();
+     }
    }
    render(){
 
@@ -162,7 +231,7 @@ export default  class BasicInfo extends Component{
                            })
               }
 
-            </div> 
+            </div>
           )
       }
     }

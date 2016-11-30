@@ -30,7 +30,8 @@ export default class ApiClient {
                     req.body = JSON.stringify(data)
                     console.log(req.body)
                     req.headers = {
-
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
                     };
 
                 }

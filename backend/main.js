@@ -50,7 +50,7 @@ window.$ = $;
 
 window.jQuery = $;
 
-require.ensure(['./modules/diyUploader/js/webuploader.html5only.js','./modules/diyUploader/js/diyUpload.js'], function(require){
+require.ensure(['./modules/diyUploader/js/webuploader.html5only.js','./modules/diyUploader/js/diyUpload.js','./modules/imageUploader/upPic.js'], function(require){
 
       window.WebUploader = require('./modules/diyUploader/js/webuploader.html5only.js');
 

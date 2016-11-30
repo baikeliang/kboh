@@ -24,12 +24,12 @@ var LoginPage = ({
              <div className="login-tab-box">
                <div className="login-input-box user-input">
                  <span className="icon-user"></span>
-                 <input onChange={ onPassword } type="text" id="username" autocomplete="off" name="username"/>
+                 <input onChange={ onUsername } type="text" id="username" autocomplete="off" name="username"/>
                </div>
 
                <div className="login-input-box pwd-input">
                  <span className="icon-lock"></span>
-                 <input onChange={ onUsername } type="password" id="pwd" autocomplete="off" name="password"/>
+                 <input onChange={ onPassword } type="password" id="pwd" autocomplete="off" name="password"/>
                </div>
 
                <div className="login-pwd-box">
