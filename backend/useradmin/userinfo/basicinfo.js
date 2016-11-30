@@ -126,12 +126,11 @@ export default  class BasicInfo extends Component{
       this.state.dateModal.display == 'block'?this.setState({...this.state,dateModal:{display:'none'}}):this.setState({...this.state,dateModal:{display:'block',position:'absolute'}});
    }
    hangleSelectDate(date){
-
+      this.state.dateModal.display = 'none';
       var dated = new Date();
       var nowYear = dated.getFullYear();
       var age = nowYear-date.format('Y');
       this.props.basicInfoEdit([{key:'birthdate',val:date.format('DD/MM/YY').toString()},{key:'age',val:age}])
-
    }
    upLoadPhoto() {
        /*图片头像上传*/
@@ -227,7 +226,6 @@ export default  class BasicInfo extends Component{
                               showDateModal:(::this.showDateModal),
                               dateModal:(this.state.dateModal),
                               birthdate:(this.props.user.getIn(['baseinfoedit','birthdate']))
-
                            })
               }
 
