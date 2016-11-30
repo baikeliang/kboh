@@ -24,7 +24,7 @@ export const UserData = ({
                   <input type="radio" className="radio" name="radio" id={'userlist_row_'+rowidx}/>
                   <label htmlFor={'userlist_row_'+rowidx}></label></span></td>
                   <td className="W100">
-                      <span onClick={(ev)=>{toUserInfo(ev,rowidx)}} className='spanName'>{account}</span>
+                      <span onClick={(ev)=>{toUserInfo(ev,rowidx,id)}} className='spanName'>{account}</span>
                   </td>
                   <td><span>{real_name}</span></td>
                   <td><span className="user-pic"><img src={((!photo)||(photo=='ssssss'))?require('backend/common/images/user_default.png'):photo} alt/></span></td>

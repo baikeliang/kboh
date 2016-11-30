@@ -1,5 +1,6 @@
 import Immutable from 'immutable'
 import Promise from 'bluebird'
+import  getApiIp from 'backend/util/apiinterface.js'
 
 const LOAD = 'bohe/auth/LOAD';
 const LOAD_SUCCESS = 'bohe/auth/LOAD_SUCCESS';
@@ -75,7 +76,7 @@ export function load({ req }) {
 
     return {
         types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
-        promise: (client) => client.GET('http://192.168.10.10/userinfo/rest?', { params }, {
+        promise: (client) => client.GET('http://'+getApiIp()+'/userinfo/rest?', { params }, {
             format: function(response){
                     if (response.status >= 400) {
                         throw new Error("Bad response from server");
@@ -102,9 +103,10 @@ export function load({ req }) {
 
 export function login(name) {
     console.log("login!!!!!")
+    console.log(getApiIp());
     return {
         types: [LOGIN, LOGIN_SUCCESS, LOGIN_FAIL],
-        promise: (client) => client.POST('http://192.168.10.10/login', {
+        promise: (client) => client.POST('http://'+getApiIp()+'/login', {
             data: {
                 name: name
             }

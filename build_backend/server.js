@@ -21136,6 +21136,18 @@ module.exports =
 	
 	var _cteeth_status2 = _interopRequireDefault(_cteeth_status);
 	
+	var _user_doctor = __webpack_require__(/*! ./redux/reducers/user_doctor */ 384);
+	
+	var _user_doctor2 = _interopRequireDefault(_user_doctor);
+	
+	var _user_clinic = __webpack_require__(/*! ./redux/reducers/user_clinic */ 385);
+	
+	var _user_clinic2 = _interopRequireDefault(_user_clinic);
+	
+	var _user_company = __webpack_require__(/*! ./redux/reducers/user_company */ 386);
+	
+	var _user_company2 = _interopRequireDefault(_user_company);
+	
 	var _clientMiddleware = __webpack_require__(/*! ./redux/middleware/clientMiddleware */ 250);
 	
 	var _clientMiddleware2 = _interopRequireDefault(_clientMiddleware);
@@ -21177,6 +21189,9 @@ module.exports =
 	        bill_patient: _bill_patient2.default,
 	        wxjdk: _wxjdk2.default,
 	        user_patient: _user_patient2.default,
+	        user_doctor: _user_doctor2.default,
+	        user_clinic: _user_clinic2.default,
+	        user_company: _user_company2.default,
 	        mteeth_status: _mteeth_status2.default,
 	        cteeth_status: _cteeth_status2.default
 	    });
@@ -21805,6 +21820,10 @@ module.exports =
 	
 	var _bluebird2 = _interopRequireDefault(_bluebird);
 	
+	var _apiinterface = __webpack_require__(/*! ../../util/apiinterface.js */ 374);
+	
+	var _apiinterface2 = _interopRequireDefault(_apiinterface);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var LOAD = 'bohe/auth/LOAD';
@@ -21888,7 +21907,7 @@ module.exports =
 	    return {
 	        types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
 	        promise: function promise(client) {
-	            return client.GET('http://192.168.10.10/userinfo/rest?', { params: params }, {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/userinfo/rest?', { params: params }, {
 	                format: function format(response) {
 	                    if (response.status >= 400) {
 	                        throw new Error("Bad response from server");
@@ -21912,10 +21931,11 @@ module.exports =
 	
 	function login(name) {
 	    console.log("login!!!!!");
+	    console.log((0, _apiinterface2.default)());
 	    return {
 	        types: [LOGIN, LOGIN_SUCCESS, LOGIN_FAIL],
 	        promise: function promise(client) {
-	            return client.POST('http://192.168.10.10/login', {
+	            return client.POST('http://' + (0, _apiinterface2.default)() + '/login', {
 	                data: {
 	                    name: name
 	                }
@@ -21980,7 +22000,9 @@ module.exports =
 	
 	exports.default = reducer;
 	exports.frontOrder = frontOrder;
+	exports.nextGroupOrders = nextGroupOrders;
 	exports.LoadedorLoading = LoadedorLoading;
+	exports.LoadedorLoading_order = LoadedorLoading_order;
 	exports.load = load;
 	exports.load_detail = load_detail;
 	
@@ -21991,6 +22013,10 @@ module.exports =
 	var _bluebird = __webpack_require__(/*! bluebird */ 242);
 	
 	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _apiinterface = __webpack_require__(/*! ../../util/apiinterface.js */ 374);
+	
+	var _apiinterface2 = _interopRequireDefault(_apiinterface);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -22003,10 +22029,13 @@ module.exports =
 	var LOAD_DETAIL_FAIL = 'bohe/order_patient/LOAD_DETAIL_FAIL';
 	
 	var SET_ORDER_TOSHOW = 'bohe/order_patient/SHOW';
+	var NEXT_GROUP_ORDERS = 'bohe/order_patient/NEXTGROUPORDERS';
 	
 	var initialState = _immutable2.default.Map({
 	    loaded: false,
-	    loading: false
+	    loading: false,
+	    showbegin: 0,
+	    detailedit: {}
 	});
 	
 	function reducer() {
@@ -22017,23 +22046,7 @@ module.exports =
 	        case LOAD:
 	            return state.merge({ loading: true });
 	        case LOAD_SUCCESS:
-	            var allres;
-	            if (_immutable2.default.List.isList(state.get('orders'))) {
-	                if (!action.refresh) {
-	
-	                    allres = state.get('orders').pop().toJS().concat(action.result);
-	                } else if (action.refresh.resolve) {
-	
-	                    action.refresh.resolve();
-	                }
-	            }
-	            if (allres) {
-	                allres.push({ flag: true });
-	                return state.merge({ loading: false, loaded: true, orders: allres });
-	            } else {
-	                action.result.push({ flag: true });
-	                return state.merge({ loading: false, loaded: true, orders: action.result });
-	            }
+	            if (action.showOrdersBegin) return state.merge({ showbegin: action.showOrdersBegin, loading: false, loaded: true, users: action.result });else return state.merge({ loading: false, loaded: true, orders: action.result });
 	        case LOAD_FAIL:
 	            if (action.refresh && action.refresh.reject) {
 	                action.refresh.reject();
@@ -22049,15 +22062,21 @@ module.exports =
 	                });
 	            });
 	        case LOAD_DETAIL_SUCCESS:
-	            return state.updateIn(['orders'], function (list) {
+	            if (!action.extract) return state.updateIn(['orders'], function (list) {
 	                return list.map(function (order) {
 	                    if (order.get('id') == action.result.id) {
 	                        return order.merge((0, _extends3.default)({ loading: false, loaded: true }, action.result));
 	                    }
 	                    return order;
 	                });
-	            });
-	
+	            });else return state.updateIn(['orders'], function (list) {
+	                return list.map(function (order) {
+	                    if (order.get('id') == action.result.id) {
+	                        return order.merge((0, _extends3.default)({ loading: false, loaded: true }, action.result));
+	                    }
+	                    return order;
+	                });
+	            }).merge({ detailedit: { idx: action.idx, data: action.result } });
 	        case LOAD_DETAIL_FAIL:
 	            return state.updateIn(['orders'], function (list) {
 	                return list.map(function (order) {
@@ -22084,6 +22103,13 @@ module.exports =
 	    };
 	}
 	
+	function nextGroupOrders(begin) {
+	    return {
+	        type: NEXT_GROUP_ORDERS,
+	        result: begin
+	    };
+	}
+	
 	function LoadedorLoading(state) {
 	    var loaded = false;
 	    var loading = false;
@@ -22092,6 +22118,19 @@ module.exports =
 	    }
 	    if (state.hasIn(['order_patient', 'loading'])) {
 	        loading = state.getIn(['order_patient', 'loading']);
+	    }
+	    return loaded || loading;
+	}
+	
+	function LoadedorLoading_order(state, idx, id) {
+	    var loaded = false;
+	    var loading = false;
+	
+	    var order = state.getIn(['order_patient', 'orders', idx]);
+	
+	    if (order) {
+	        loading = order.get('loading');
+	        loaded = order.get('loaded');
 	    }
 	    return loaded || loading;
 	}
@@ -22105,7 +22144,8 @@ module.exports =
 	        num = _ref2.num,
 	        begin = _ref2.begin,
 	        req = _ref2.req,
-	        refresh = _ref2.refresh;
+	        refresh = _ref2.refresh,
+	        showOrdersBegin = _ref2.showOrdersBegin;
 	
 	    var params = {};
 	
@@ -22133,7 +22173,7 @@ module.exports =
 	    return {
 	        types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
 	        promise: function promise(client) {
-	            return client.GET('http://192.168.10.10/patient/orders/rest?', { params: params }, {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/patient/orders/rest?', { params: params }, {
 	                format: function format(response) {
 	                    if (response.status >= 400) {
 	                        throw new Error("Bad response from server");
@@ -22162,7 +22202,9 @@ module.exports =
 	}
 	
 	function load_detail(_ref3) {
-	    var id = _ref3.id;
+	    var id = _ref3.id,
+	        idx = _ref3.idx,
+	        extract = _ref3.extract;
 	
 	    var params = {};
 	    params.id = id;
@@ -22172,7 +22214,7 @@ module.exports =
 	    return {
 	        types: [LOAD_DETAIL, LOAD_DETAIL_SUCCESS, LOAD_DETAIL_FAIL],
 	        promise: function promise(client) {
-	            return client.GET('http://192.168.10.10/patient/orderInfo/rest?', { params: params }, {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/patient/orderInfo/rest?', { params: params }, {
 	                format: function format(response) {
 	                    if (response.status >= 400) {
 	                        throw new Error("Bad response from server");
@@ -22199,7 +22241,9 @@ module.exports =
 	                }
 	            });
 	        },
-	        id: id
+	        id: id,
+	        idx: idx,
+	        extract: extract
 	    };
 	}
 
@@ -22787,15 +22831,35 @@ module.exports =
 	    value: true
 	});
 	
+	var _typeof2 = __webpack_require__(/*! babel-runtime/helpers/typeof */ 251);
+	
+	var _typeof3 = _interopRequireDefault(_typeof2);
+	
 	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
 	
 	var _extends3 = _interopRequireDefault(_extends2);
 	
 	exports.default = reducer;
+	exports.basicInfoSave = basicInfoSave;
+	exports.basicInfoEdit = basicInfoEdit;
+	exports.historyFlush = historyFlush;
+	exports.historyEditADD = historyEditADD;
+	exports.historyEditDEL = historyEditDEL;
+	exports.oralEditDEL = oralEditDEL;
+	exports.oralEditADD = oralEditADD;
+	exports.oralFlush = oralFlush;
 	exports.frontUserForInfo = frontUserForInfo;
+	exports.nextGroupUsers = nextGroupUsers;
 	exports.LoadedorLoading = LoadedorLoading;
+	exports.LoadedorLoadingUser = LoadedorLoadingUser;
+	exports.LoadedorLoadingUser_History = LoadedorLoadingUser_History;
+	exports.LoadedorLoadingUser_Oral = LoadedorLoadingUser_Oral;
+	exports.changeTime = changeTime;
+	exports.changeOralTime = changeOralTime;
 	exports.load = load;
-	exports.load_detail = load_detail;
+	exports.load_detail_baseinfo = load_detail_baseinfo;
+	exports.load_detail_history = load_detail_history;
+	exports.load_detail_oral = load_detail_oral;
 	
 	var _immutable = __webpack_require__(/*! immutable */ 46);
 	
@@ -22805,21 +22869,50 @@ module.exports =
 	
 	var _bluebird2 = _interopRequireDefault(_bluebird);
 	
+	var _apiinterface = __webpack_require__(/*! ../../util/apiinterface.js */ 374);
+	
+	var _apiinterface2 = _interopRequireDefault(_apiinterface);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var LOAD = 'bohe/user_patient/LOAD';
 	var LOAD_SUCCESS = 'bohe/user_patient/LOAD_SUCCESS';
 	var LOAD_FAIL = 'bohe/user_patient/LOAD_FAIL';
 	
-	var LOAD_DETAIL = 'bohe/user_patient/LOAD_DETAIL';
-	var LOAD_DETAIL_SUCCESS = 'bohe/user_patient/LOAD_DETAIL_SUCCESS';
-	var LOAD_DETAIL_FAIL = 'bohe/user_patient/LOAD_DETAIL_FAIL';
+	var LOAD_DETAIL_BASEINFO = 'bohe/user_patient/LOAD_DETAIL_BASEINFO';
+	var LOAD_DETAIL_BASEINFO_SUCCESS = 'bohe/user_patient/LOAD_DETAIL_BASEINFO_SUCCESS';
+	var LOAD_DETAIL_BASEINFO_FAIL = 'bohe/user_patient/LOAD_DETAIL_BASEINFO_FAIL';
+	
+	var LOAD_DETAIL_HISTORY = 'bohe/user_patient/LOAD_DETAIL_HISTORY';
+	var LOAD_DETAIL_HISTORY_SUCCESS = 'bohe/user_patient/LOAD_DETAIL_HISTORY_SUCCESS';
+	var LOAD_DETAIL_HISTORY_FAIL = 'bohe/user_patient/LOAD_DETAIL_HISTORY_FAIL';
+	
+	var LOAD_DETAIL_ORAL = 'bohe/user_patient/LOAD_DETAIL_ORAL';
+	var LOAD_DETAIL_ORAL_SUCCESS = 'bohe/user_patient/LOAD_DETAIL_ORAL_SUCCESS';
+	var LOAD_DETAIL_ORAL_FAIL = 'bohe/user_patient/LOAD_DETAIL_ORAL_FAIL';
+	
+	var BASICINFO_SAVE = 'bohe/user_patient/BASICINFO_SAVE';
+	var BASICINFO_EDIT = 'bohe/user_patient/BASICINFO_EDIT';
+	
+	var HISTORY_SAVE = 'bohe/user_patient/HISTORY_SAVE';
+	var HISTORY_EDIT_ADD = 'bohe/user_patient/HISTORY_EDIT_ADD';
+	var HISTORY_EDIT_DEL = 'bohe/user_patient/HISTORY_EDIT_DEL';
+	var HISTORY_FLUSH = 'bohe/user_patient/HISTORY_FLUSH';
+	var HISTORY_CHANGE_TIME = 'bohe/user_patient/HISTORY_CHANGE_TIME';
+	
+	var ORAL_EDIT_ADD = 'bohe/user_patient/ORAL_EDIT_ADD';
+	var ORAL_FLUSH = 'bohe/user_patient/ORAL_FLUSH';
+	var ORAL_CHANGE_TIME = 'bohe/user_patient/ORAL_CHANGE_TIME';
+	var ORAL_EDIT_DEL = 'bohe/user_patient/ORAL_EDIT_DEL';
 	
 	var SET_USER_TOSHOWINFO = 'bohe/user_patient/SHOWINFO';
 	
+	var NEXT_GROUP_USERS = 'bohe/user_patient/NEXTGROUPUSERS';
+	
 	var initialState = _immutable2.default.Map({
 	    loaded: false,
-	    loading: false
+	    loading: false,
+	    showbegin: 0
 	});
 	
 	function reducer() {
@@ -22830,50 +22923,34 @@ module.exports =
 	        case LOAD:
 	            return state.merge({ loading: true });
 	        case LOAD_SUCCESS:
-	            var allres;
-	            console.log('111DDDDDDDDDD!!!!!');
-	            if (_immutable2.default.List.isList(state.get('users'))) {
-	                if (!action.refresh) {
-	
-	                    allres = state.get('users').pop().toJS().concat(action.result);
-	                } else if (action.refresh.resolve) {
-	
-	                    action.refresh.resolve();
-	                }
-	            }
-	            if (allres) {
-	                allres.push({ flag: true });
-	                return state.merge({ loading: false, loaded: true, users: allres });
-	            } else {
-	                console.log('DDDDDDDDDD!!!!!');
-	                action.result.push({ flag: true });
-	                return state.merge({ loading: false, loaded: true, users: action.result });
-	            }
+	            if (action.showUsersBegin) return state.merge({ showbegin: action.showUsersBegin, loading: false, loaded: true, users: action.result });else return state.merge({ loading: false, loaded: true, users: action.result });
 	        case LOAD_FAIL:
 	            if (action.refresh && action.refresh.reject) {
 	                action.refresh.reject();
 	            }
 	            return state.merge({ loading: false, loaded: false, error: action.error });
-	        case LOAD_DETAIL:
+	        case SET_USER_TOSHOWINFO:
+	            return state.merge({ frontuserinfo: action.result });
+	        case LOAD_DETAIL_BASEINFO:
 	            return state.updateIn(['users'], function (list) {
 	                return list.map(function (user) {
 	                    if (user.get('id') == action.id) {
-	                        return user.merge({ loading: true });
+	                        return user.merge({ loading: true, baseinfoedit: {} });
 	                    }
 	                    return user;
 	                });
 	            });
-	        case LOAD_DETAIL_SUCCESS:
+	        case LOAD_DETAIL_BASEINFO_SUCCESS:
+	
 	            return state.updateIn(['users'], function (list) {
 	                return list.map(function (user) {
 	                    if (user.get('id') == action.result.id) {
-	                        return user.merge((0, _extends3.default)({ loading: false, loaded: true }, action.result));
+	                        return user.merge({ loading: false, loaded: true, baseinfo: action.result });
 	                    }
 	                    return user;
 	                });
 	            });
-	
-	        case LOAD_DETAIL_FAIL:
+	        case LOAD_DETAIL_BASEINFO_FAIL:
 	            return state.updateIn(['users'], function (list) {
 	                return list.map(function (user) {
 	                    if (user.get('id') == action.error.id) {
@@ -22882,11 +22959,329 @@ module.exports =
 	                    return user;
 	                });
 	            });
+	        case BASICINFO_EDIT:
+	            var idx = state.getIn(['frontuserinfo', 'idx']);
+	            var pairs = action.result;
+	            var baseinfoedit = {};
+	            pairs.forEach(function (pair) {
+	                baseinfoedit[pair.key] = pair.val;
+	            });
+	            var meta_info = state.getIn(['users', idx, 'baseinfoedit']);
+	            return state.setIn(['users', idx, 'baseinfoedit'], meta_info.merge(baseinfoedit));
+	        case BASICINFO_SAVE:
+	            var idx = state.getIn(['frontuserinfo', 'idx']);
+	            var infotomerge = state.getIn(['users', idx, 'baseinfoedit']);
+	            var metainfo = state.getIn(['users', idx, 'baseinfo']);
+	            return state.setIn(['users', idx, 'baseinfo'], metainfo.merge(infotomerge));
+	        case LOAD_DETAIL_HISTORY:
+	            return state.updateIn(['users'], function (list) {
+	                return list.map(function (user) {
+	                    if (user.get('id') == action.id) {
+	                        return user.merge({ hisloading: true, historyedit: {} });
+	                    }
+	                    return user;
+	                });
+	            });
+	        case LOAD_DETAIL_HISTORY_SUCCESS:
+	            return state.updateIn(['users'], function (list) {
+	                return list.map(function (user) {
+	                    if (user.get('id') == action.result.id) {
+	                        console.log("QQQQQQQQQQQQQQQQQQQQQQQ");
+	
+	                        var historyedit = { history: { body_condition: [], allergy: [], family_history: [], infection: [], medicine: [], surgery: [] }, time: '', timelist: [] };
+	
+	                        var metahistory = action.result.allhistory ? action.result.allhistory[action.result.allhistory.length - 1] : undefined;
+	
+	                        if (metahistory) {
+	
+	                            historyedit.history = (0, _extends3.default)({}, historyedit.history, metahistory.history);
+	
+	                            historyedit.time = metahistory.time;
+	
+	                            var timelist = action.result.allhistory.map(function (history) {
+	                                return history.time;
+	                            });
+	
+	                            console.log(historyedit);
+	                            console.log("LLLHH");
+	                            historyedit.timelist = timelist;
+	                            historyedit.idx = action.result.allhistory.length - 1;
+	                        }
+	                        return user.merge({ hisloading: false, hisloaded: true, historyedit: historyedit, allhistory: action.result.allhistory });
+	                    }
+	                    return user;
+	                });
+	            });
+	        case LOAD_DETAIL_HISTORY_FAIL:
+	            return state.updateIn(['users'], function (list) {
+	                return list.map(function (user) {
+	                    if (user.get('id') == action.error.id) {
+	                        return user.merge({ hisloading: false, hisloaded: false, error: action.error.info });
+	                    }
+	                    return user;
+	                });
+	            });
 	        case SET_USER_TOSHOWINFO:
 	            return state.merge({ frontuserinfo: action.result });
+	        case NEXT_GROUP_USERS:
+	            return state.merge({ showbegin: action.result });
+	        case HISTORY_FLUSH:
+	            var idx = state.getIn(['frontuserinfo', 'idx']);
+	
+	            var historytomerge = state.getIn(['users', idx, 'historyedit', 'history']);
+	
+	            var historyidx = state.getIn(['users', idx, 'historyedit', 'idx']);
+	            console.log('WWWWWWWWWWWWWW');
+	            console.log(historyidx);
+	            if (historyidx >= 0) {
+	                console.log("TTTTTTTTTTTTTTRRRRRRR");
+	                return state.setIn(['users', idx, 'allhistory', historyidx, 'history'], historytomerge);
+	            } else return state;
+	        case HISTORY_EDIT_ADD:
+	            var idx = state.getIn(['frontuserinfo', 'idx']);
+	            var pair = action.result;
+	
+	            console.log("UUU");
+	            console.log(pair.key);
+	            console.log(pair.val);
+	            var index = state.getIn(['users', idx, 'historyedit', 'history', pair.key]).findIndex(function (value) {
+	                return value.get('name') == pair.val.name;
+	            });
+	            console.log("UUU2");
+	            console.log(index);
+	            if (index >= 0) {
+	                var _ret = function () {
+	                    console.log("EEEEEEEEQQQQQQQQ");
+	                    var i = 0;
+	                    console.log(state.getIn(['users', idx, 'historyedit', 'history', pair.key]).toJS());
+	                    return {
+	                        v: state.updateIn(['users', idx, 'historyedit', 'history', pair.key], function (list) {
+	                            return list.map(function (item) {
+	                                i++;
+	                                console.log('ADD!!!!!!');
+	                                console.log(item);
+	                                if (i == index + 1) {
+	                                    return item.merge(pair.val);
+	                                } else {
+	                                    return item;
+	                                }
+	                            });
+	                        })
+	                    };
+	                }();
+	
+	                if ((typeof _ret === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret)) === "object") return _ret.v;
+	            } else return state.setIn(['users', idx, 'historyedit', 'history', pair.key], state.getIn(['users', idx, 'historyedit', 'history', pair.key]).push(_immutable2.default.Map(pair.val)));
+	
+	        case HISTORY_EDIT_DEL:
+	            var idx = state.getIn(['frontuserinfo', 'idx']);
+	            var pair = action.result;
+	            console.log("UUU3");
+	            console.log(pair);
+	            var index = state.getIn(['users', idx, 'historyedit', 'history', pair.key]).findIndex(function (value) {
+	                return value.get('name') == pair.val.name;
+	            });
+	            console.log(index);
+	            if (index >= 0) return state.setIn(['users', idx, 'historyedit', 'history', pair.key], state.getIn(['users', idx, 'historyedit', 'history', pair.key]).remove(index));else return state;
+	        case HISTORY_CHANGE_TIME:
+	            var pos = action.result;
+	            var idx = state.getIn(['frontuserinfo', 'idx']);
+	            var timelist = state.getIn(['users', idx, 'historyedit', 'timelist']);
+	            if (pos.idx >= 0) {
+	                console.log('PpPPPPPPPP');
+	                console.log(pos.idx);
+	                console.log(timelist);
+	                console.log(state.getIn(['users', idx, 'allhistory', pos.idx]).toJS());
+	                return state.setIn(['users', idx, 'historyedit'], state.getIn(['users', idx, 'allhistory', pos.idx])).setIn(['users', idx, 'historyedit', 'timelist'], timelist).setIn(['users', idx, 'historyedit', 'idx'], pos.idx);
+	            } else {
+	                return state;
+	            }
+	        case LOAD_DETAIL_ORAL:
+	            return state.updateIn(['users'], function (list) {
+	                return list.map(function (user) {
+	                    if (user.get('id') == action.id) {
+	                        return user.merge({ oralloading: true, oraledit: {} });
+	                    }
+	                    return user;
+	                });
+	            });
+	        case LOAD_DETAIL_ORAL_SUCCESS:
+	            return state.updateIn(['users'], function (list) {
+	                return list.map(function (user) {
+	                    if (user.get('id') == action.result.id) {
+	
+	                        var oraledit = { oral: { teetharound: [], mucosa: [], surgery: [], repairhis: [] }, time: '', timelist: [] };
+	
+	                        var metaoral = action.result.alloral ? action.result.alloral[action.result.alloral.length - 1] : undefined;
+	
+	                        if (metaoral) {
+	
+	                            oraledit.oral = (0, _extends3.default)({}, oraledit.oral, metaoral.oral);
+	
+	                            oraledit.time = metaoral.time;
+	
+	                            var timelist = action.result.alloral.map(function (oral) {
+	                                return oral.time;
+	                            });
+	                            console.log('AAAAAACCCCCCCC');
+	                            console.log(timelist);
+	                            console.log(oraledit);
+	                            oraledit.timelist = timelist;
+	                            oraledit.idx = action.result.alloral.length - 1;
+	                        }
+	                        return user.merge({ oralloading: false, oralloaded: true, oraledit: oraledit, alloral: action.result.alloral });
+	                    }
+	                    return user;
+	                });
+	            });
+	        case LOAD_DETAIL_ORAL_FAIL:
+	            return state.updateIn(['users'], function (list) {
+	                return list.map(function (user) {
+	                    if (user.get('id') == action.error.id) {
+	                        return user.merge({ oralloading: false, oralloaded: false, error: action.error.info });
+	                    }
+	                    return user;
+	                });
+	            });
+	        case ORAL_EDIT_ADD:
+	            var idx = state.getIn(['frontuserinfo', 'idx']);
+	            var pair = action.result;
+	            console.log('OOOOOOOOOPPPPPPPPP');
+	            console.log(pair.key);
+	            console.log(state.getIn(['users', idx, 'oraledit', 'oral', pair.key]));
+	            var index = state.getIn(['users', idx, 'oraledit', 'oral', pair.key]).findIndex(function (value) {
+	                return value.get('name') == pair.val.name;
+	            });
+	
+	            if (index >= 0) {
+	                var _ret2 = function () {
+	                    console.log(index);
+	                    var i = 0;
+	                    console.log(state.getIn(['users', idx, 'oraledit', 'oral', pair.key]));
+	                    return {
+	                        v: state.updateIn(['users', idx, 'oraledit', 'oral', pair.key], function (list) {
+	                            return list.map(function (item) {
+	                                i++;
+	                                console.log('ADD!!!!!!');
+	                                console.log(pair.val);
+	                                if (i == index + 1) {
+	                                    var _item_ = item.toJS();
+	                                    var item_val = _item_.val;
+	                                    var _item_val = pair.val.val;
+	                                    _item_.val = (0, _extends3.default)({}, item_val, _item_val);
+	                                    return _immutable2.default.Map(_item_);
+	                                } else {
+	                                    return item;
+	                                }
+	                            });
+	                        })
+	                    };
+	                }();
+	
+	                if ((typeof _ret2 === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret2)) === "object") return _ret2.v;
+	            } else {
+	                console.log('111111111111111111!!!!!!!!!!!');
+	                console.log(pair.val);
+	                return state.setIn(['users', idx, 'oraledit', 'oral', pair.key], state.getIn(['users', idx, 'oraledit', 'oral', pair.key]).push(_immutable2.default.Map(pair.val)));
+	            }
+	        case ORAL_FLUSH:
+	            var idx = state.getIn(['frontuserinfo', 'idx']);
+	
+	            var oraltomerge = state.getIn(['users', idx, 'oraledit', 'oral']);
+	
+	            var oralidx = state.getIn(['users', idx, 'oraledit', 'idx']);
+	            console.log('WWWWWWWWWWWWWW');
+	            console.log(oralidx);
+	            if (oralidx >= 0) {
+	                console.log("TTTTTTTTTTTTTTRRRRRRR");
+	                return state.setIn(['users', idx, 'alloral', oralidx, 'oral'], oraltomerge);
+	            } else return state;
+	        case ORAL_CHANGE_TIME:
+	            var pos = action.result;
+	            var idx = state.getIn(['frontuserinfo', 'idx']);
+	            var timelist = state.getIn(['users', idx, 'oraledit', 'timelist']);
+	            if (pos.idx >= 0) {
+	                console.log('PpPPPPPPPP');
+	                console.log(pos.idx);
+	                console.log(timelist);
+	                console.log(state.getIn(['users', idx, 'alloral', pos.idx]).toJS());
+	                return state.setIn(['users', idx, 'oraledit'], state.getIn(['users', idx, 'alloral', pos.idx])).setIn(['users', idx, 'oraledit', 'timelist'], timelist).setIn(['users', idx, 'oraledit', 'idx'], pos.idx);
+	            } else {
+	                return state;
+	            }
+	        case ORAL_EDIT_DEL:
+	            var idx = state.getIn(['frontuserinfo', 'idx']);
+	            var pair = action.result;
+	            console.log("UUU3");
+	            console.log(pair);
+	            var index = state.getIn(['users', idx, 'oraledit', 'oral', pair.key]).findIndex(function (value) {
+	                return value.get('name') == pair.val.name;
+	            });
+	            console.log(index);
+	            if (index >= 0) return state.setIn(['users', idx, 'oraledit', 'oral', pair.key], state.getIn(['users', idx, 'oraledit', 'oral', pair.key]).remove(index));else return state;
 	        default:
 	            return state;
 	    }
+	}
+	function basicInfoSave() {
+	
+	    return {
+	        type: BASICINFO_SAVE
+	    };
+	}
+	
+	function basicInfoEdit(pairs) {
+	
+	    return {
+	        type: BASICINFO_EDIT,
+	        result: pairs
+	    };
+	}
+	
+	function historyFlush() {
+	
+	    return {
+	        type: HISTORY_FLUSH
+	    };
+	}
+	
+	function historyEditADD(pair) {
+	
+	    return {
+	        type: HISTORY_EDIT_ADD,
+	        result: pair
+	    };
+	}
+	
+	function historyEditDEL(pair) {
+	
+	    return {
+	        type: HISTORY_EDIT_DEL,
+	        result: pair
+	    };
+	}
+	
+	function oralEditDEL(pair) {
+	
+	    return {
+	        type: ORAL_EDIT_DEL,
+	        result: pair
+	    };
+	}
+	
+	function oralEditADD(pair) {
+	
+	    return {
+	        type: ORAL_EDIT_ADD,
+	        result: pair
+	    };
+	}
+	
+	function oralFlush() {
+	
+	    return {
+	        type: ORAL_FLUSH
+	    };
 	}
 	
 	function frontUserForInfo(_ref) {
@@ -22896,6 +23291,13 @@ module.exports =
 	    return {
 	        type: SET_USER_TOSHOWINFO,
 	        result: { idx: idx, id: id }
+	    };
+	}
+	
+	function nextGroupUsers(begin) {
+	    return {
+	        type: NEXT_GROUP_USERS,
+	        result: begin
 	    };
 	}
 	
@@ -22910,6 +23312,58 @@ module.exports =
 	    }
 	    return loaded || loading;
 	}
+	function LoadedorLoadingUser(state) {
+	    var loaded = false;
+	    var loading = false;
+	    var idx = state.getIn(['user_patient', "frontuserinfo", 'idx']);
+	    if (state.hasIn(['user_patient', 'users', idx, 'loaded'])) {
+	        loaded = state.getIn(['user_patient', 'users', idx, 'loaded']);
+	    }
+	    if (state.hasIn(['user_patient', 'users', idx, 'loading'])) {
+	        loading = state.getIn(['user_patient', 'users', idx, 'loading']);
+	    }
+	    return loaded || loading;
+	}
+	
+	function LoadedorLoadingUser_History(state) {
+	    var loaded = false;
+	    var loading = false;
+	    var idx = state.getIn(['user_patient', "frontuserinfo", 'idx']);
+	    if (state.hasIn(['user_patient', 'users', idx, 'loaded'])) {
+	        loaded = state.getIn(['user_patient', 'users', idx, 'hisloaded']);
+	    }
+	    if (state.hasIn(['user_patient', 'users', idx, 'loading'])) {
+	        loading = state.getIn(['user_patient', 'users', idx, 'hisloading']);
+	    }
+	    return loaded || loading;
+	}
+	
+	function LoadedorLoadingUser_Oral(state) {
+	    var loaded = false;
+	    var loading = false;
+	    var idx = state.getIn(['user_patient', "frontuserinfo", 'idx']);
+	    if (state.hasIn(['user_patient', 'users', idx, 'loaded'])) {
+	        loaded = state.getIn(['user_patient', 'users', idx, 'oralloaded']);
+	    }
+	    if (state.hasIn(['user_patient', 'users', idx, 'loading'])) {
+	        loading = state.getIn(['user_patient', 'users', idx, 'oralloading']);
+	    }
+	    return loaded || loading;
+	}
+	
+	function changeTime(pos) {
+	    return {
+	        type: HISTORY_CHANGE_TIME,
+	        result: pos
+	    };
+	}
+	
+	function changeOralTime(pos) {
+	    return {
+	        type: ORAL_CHANGE_TIME,
+	        result: pos
+	    };
+	}
 	
 	/* 当 直接采用 浏览器发起域名访问时 不会携带本地Token 所以在鉴权阶段 会转入login 登录后得到新的签发token
 	   当采用 微信公众号直接跳转时 鉴权阶段使用openid 通过鉴权，签发新的token到state的user中
@@ -22920,7 +23374,8 @@ module.exports =
 	        num = _ref2.num,
 	        begin = _ref2.begin,
 	        req = _ref2.req,
-	        refresh = _ref2.refresh;
+	        refresh = _ref2.refresh,
+	        showUsersBegin = _ref2.showUsersBegin;
 	
 	    var params = {};
 	
@@ -22944,11 +23399,11 @@ module.exports =
 	    } else {
 	        params = { num: num, begin: begin };
 	    }
-	
 	    return {
+	
 	        types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
 	        promise: function promise(client) {
-	            return client.GET('http://192.168.10.10/user_patient/rest?', { params: params }, {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/user_patient/rest?', { params: params }, {
 	                format: function format(response) {
 	                    if (response.status >= 400) {
 	                        throw new Error("Bad response from server");
@@ -22972,11 +23427,13 @@ module.exports =
 	                }
 	            });
 	        },
-	        refresh: refresh
+	        refresh: refresh,
+	        showUsersBegin: showUsersBegin
 	    };
 	}
 	
-	function load_detail(_ref3) {
+	// 基础信息。。。。。。。。。。。。。。。。。。。。。
+	function load_detail_baseinfo(_ref3) {
 	    var id = _ref3.id;
 	
 	    var params = {};
@@ -22985,9 +23442,9 @@ module.exports =
 	    console.log('load_detail!!!!!!!!!!!');
 	    console.log(id);
 	    return {
-	        types: [LOAD_DETAIL, LOAD_DETAIL_SUCCESS, LOAD_DETAIL_FAIL],
+	        types: [LOAD_DETAIL_BASEINFO, LOAD_DETAIL_BASEINFO_SUCCESS, LOAD_DETAIL_BASEINFO_FAIL],
 	        promise: function promise(client) {
-	            return client.GET('http://192.168.10.10/patient/info/rest?', { params: params }, {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/user_patient/basicinfo/rest?', { params: params }, {
 	                format: function format(response) {
 	                    if (response.status >= 400) {
 	                        throw new Error("Bad response from server");
@@ -23001,7 +23458,92 @@ module.exports =
 	
 	                    if (res.valid == 1) {
 	
-	                        return _bluebird2.default.resolve(res.user);
+	                        return _bluebird2.default.resolve(res.baseinfo);
+	                    } else {
+	                        //var err = { info: 'auth' }
+	                        return _bluebird2.default.reject({ id: id, info: 'notvalid' });
+	                    }
+	                },
+	                error: function error(err) {
+	                    console.log(err);
+	                    console.log('GGGGGGGGGGGGGG1');
+	                    return _bluebird2.default.reject({ id: id, info: 'wire' });
+	                }
+	            });
+	        },
+	        id: id
+	    };
+	}
+	//既往史。。。。。。。。。。。。
+	function load_detail_history(_ref4) {
+	    var id = _ref4.id;
+	
+	    var params = {};
+	    params.id = id;
+	
+	    console.log('load_detail!!!!!!!!!!!');
+	    console.log(id);
+	    return {
+	        types: [LOAD_DETAIL_HISTORY, LOAD_DETAIL_HISTORY_SUCCESS, LOAD_DETAIL_HISTORY_FAIL],
+	        promise: function promise(client) {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/user_patient/history/rest?', { params: params }, {
+	                format: function format(response) {
+	                    if (response.status >= 400) {
+	                        throw new Error("Bad response from server");
+	                    }
+	                    console.log('>>>>>>>>>>>>>>>>');
+	                    return response.json();
+	                },
+	                done: function done(res) {
+	
+	                    console.log(res);
+	
+	                    if (res.valid == 1) {
+	                        console.log(res.allhistory);
+	                        return _bluebird2.default.resolve(res);
+	                    } else {
+	                        //var err = { info: 'auth' }
+	                        return _bluebird2.default.reject({ id: id, info: 'notvalid' });
+	                    }
+	                },
+	                error: function error(err) {
+	                    console.log(err);
+	                    console.log('GGGGGGGGGGGGGG1');
+	                    return _bluebird2.default.reject({ id: id, info: 'wire' });
+	                }
+	            });
+	        },
+	        id: id
+	    };
+	}
+	
+	//口腔情况。。。。。。。。。。。。
+	function load_detail_oral(_ref5) {
+	    var id = _ref5.id;
+	
+	    var params = {};
+	    params.id = id;
+	
+	    console.log('load_detail!!!!!!!!!!!');
+	    console.log(id);
+	    return {
+	        types: [LOAD_DETAIL_ORAL, LOAD_DETAIL_ORAL_SUCCESS, LOAD_DETAIL_ORAL_FAIL],
+	        promise: function promise(client) {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/user_patient/oral/rest?', { params: params }, {
+	                format: function format(response) {
+	                    if (response.status >= 400) {
+	                        throw new Error("Bad response from server");
+	                    }
+	                    console.log('>>>>>>>>>>>>>>>>');
+	                    return response.json();
+	                },
+	                done: function done(res) {
+	
+	                    console.log(res);
+	
+	                    if (res.valid == 1) {
+	                        console.log(res.alloral);
+	                        return _bluebird2.default.resolve(res);
 	                    } else {
 	                        //var err = { info: 'auth' }
 	                        return _bluebird2.default.reject({ id: id, info: 'notvalid' });
@@ -23036,6 +23578,7 @@ module.exports =
 	var _extends3 = _interopRequireDefault(_extends2);
 	
 	exports.default = reducer;
+	exports.flushgraphydata = flushgraphydata;
 	exports.switchtooth = switchtooth;
 	exports.switchteeth = switchteeth;
 	exports.switchache = switchache;
@@ -23050,6 +23593,10 @@ module.exports =
 	
 	var _bluebird2 = _interopRequireDefault(_bluebird);
 	
+	var _apiinterface = __webpack_require__(/*! ../../util/apiinterface.js */ 374);
+	
+	var _apiinterface2 = _interopRequireDefault(_apiinterface);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var LOAD = 'bohe/mteeth_status/LOAD';
@@ -23059,6 +23606,8 @@ module.exports =
 	var SWITCH_TEETH = 'bohe/mteeth_status/SWITCHTEETH';
 	var SWITCH_ACHE = 'bohe/mteeth_status/SWITCHACHE';
 	var SWITCH_TOOTH = 'bohe/mteeth_status/SWITCHTOOTH';
+	
+	var FLUSH_GRAPHY_DATA = 'bohe/mteeth_status/FLUSHGRAPHYDATA';
 	
 	var teeth_ui = {
 	  size: 0,
@@ -23234,15 +23783,26 @@ module.exports =
 	    case LOAD_SUCCESS:
 	      var _data = {};
 	      var teethlist = action.result;
-	      _data[action.index] = teethlist;
 	
-	      var teethui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
+	      _data[action.index.toString()] = teethlist;
 	
-	      var latest_data = (0, _extends3.default)({ idx: teethlist.length - 1, useridx: action.index, size: teethlist.length }, teethui);
-	      //return state.merge({ loading: false, loaded: true, teeth: action.result })
-	      return state.mergeDeep({ loading: false, loaded: true, teeth_ui: latest_data, allUserTeeth: _data });
+	      var tooth_ui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
+	
+	      var timelist = teethlist.map(function (teeth) {
+	        return teeth.time;
+	      });
+	      console.log(timelist);
+	      var teeth_ui = (0, _extends3.default)({ idx: teethlist.length - 1, useridx: action.index.toString(), timelist: timelist, size: teethlist.length }, tooth_ui);
+	
+	      return state.mergeDeep({ loading: false, loaded: true, teeth_ui: teeth_ui, allUserTeeth: _data });
 	    case LOAD_FAIL:
 	      return state.merge({ loading: false, loaded: false, error: action.error });
+	    case FLUSH_GRAPHY_DATA:
+	      var useridx = state.getIn(['teeth_ui', 'useridx']);
+	      var idx = state.getIn(['teeth_ui', 'idx']);
+	      var metateeth = state.getIn(['allUserTeeth', useridx, idx]);
+	      var newteeth = state.getIn(['teeth_ui', 'teeth']).toJS();
+	      return state.setIn(['allUserTeeth', useridx, idx, 'teeth'], metateeth.merge(newteeth));
 	    case SWITCH_TEETH:
 	      var pos = action.result;
 	      var teeth;
@@ -23304,6 +23864,11 @@ module.exports =
 	  }
 	}
 	
+	function flushgraphydata() {
+	  return {
+	    type: FLUSH_GRAPHY_DATA
+	  };
+	}
 	function switchtooth(_ref) {
 	  var toothname = _ref.toothname;
 	
@@ -23376,7 +23941,7 @@ module.exports =
 	  return {
 	    types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
 	    promise: function promise(client) {
-	      return client.GET('http://192.168.10.10/patient/mteeth/rest?', { params: params }, {
+	      return client.GET('http://' + (0, _apiinterface2.default)() + '/patient/mteeth/rest?', { params: params }, {
 	        format: function format(response) {
 	          if (response.status >= 400) {
 	            throw new Error("Bad response from server");
@@ -23436,6 +24001,10 @@ module.exports =
 	var _bluebird = __webpack_require__(/*! bluebird */ 242);
 	
 	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _apiinterface = __webpack_require__(/*! ../../util/apiinterface.js */ 374);
+	
+	var _apiinterface2 = _interopRequireDefault(_apiinterface);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -23557,13 +24126,18 @@ module.exports =
 	        case LOAD_SUCCESS:
 	            var _data = {};
 	            var teethlist = action.result;
+	
 	            _data[action.index] = teethlist;
 	
-	            var teethui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
+	            var tooth_ui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
 	
-	            var latest_data = (0, _extends3.default)({ idx: teethlist.length - 1, useridx: action.index, size: teethlist.length }, teethui);
-	            //return state.merge({ loading: false, loaded: true, teeth: action.result })
-	            return state.mergeDeep({ loading: false, loaded: true, teeth_ui: latest_data, allUserTeeth: _data });
+	            var timelist = teethlist.map(function (teeth) {
+	                return teeth.time;
+	            });
+	
+	            var teeth_ui = (0, _extends3.default)({ idx: teethlist.length - 1, useridx: action.index, timelist: timelist, size: teethlist.length }, tooth_ui);
+	
+	            return state.mergeDeep({ loading: false, loaded: true, teeth_ui: teeth_ui, allUserTeeth: _data });
 	        case LOAD_FAIL:
 	            return state.merge({ loading: false, loaded: false, error: action.error });
 	        case SWITCH_TEETH:
@@ -23697,7 +24271,7 @@ module.exports =
 	    return {
 	        types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
 	        promise: function promise(client) {
-	            return client.GET('http://192.168.10.10/patient/cteeth/rest?', { params: params }, {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/patient/cteeth/rest?', { params: params }, {
 	                format: function format(response) {
 	                    if (response.status >= 400) {
 	                        throw new Error("Bad response from server");
@@ -24775,6 +25349,10 @@ module.exports =
 	
 	var _userlist2 = _interopRequireDefault(_userlist);
 	
+	var _orderlist = __webpack_require__(/*! ./ordertable/orderlist.js */ 390);
+	
+	var _orderlist2 = _interopRequireDefault(_orderlist);
+	
 	var _left_table = __webpack_require__(/*! ./common/js/partial/left_table.js */ 329);
 	
 	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
@@ -24889,12 +25467,16 @@ module.exports =
 	    }, {
 	        key: 'onClick',
 	        value: function onClick(ev, itemid) {
-	
+	            console.log("change___________");
+	            console.log(itemid);
+	            var asyncProcess = function () {
+	                if (itemid == '0') return _orderlist.asyncEvent;else if (itemid == '1') return _userlist.asyncEvent;else return [];
+	            }();
 	            this.showRight({
-	                asyncProcess: _userlist.asyncEvent,
+	                asyncProcess: asyncProcess,
 	                itemid: itemid,
 	                comCreater: function comCreater() {
-	                    return _react2.default.createElement(_userlist2.default, null);
+	                    if (itemid == '0') return _react2.default.createElement(_orderlist2.default, null);else if (itemid == '1') return _react2.default.createElement(_userlist2.default, null);else return _react2.default.createElement('div', null);
 	                }
 	            });
 	        }
@@ -25494,7 +26076,6 @@ module.exports =
 	            getState = _ref$store.getState,
 	            params = _ref.params;
 	
-	        console.log("EEEEEEEEEEEEEEEEEEEE111111");
 	        if (!(0, _auth.isLoaded)(getState())) {
 	            return dispatch((0, _auth.load)(params)).then(function () {
 	                if (!(0, _user_patient.LoadedorLoading)(getState())) {
@@ -25504,9 +26085,7 @@ module.exports =
 	                } else return _bluebird2.default.resolve();
 	            });
 	        } else {
-	            console.log("EEEEEEEEEEEEEEEEEEEE");
 	            if (!(0, _user_patient.LoadedorLoading)(getState())) {
-	                console.log("EEEEEEEEEEEEEEEEEEEE2");
 	                var state = getState();
 	                var user = state.getIn(['auth', 'user']).toJS();
 	                return dispatch((0, _user_patient.load)({ user: user, num: 10, begin: 0, refresh: { flag: true } }));
@@ -25520,7 +26099,7 @@ module.exports =
 	        auth: state.get('auth'),
 	        userRepo: state.get('user_patient')
 	    };
-	}, { pushState: _reactRouterRedux.push, load: _user_patient.load, toDetail: _user_patient.frontUserForInfo }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
+	}, { pushState: _reactRouterRedux.push, load: _user_patient.load, toDetail: _user_patient.frontUserForInfo, nextGroupUsers: _user_patient.nextGroupUsers }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
 	    (0, _inherits3.default)(UserListCom, _Component);
 	
 	    function UserListCom() {
@@ -25565,11 +26144,11 @@ module.exports =
 	        value: function toSearch() {}
 	    }, {
 	        key: 'toUserInfo',
-	        value: function toUserInfo(ev, idx) {
+	        value: function toUserInfo(ev, idx, id) {
 	            console.log(idx);
 	            console.log(this.context);
 	
-	            this.props.toDetail({ idx: idx });
+	            this.props.toDetail({ idx: idx, id: id });
 	
 	            this.context.showRight({
 	                asyncProcess: [],
@@ -25579,6 +26158,13 @@ module.exports =
 	            });
 	        }
 	    }, {
+	        key: 'handlePageClick',
+	        value: function handlePageClick(data) {
+	            var selected = data.selected;
+	
+	            this.props.load({ num: 10, begin: selected * 10, showbegin: selected * 10 });
+	        }
+	    }, {
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {}
 	    }, {
@@ -25586,19 +26172,24 @@ module.exports =
 	        value: function render() {
 	            console.log(this.props.userRepo.toJS());
 	            if (this.props.auth.has('user')) {
-	
+	                console.log("PPPPPPPPPPPPPPPPPPPPPPPPPP");
 	                var size = this.props.userRepo.get('users').size;
+	                var showbegin = this.props.userRepo.get('showbegin');
+	                console.log("PPPPPPPPPPPPPPPPPPPPPPPPPP1");
 	                var nodata = size == 0 ? true : false;
-	                console.log(size);
-	                console.log("sssssssrrr");
 	                var options = {
 	                    touchAction: 'pan-y'
 	                };
 	                var height = window.innerHeight || document.documentElement.clientHeight;
-	                var data = nodata ? [] : this.props.userRepo.get('users').toJS();
+	                var data = [];
+	                console.log("LLLLLRRRRRRRR");
+	                for (var i = 0; i < 10 && showbegin + i < size; i++) {
+	                    data.push(this.props.userRepo.getIn(['users', showbegin + i]).toJS());
+	                }
+	
 	                console.log("ffffggg");
 	                console.log(data);
-	                return (0, _userlistpage.UserList)({ toUserInfo: this.toUserInfo.bind(this), toSearch: this.toSearch.bind(this), toAddUser: this.toAddUser.bind(this), toDeleteUser: this.toDeleteUser.bind(this), toEditUser: this.toEditUser.bind(this), data: data, nodata: nodata, options: options, length: size, handlePan: this.handlePan.bind(this), handleRefresh: this.handleRefresh.bind(this) });
+	                return (0, _userlistpage.UserList)({ handlePageClick: this.handlePageClick.bind(this), toUserInfo: this.toUserInfo.bind(this), toSearch: this.toSearch.bind(this), toAddUser: this.toAddUser.bind(this), toDeleteUser: this.toDeleteUser.bind(this), toEditUser: this.toEditUser.bind(this), data: data, nodata: nodata, options: options, length: size, handlePan: this.handlePan.bind(this), handleRefresh: this.handleRefresh.bind(this) });
 	            } else {
 	                return _react2.default.createElement('div', null);
 	            }
@@ -25773,7 +26364,7 @@ module.exports =
 	            _react2.default.createElement(
 	                'span',
 	                { onClick: function onClick(ev) {
-	                        toUserInfo(ev, rowidx);
+	                        toUserInfo(ev, rowidx, id);
 	                    }, className: 'spanName' },
 	                account
 	            )
@@ -25916,6 +26507,10 @@ module.exports =
 	
 	var _userdata = __webpack_require__(/*! ./userdata.js */ 308);
 	
+	var _reactPaginate = __webpack_require__(/*! react-paginate */ 387);
+	
+	var _reactPaginate2 = _interopRequireDefault(_reactPaginate);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var UserList = exports.UserList = function UserList(_ref) {
@@ -25925,7 +26520,9 @@ module.exports =
 	      toAddUser = _ref.toAddUser,
 	      toDeleteUser = _ref.toDeleteUser,
 	      toEditUser = _ref.toEditUser,
-	      toUserInfo = _ref.toUserInfo;
+	      toUserInfo = _ref.toUserInfo,
+	      handlePageClick = _ref.handlePageClick,
+	      pageNum = _ref.pageNum;
 	
 	  var rowidx = 0;
 	  return _react2.default.createElement(
@@ -26077,7 +26674,22 @@ module.exports =
 	            return ret;
 	          })
 	        )
-	      )
+	      ),
+	      _react2.default.createElement(_reactPaginate2.default, { previousLabel: "previous",
+	        nextLabel: "next",
+	        breakLabel: _react2.default.createElement(
+	          'a',
+	          null,
+	          '...'
+	        ),
+	        breakClassName: "break-me",
+	        pageNum: 110,
+	        marginPagesDisplayed: 2,
+	        pageRangeDisplayed: 5,
+	        clickCallback: handlePageClick,
+	        containerClassName: "pagination",
+	        subContainerClassName: "pages pagination",
+	        activeClassName: "active" })
 	    )
 	  );
 	};
@@ -26136,7 +26748,7 @@ module.exports =
 	
 	var _nav2 = _interopRequireDefault(_nav);
 	
-	var _header = __webpack_require__(/*! ./view/header.js */ 325);
+	var _header = __webpack_require__(/*! ./view/baseinfo/header.js */ 368);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -26876,6 +27488,18 @@ module.exports =
 	
 	var _teethgraph2 = _interopRequireDefault(_teethgraph);
 	
+	var _basicinfo = __webpack_require__(/*! ./basicinfo.js */ 363);
+	
+	var _basicinfo2 = _interopRequireDefault(_basicinfo);
+	
+	var _history = __webpack_require__(/*! ./history.js */ 375);
+	
+	var _history2 = _interopRequireDefault(_history);
+	
+	var _teethstatus = __webpack_require__(/*! ./teethstatus.js */ 380);
+	
+	var _teethstatus2 = _interopRequireDefault(_teethstatus);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var BASIC = 'BASIC';
@@ -26889,7 +27513,6 @@ module.exports =
 	        toTeethStatus = _ref.toTeethStatus,
 	        toTeethGraph = _ref.toTeethGraph,
 	        tab = _ref.tab;
-	
 	
 	    return _react2.default.createElement(
 	        'div',
@@ -26957,15 +27580,23 @@ module.exports =
 	        key: 'toBasic',
 	        value: function toBasic() {
 	            this.setState({ tab: BASIC });
+	            this.context.showUserData({ asyncProcess: _basicinfo.asyncEvent, comCreater: function comCreater() {
+	                    return _react2.default.createElement(_basicinfo2.default, null);
+	                } });
 	        }
 	    }, {
 	        key: 'toillHistory',
 	        value: function toillHistory() {
 	            this.setState({ tab: ILLHISTORY });
+	            this.context.showUserData({ asyncProcess: _history.asyncEvent, comCreater: function comCreater() {
+	                    return _react2.default.createElement(_history2.default, null);
+	                } });
 	        }
 	    }, {
 	        key: 'toTeethGraph',
 	        value: function toTeethGraph() {
+	            var WebUploader = window.webuploader;
+	            console.log(WebUploader);
 	            this.setState({ tab: TEETHGRAPH });
 	            this.context.showUserData({ asyncProcess: _teethgraph.asyncEvent, comCreater: function comCreater() {
 	                    return _react2.default.createElement(_teethgraph2.default, null);
@@ -26975,6 +27606,9 @@ module.exports =
 	        key: 'toTeethStatus',
 	        value: function toTeethStatus() {
 	            this.setState({ tab: TEETHSTATUS });
+	            this.context.showUserData({ asyncProcess: _teethstatus.asyncEvent, comCreater: function comCreater() {
+	                    return _react2.default.createElement(_teethstatus2.default, null);
+	                } });
 	        }
 	    }, {
 	        key: 'render',
@@ -27002,6 +27636,10 @@ module.exports =
 	    value: true
 	});
 	exports.default = exports.asyncEvent = undefined;
+	
+	var _defineProperty2 = __webpack_require__(/*! babel-runtime/helpers/defineProperty */ 388);
+	
+	var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 	
 	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
 	
@@ -27047,7 +27685,7 @@ module.exports =
 	
 	var _nav2 = _interopRequireDefault(_nav);
 	
-	var _header = __webpack_require__(/*! ./view/header.js */ 325);
+	var _header = __webpack_require__(/*! ./view/baseinfo/header.js */ 368);
 	
 	var _auth2 = __webpack_require__(/*! ../../redux/reducers/auth */ 241);
 	
@@ -27057,11 +27695,11 @@ module.exports =
 	
 	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
 	
-	var _teethshow = __webpack_require__(/*! ./view/teethshow.js */ 326);
+	var _teethshow = __webpack_require__(/*! ./view/teeth/teethshow.js */ 369);
 	
-	var _teethedit = __webpack_require__(/*! ./view/teethedit.js */ 327);
+	var _teethedit = __webpack_require__(/*! ./view/teeth/teethedit.js */ 370);
 	
-	var _teethheader = __webpack_require__(/*! ./view/teethheader.js */ 328);
+	var _teethheader = __webpack_require__(/*! ./view/teeth/teethheader.js */ 371);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -27103,10 +27741,10 @@ module.exports =
 	var TeethGraph = (_dec = (0, _reduxConnect.asyncConnect)(asyncEvent), _dec2 = (0, _reactRedux.connect)(function (state) {
 	    return {
 	        auth: state.get('auth'),
-	        mteeth_status: state.get('mteeth_status'),
-	        cteeth_status: state.get('cteeth_status')
+	        mteeth_ui: state.getIn(['mteeth_status', 'teeth_ui']),
+	        cteeth_ui: state.getIn(['cteeth_status', 'teeth_ui'])
 	    };
-	}, { pushState: _reactRouterRedux.push, switchteethm: _mteeth_status.switchteeth, switchteethc: _cteeth_status.switchteeth, switchachem: _mteeth_status.switchache, switchachec: _cteeth_status.switchache, switchtoothm: _mteeth_status.switchtooth, switchtoothc: _cteeth_status.switchtooth }), _dec(_class = _dec2(_class = function (_Component) {
+	}, { pushState: _reactRouterRedux.push, switchteethm: _mteeth_status.switchteeth, switchteethc: _cteeth_status.switchteeth, switchachem: _mteeth_status.switchache, switchachec: _cteeth_status.switchache, switchtoothm: _mteeth_status.switchtooth, switchtoothc: _cteeth_status.switchtooth, flushgraphydata: _mteeth_status.flushgraphydata }), _dec(_class = _dec2(_class = function (_Component) {
 	    (0, _inherits3.default)(TeethGraph, _Component);
 	
 	    function TeethGraph(props) {
@@ -27129,9 +27767,15 @@ module.exports =
 	    }, {
 	        key: 'toAdd',
 	        value: function toAdd() {
-	            var teeth_status = this.props.teethtype == 'M' ? this.props.mteeth_status : this.props.cteeth_status;
-	            var addtime = teeth_status.getIn(['teeth_ui', 'time']);
+	            var teeth_ui = this.props.teethtype == 'M' ? this.props.mteeth_ui : this.props.cteeth_ui;
+	            var addtime = teeth_ui.get('time');
 	            this.setState((0, _extends3.default)({}, this.state, { check: false, edit: false, add: true, addtime: addtime }));
+	        }
+	    }, {
+	        key: 'save',
+	        value: function save() {
+	            this.props.flushgraphydata();
+	            this.toCheck();
 	        }
 	    }, {
 	        key: 'toEdit',
@@ -27141,7 +27785,6 @@ module.exports =
 	    }, {
 	        key: 'toCheck',
 	        value: function toCheck() {
-	
 	            this.setState((0, _extends3.default)({}, this.state, { check: true, edit: false, add: false }));
 	        }
 	    }, {
@@ -27158,7 +27801,7 @@ module.exports =
 	        key: 'componentWillMount',
 	        value: function componentWillMount() {
 	
-	            var teethtype = this.props.mteeth_status.get('allUserTeeth').size >= 0 ? 'M' : 'C';
+	            var teethtype = this.props.mteeth_ui.get('size') >= 0 ? 'M' : 'C';
 	            this.setState((0, _extends3.default)({}, this.state, { teethtype: teethtype }));
 	        }
 	    }, {
@@ -27167,8 +27810,8 @@ module.exports =
 	    }, {
 	        key: 'componentWillReceiveProps',
 	        value: function componentWillReceiveProps(nextProps) {
-	            var teethtype = nextProps.mteeth_status.get('allUserTeeth').size >= 0 ? 'M' : 'C';
-	            var curToothName = nextProps.mteeth_status.get('allUserTeeth').size >= 0 ? nextProps.mteeth_status.getIn(['teeth_ui', 'toothname']) : nextProps.cteeth_status.getIn(['teeth_ui', 'toothname']);
+	            var teethtype = nextProps.mteeth_ui.get('size') >= 0 ? 'M' : 'C';
+	            var curToothName = nextProps.mteeth_ui.get('size') >= 0 ? nextProps.mteeth_ui.get('toothname') : nextProps.cteeth_ui.get('toothname');
 	            if (curToothName) this.setState((0, _extends3.default)({}, this.state, { teethtype: teethtype, curToothName: curToothName }));else this.setState((0, _extends3.default)({}, this.state, { teethtype: teethtype }));
 	        }
 	    }, {
@@ -27192,6 +27835,23 @@ module.exports =
 	            this.props.switchachec({ acheidx: acheidx, curToothName: curToothName, status: status });
 	        }
 	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            var _window$$$diyUpload;
+	
+	            window.$("#pick").diyUpload((_window$$$diyUpload = {
+	                url: '',
+	                success: function success(data) {},
+	                error: function error(err) {
+	                    console.log(err);
+	                },
+	                buttonText: '上传图片'
+	            }, (0, _defineProperty3.default)(_window$$$diyUpload, 'buttonText', '上传图片'), (0, _defineProperty3.default)(_window$$$diyUpload, 'chunked', false), (0, _defineProperty3.default)(_window$$$diyUpload, 'auto', true), (0, _defineProperty3.default)(_window$$$diyUpload, 'chunkSize', 1048576 * 15), (0, _defineProperty3.default)(_window$$$diyUpload, 'fileNumLimit', 1), (0, _defineProperty3.default)(_window$$$diyUpload, 'fileSizeLimit', 1048576 * 100), (0, _defineProperty3.default)(_window$$$diyUpload, 'fileSingleSizeLimit', 1048576 * 15), (0, _defineProperty3.default)(_window$$$diyUpload, 'accept', {
+	                mimeTypes: 'image/*',
+	                extensions: 'gif,jpg,jpeg,png'
+	            }), _window$$$diyUpload));
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
 	
@@ -27204,24 +27864,25 @@ module.exports =
 	                        check: this.state.check,
 	                        add: this.state.add,
 	                        addTime: this.state.addtime,
-	                        teeth_status: this.state.teethtype == 'M' ? this.props.mteeth_status.toJS() : this.props.cteeth_status.toJS(),
+	                        teeth_ui: this.state.teethtype == 'M' ? this.props.mteeth_ui.toJS() : this.props.cteeth_ui.toJS(),
 	                        toAdd: this.toAdd.bind(this),
 	                        toEdit: this.toEdit.bind(this),
 	                        toCheck: this.toCheck.bind(this),
+	                        saveTeethGraph: this.save.bind(this),
 	                        changeCheckTime: this.changeCheckTime.bind(this),
 	                        changeEditTime: this.changeEditTime.bind(this)
 	                    }),
 	                    ' ',
 	                    this.state.check ? (0, _teethshow.TeethShow)({
 	                        teethtype: this.state.teethtype,
-	                        mteeth_status: this.props.mteeth_status ? this.props.mteeth_status.toJS() : [],
-	                        cteeth_status: this.props.cteeth_status ? this.props.cteeth_status.toJS() : [],
+	                        mteeth_ui: this.props.mteeth_ui ? this.props.mteeth_ui.toJS() : {},
+	                        cteeth_ui: this.props.cteeth_ui ? this.props.cteeth_ui.toJS() : {},
 	                        toMteeth: this.toMteeth.bind(this),
 	                        toCteeth: this.toCteeth.bind(this)
 	                    }) : (0, _teethedit.TeethEdit)({
 	                        teethtype: this.state.teethtype,
-	                        mteeth_status: this.props.mteeth_status ? this.props.mteeth_status.toJS() : [],
-	                        cteeth_status: this.props.cteeth_status ? this.props.cteeth_status.toJS() : [],
+	                        mteeth_ui: this.props.mteeth_ui ? this.props.mteeth_ui.toJS() : {},
+	                        cteeth_ui: this.props.cteeth_ui ? this.props.cteeth_ui.toJS() : {},
 	                        toMteeth: this.toMteeth.bind(this),
 	                        toCteeth: this.toCteeth.bind(this),
 	                        clickOnTooth: this.clickOnTooth.bind(this),
@@ -27238,576 +27899,10 @@ module.exports =
 	exports.default = TeethGraph;
 
 /***/ },
-/* 325 */
-/*!***************************************************!*\
-  !*** ./backend/useradmin/userinfo/view/header.js ***!
-  \***************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.Header = undefined;
-	
-	var _react = __webpack_require__(/*! react */ 47);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _reactDom = __webpack_require__(/*! react-dom */ 302);
-	
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var Header = exports.Header = function Header(_ref) {
-	    var backToUsers = _ref.backToUsers,
-	        toMedRecord = _ref.toMedRecord,
-	        photo = _ref.photo,
-	        realname = _ref.realname,
-	        phone = _ref.phone,
-	        age = _ref.age;
-	
-	    return _react2.default.createElement(
-	        'div',
-	        { className: 'rtop rtop_edit' },
-	        _react2.default.createElement(
-	            'div',
-	            { className: 'but-box bj-none' },
-	            _react2.default.createElement(
-	                'p',
-	                null,
-	                _react2.default.createElement(
-	                    'a',
-	                    { onClick: backToUsers, className: 'back-but' },
-	                    '\u8FD4\u56DE'
-	                )
-	            )
-	        ),
-	        _react2.default.createElement(
-	            'div',
-	            { className: 'userInfobox' },
-	            _react2.default.createElement(
-	                'dl',
-	                null,
-	                _react2.default.createElement(
-	                    'dt',
-	                    null,
-	                    _react2.default.createElement('img', { src: !photo || photo == 'ssssss' ? __webpack_require__(/*! ../../../common/images/user_default.png */ 309) : photo, alt: '' })
-	                ),
-	                _react2.default.createElement(
-	                    'dd',
-	                    null,
-	                    _react2.default.createElement(
-	                        'h3',
-	                        null,
-	                        _react2.default.createElement(
-	                            'span',
-	                            null,
-	                            realname
-	                        ),
-	                        _react2.default.createElement(
-	                            'span',
-	                            null,
-	                            age
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'p',
-	                        null,
-	                        phone
-	                    )
-	                )
-	            ),
-	            _react2.default.createElement(
-	                'a',
-	                { onClick: toMedRecord, className: 'default_inputbtn see-but' },
-	                '\u67E5\u770B\u75C5\u5386'
-	            )
-	        )
-	    );
-	};
-
-/***/ },
-/* 326 */
-/*!******************************************************!*\
-  !*** ./backend/useradmin/userinfo/view/teethshow.js ***!
-  \******************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.TeethShow = undefined;
-	
-	var _react = __webpack_require__(/*! react */ 47);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _reactDom = __webpack_require__(/*! react-dom */ 302);
-	
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-	
-	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var ToothAche = function ToothAche(_ref) {
-	    var tooth = _ref.tooth,
-	        ache_list = _ref.ache_list;
-	
-	
-	    return _react2.default.createElement(
-	        'div',
-	        { className: 'H_teeth_position_list_margin_bottom' },
-	        _react2.default.createElement(
-	            'label',
-	            null,
-	            '牙齿' + tooth.name + ':'
-	        ),
-	        _react2.default.createElement(
-	            'p',
-	            null,
-	            tooth.ache.map(function (idx) {
-	                return _react2.default.createElement(
-	                    'span',
-	                    { className: 'H_teeth_position_list_margin' },
-	                    ache_list[idx].name
-	                );
-	            })
-	        )
-	    );
-	};
-	
-	var TeethAche = function TeethAche(_ref2) {
-	    var teeth_status = _ref2.teeth_status;
-	
-	    var teethui = [];
-	    teeth_status.teeth_ui.teeth.forEach(function (tooth) {
-	        if (tooth.ache.length) teethui.push(ToothAche({ tooth: tooth, ache_list: teeth_status.teeth_ui.ache_list }));
-	    });
-	    return teethui;
-	};
-	
-	var TeethShow = exports.TeethShow = function TeethShow(_ref3) {
-	    var teethtype = _ref3.teethtype,
-	        mteeth_status = _ref3.mteeth_status,
-	        cteeth_status = _ref3.cteeth_status,
-	        toMteeth = _ref3.toMteeth,
-	        toCteeth = _ref3.toCteeth;
-	
-	    var height = window.innerHeight || document.documentElement.clientHeight;
-	    return _react2.default.createElement(
-	        'div',
-	        { className: 'userContain z_userContain_edit', style: { height: height - 260 + 'px' } },
-	        _react2.default.createElement(
-	            'div',
-	            { className: 'z_userContainMain' },
-	            _react2.default.createElement(
-	                'div',
-	                { className: 'containb_right', style: { paddingBottom: "50px" } },
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'H_teeth_position' },
-	                    _react2.default.createElement(
-	                        'div',
-	                        { className: 'H_teeth_position_left' },
-	                        _react2.default.createElement(
-	                            'span',
-	                            { onClick: toMteeth, className: 'man active', id: 'mantab' },
-	                            '\u6210\u4EBA\u7259\u4F4D\u56FE'
-	                        ),
-	                        _react2.default.createElement(
-	                            'span',
-	                            { onClick: toCteeth, className: 'child', id: 'childtab' },
-	                            '\u5E7C\u513F\u7259\u4F4D\u56FE'
-	                        )
-	                    ),
-	                    teethtype == 'M' ? _react2.default.createElement(
-	                        'div',
-	                        null,
-	                        _react2.default.createElement(
-	                            'div',
-	                            { className: 'H_teeth_position_pic' },
-	                            mteeth_status.teeth_ui.teeth.map(function (tooth) {
-	                                return _react2.default.createElement(
-	                                    'div',
-	                                    { className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name, style: tooth.ache.length > 0 ? { backgroundColor: '#cc6060' } : { backgroundColor: '#fafcff' } },
-	                                    tooth.name
-	                                );
-	                            })
-	                        ),
-	                        _react2.default.createElement(
-	                            'div',
-	                            { className: 'H_teeth_position_list' },
-	                            TeethAche({ teeth_status: mteeth_status })
-	                        )
-	                    ) : _react2.default.createElement(
-	                        'div',
-	                        null,
-	                        _react2.default.createElement(
-	                            'div',
-	                            { className: 'H_teeth_position_pic H_teeth_position_pic_son' },
-	                            cteeth_status.teeth_ui.teeth.map(function (tooth) {
-	                                return _react2.default.createElement(
-	                                    'div',
-	                                    { className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name },
-	                                    tooth.name
-	                                );
-	                            })
-	                        ),
-	                        _react2.default.createElement(
-	                            'div',
-	                            { className: 'H_teeth_position_list' },
-	                            TeethAche({ teeth_status: cteeth_status })
-	                        )
-	                    )
-	                )
-	            )
-	        )
-	    );
-	};
-
-/***/ },
-/* 327 */
-/*!******************************************************!*\
-  !*** ./backend/useradmin/userinfo/view/teethedit.js ***!
-  \******************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.TeethEdit = undefined;
-	
-	var _react = __webpack_require__(/*! react */ 47);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _reactDom = __webpack_require__(/*! react-dom */ 302);
-	
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-	
-	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var TeethEdit = exports.TeethEdit = function TeethEdit(_ref) {
-	    var teethtype = _ref.teethtype,
-	        mteeth_status = _ref.mteeth_status,
-	        cteeth_status = _ref.cteeth_status,
-	        toMteeth = _ref.toMteeth,
-	        toCteeth = _ref.toCteeth,
-	        clickOnTooth = _ref.clickOnTooth,
-	        curToothName = _ref.curToothName,
-	        clickOnMAche = _ref.clickOnMAche,
-	        clickOnCAche = _ref.clickOnCAche;
-	
-	    var height = window.innerHeight || document.documentElement.clientHeight;
-	    var macheidx = 0;
-	    var cacheidx = 0;
-	    return _react2.default.createElement(
-	        'div',
-	        { className: 'userContain z_userContain_edit', style: { height: height - 260 + 'px' } },
-	        _react2.default.createElement(
-	            'div',
-	            { className: 'z_userContainMain' },
-	            _react2.default.createElement(
-	                'div',
-	                { className: 'containb_right', style: { paddingBottom: "50px" } },
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'H_teeth_position' },
-	                    _react2.default.createElement(
-	                        'div',
-	                        { className: 'H_teeth_position_left' },
-	                        _react2.default.createElement(
-	                            'span',
-	                            { onClick: toMteeth, className: 'man active', id: 'mantab' },
-	                            '\u6210\u4EBA\u7259\u4F4D\u56FE'
-	                        ),
-	                        _react2.default.createElement(
-	                            'span',
-	                            { onClick: toCteeth, className: 'child', id: 'childtab' },
-	                            '\u5E7C\u513F\u7259\u4F4D\u56FE'
-	                        )
-	                    ),
-	                    teethtype == 'M' ? _react2.default.createElement(
-	                        'div',
-	                        null,
-	                        _react2.default.createElement(
-	                            'div',
-	                            { className: 'H_teeth_position_pic' },
-	                            mteeth_status.teeth_ui.teeth.map(function (tooth) {
-	                                return _react2.default.createElement(
-	                                    'div',
-	                                    { onClick: function onClick(ev) {
-	                                            clickOnTooth(ev, tooth.name);
-	                                        }, className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name, style: curToothName == tooth.name ? { backgroundColor: '#c1d5f2' } : tooth.ache.length > 0 ? { backgroundColor: '#cc6060' } : { backgroundColor: '#fafcff' } },
-	                                    tooth.name
-	                                );
-	                            })
-	                        ),
-	                        _react2.default.createElement(
-	                            'div',
-	                            { className: 'H_teeth_position_list' },
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'H_teeth_position_list_title' },
-	                                _react2.default.createElement(
-	                                    'span',
-	                                    { style: { fontSize: '18px' } },
-	                                    curToothName ? '牙齿：' + curToothName : '请选择左图的牙齿，进行添加'
-	                                )
-	                            ),
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'H_teeth_position_list_item', style: curToothName ? {} : { pointerEvents: 'none' } },
-	                                mteeth_status.teeth_ui.ache_list.map(function (ache) {
-	                                    var _marchidx = macheidx++;
-	                                    return _react2.default.createElement(
-	                                        'div',
-	                                        { className: 'wrap' },
-	                                        _react2.default.createElement('input', { type: 'checkbox', id: _marchidx, checked: ache.bool }),
-	                                        _react2.default.createElement(
-	                                            'label',
-	                                            { onClick: function onClick(ev) {
-	                                                    clickOnMAche(ev, _marchidx, curToothName, !ache.bool);
-	                                                }, htmlFor: _marchidx },
-	                                            _react2.default.createElement(
-	                                                'i',
-	                                                null,
-	                                                '\xA0',
-	                                                ache.name
-	                                            )
-	                                        )
-	                                    );
-	                                })
-	                            )
-	                        )
-	                    ) : _react2.default.createElement(
-	                        'div',
-	                        null,
-	                        _react2.default.createElement(
-	                            'div',
-	                            { className: 'H_teeth_position_pic H_teeth_position_pic_son' },
-	                            cteeth_status.teeth_ui.teeth.map(function (tooth) {
-	                                return _react2.default.createElement(
-	                                    'div',
-	                                    { onClick: function onClick(ev) {
-	                                            clickOnTooth(ev, tooth.name);
-	                                        }, className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name, style: curToothName == tooth.name ? { backgroundColor: '#c1d5f2' } : tooth.ache.length > 0 ? { backgroundColor: '#cc6060' } : { backgroundColor: '#fafcff' } },
-	                                    tooth.name
-	                                );
-	                            })
-	                        ),
-	                        _react2.default.createElement(
-	                            'div',
-	                            { className: 'H_teeth_position_list' },
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'H_teeth_position_list_title' },
-	                                _react2.default.createElement(
-	                                    'span',
-	                                    { style: { fontSize: '18px' } },
-	                                    curToothName ? '牙齿：' + curToothName : '请选择左图的牙齿，进行添加'
-	                                )
-	                            ),
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'H_teeth_position_list_item', style: curToothName ? {} : { pointerEvents: 'none' } },
-	                                cteeth_status.teeth_ui.ache_list.map(function (ache) {
-	                                    cacheidx++;
-	                                    return _react2.default.createElement(
-	                                        'div',
-	                                        { className: 'wrap' },
-	                                        _react2.default.createElement('input', { type: 'checkbox', id: cacheidx, checked: ache.bool }),
-	                                        _react2.default.createElement(
-	                                            'label',
-	                                            { onClick: function onClick(ev) {
-	                                                    clickOnCAche(ev, cacheidx - 1, curToothName, !ache.bool);
-	                                                }, htmlFor: cacheidx },
-	                                            _react2.default.createElement(
-	                                                'i',
-	                                                null,
-	                                                '\xA0',
-	                                                ache.name
-	                                            )
-	                                        )
-	                                    );
-	                                })
-	                            )
-	                        )
-	                    )
-	                )
-	            )
-	        )
-	    );
-	};
-
-/***/ },
-/* 328 */
-/*!********************************************************!*\
-  !*** ./backend/useradmin/userinfo/view/teethheader.js ***!
-  \********************************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.TeethHeader = undefined;
-	
-	var _react = __webpack_require__(/*! react */ 47);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _reactDom = __webpack_require__(/*! react-dom */ 302);
-	
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-	
-	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	var TeethHeader = exports.TeethHeader = function TeethHeader(_ref) {
-	    var edit = _ref.edit,
-	        check = _ref.check,
-	        add = _ref.add,
-	        addTime = _ref.addTime,
-	        teeth_status = _ref.teeth_status,
-	        toAdd = _ref.toAdd,
-	        toEdit = _ref.toEdit,
-	        toCheck = _ref.toCheck,
-	        changeCheckTime = _ref.changeCheckTime,
-	        changeEditTime = _ref.changeEditTime;
-	
-	    if (check) {
-	        var index = 0;
-	        return _react2.default.createElement(
-	            'div',
-	            { className: 'time z_time_edit', style: { top: '215px' } },
-	            _react2.default.createElement(
-	                'div',
-	                { className: 'z_time_btn', style: { border: 'none' } },
-	                _react2.default.createElement(
-	                    'p',
-	                    null,
-	                    _react2.default.createElement(
-	                        'b',
-	                        null,
-	                        '\u66F4\u65B0\u8BB0\u5F55\uFF1A'
-	                    ),
-	                    _react2.default.createElement(
-	                        'select',
-	                        { onChange: changeCheckTime },
-	                        teeth_status.allUserTeeth[teeth_status.teeth_ui.useridx].map(function (teeth) {
-	                            index++;
-	                            return _react2.default.createElement(
-	                                'option',
-	                                { value: index },
-	                                teeth.time
-	                            );
-	                        })
-	                    )
-	                ),
-	                _react2.default.createElement(
-	                    'label',
-	                    null,
-	                    _react2.default.createElement(
-	                        'span',
-	                        { onClick: toAdd, className: 'default_inputbtn z_add_btn' },
-	                        '\u6DFB\u52A0'
-	                    ),
-	                    _react2.default.createElement(
-	                        'span',
-	                        { onClick: toEdit, className: 'default_inputbtn z_edit_btn' },
-	                        '\u7F16\u8F91'
-	                    )
-	                )
-	            )
-	        );
-	    } else if (edit) {
-	        return _react2.default.createElement(
-	            'div',
-	            { className: 'time z_time_edit' },
-	            _react2.default.createElement(
-	                'div',
-	                { className: 'z_time_btn' },
-	                _react2.default.createElement(
-	                    'p',
-	                    null,
-	                    _react2.default.createElement(
-	                        'b',
-	                        null,
-	                        '\u66F4\u65B0\u8BB0\u5F55\uFF1A'
-	                    ),
-	                    _react2.default.createElement(
-	                        'select',
-	                        { onChange: changeEditTime },
-	                        teeth_status.allUserTeeth[teeth_status.teeth_ui.useridx].map(function (teeth) {
-	                            return _react2.default.createElement(
-	                                'option',
-	                                { value: index },
-	                                teeth.time
-	                            );
-	                        })
-	                    )
-	                ),
-	                _react2.default.createElement(
-	                    'label',
-	                    null,
-	                    _react2.default.createElement(
-	                        'span',
-	                        { onClick: toCheck, className: 'default_inputbtn z_save_btn' },
-	                        '\u4FDD\u5B58'
-	                    )
-	                )
-	            )
-	        );
-	    } else if (add) {
-	        return _react2.default.createElement(
-	            'div',
-	            { className: 'time z_time_edit' },
-	            _react2.default.createElement(
-	                'div',
-	                { className: 'z_time_btn' },
-	                _react2.default.createElement(
-	                    'p',
-	                    null,
-	                    _react2.default.createElement(
-	                        'em',
-	                        { className: 'see_page_em' },
-	                        '\u57FA\u4E8E\u6700\u65B0\uFF08',
-	                        _react2.default.createElement(
-	                            'font',
-	                            { className: 'new_time' },
-	                            addTime
-	                        ),
-	                        '\uFF09\u4FE1\u606F\u4E0A\u8FDB\u884C\u6DFB\u52A0'
-	                    )
-	                ),
-	                _react2.default.createElement(
-	                    'label',
-	                    null,
-	                    _react2.default.createElement(
-	                        'span',
-	                        { onClick: toCheck, className: 'default_inputbtn z_save_btn' },
-	                        '\u4FDD\u5B58'
-	                    )
-	                )
-	            )
-	        );
-	    }
-	};
-
-/***/ },
+/* 325 */,
+/* 326 */,
+/* 327 */,
+/* 328 */,
 /* 329 */
 /*!*************************************************!*\
   !*** ./backend/common/js/partial/left_table.js ***!
@@ -28259,13 +28354,13 @@ module.exports =
 	            'div',
 	            { className: 'login-input-box user-input' },
 	            _react2.default.createElement('span', { className: 'icon-user' }),
-	            _react2.default.createElement('input', { onChange: onPassword, type: 'text', id: 'username', autocomplete: 'off', name: 'username' })
+	            _react2.default.createElement('input', { onChange: onUsername, type: 'text', id: 'username', autocomplete: 'off', name: 'username' })
 	          ),
 	          _react2.default.createElement(
 	            'div',
 	            { className: 'login-input-box pwd-input' },
 	            _react2.default.createElement('span', { className: 'icon-lock' }),
-	            _react2.default.createElement('input', { onChange: onUsername, type: 'password', id: 'pwd', autocomplete: 'off', name: 'password' })
+	            _react2.default.createElement('input', { onChange: onPassword, type: 'password', id: 'pwd', autocomplete: 'off', name: 'password' })
 	          ),
 	          _react2.default.createElement(
 	            'div',
@@ -28466,7 +28561,10 @@ module.exports =
 	                console.log("pppppppp");
 	                req.body = (0, _stringify2.default)(data);
 	                console.log(req.body);
-	                req.headers = {};
+	                req.headers = {
+	                    'Accept': 'application/json',
+	                    'Content-Type': 'application/json'
+	                };
 	            }
 	            return fetch(path + u, req).then(format).then(done, error);
 	        };
@@ -28580,6 +28678,6885 @@ module.exports =
 /***/ function(module, exports) {
 
 	module.exports = require("cookie-parser");
+
+/***/ },
+/* 363 */
+/*!*************************************************!*\
+  !*** ./backend/useradmin/userinfo/basicinfo.js ***!
+  \*************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = exports.asyncEvent = exports.BaseInfoHead = undefined;
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 284);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 288);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 289);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 293);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 294);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _promise = __webpack_require__(/*! babel-runtime/core-js/promise */ 312);
+	
+	var _promise2 = _interopRequireDefault(_promise);
+	
+	var _dec, _dec2, _class;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	var _nav = __webpack_require__(/*! ./nav.js */ 323);
+	
+	var _nav2 = _interopRequireDefault(_nav);
+	
+	var _header = __webpack_require__(/*! ./view/baseinfo/header.js */ 368);
+	
+	var _auth = __webpack_require__(/*! ../../redux/reducers/auth */ 241);
+	
+	var _user_patient = __webpack_require__(/*! ../../redux/reducers/user_patient */ 247);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	var _baseinfoedit = __webpack_require__(/*! ./view/baseinfo/baseinfoedit */ 372);
+	
+	var _baseinfoshow = __webpack_require__(/*! ./view/baseinfo/baseinfoshow */ 373);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var __asyncEvent = function __asyncEvent(_ref) {
+	    var dispatch = _ref.dispatch,
+	        getState = _ref.getState;
+	
+	
+	    var state = getState();
+	    var id = state.getIn(['user_patient', 'frontuserinfo', 'id']);
+	    return dispatch((0, _user_patient.load_detail_baseinfo)({ id: id }));
+	};
+	var BaseInfoHead = exports.BaseInfoHead = function BaseInfoHead(_ref2) {
+	    var edit = _ref2.edit,
+	        check = _ref2.check,
+	        add = _ref2.add,
+	        toEdit = _ref2.toEdit,
+	        toSave = _ref2.toSave;
+	
+	    if (check) {
+	        var index = 0;
+	        return _react2.default.createElement(
+	            'div',
+	            { className: 'time z_time_edit', style: { top: '215px' } },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'z_time_btn', style: { border: 'none' } },
+	                _react2.default.createElement(
+	                    'label',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        { onClick: toEdit, className: 'default_inputbtn z_edit_btn' },
+	                        '\u7F16\u8F91'
+	                    )
+	                )
+	            )
+	        );
+	    } else if (edit) {
+	        return _react2.default.createElement(
+	            'div',
+	            { className: 'time z_time_edit' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'z_time_btn' },
+	                _react2.default.createElement(
+	                    'label',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        { onClick: toSave, className: 'default_inputbtn z_save_btn' },
+	                        '\u4FDD\u5B58'
+	                    )
+	                )
+	            )
+	        );
+	    }
+	};
+	var asyncEvent = exports.asyncEvent = [{
+	    promise: function promise(_ref3) {
+	        var _ref3$store = _ref3.store,
+	            dispatch = _ref3$store.dispatch,
+	            getState = _ref3$store.getState,
+	            params = _ref3.params;
+	
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                if (!(0, _user_patient.LoadedorLoadingUser)(getState())) {
+	                    return __asyncEvent({ dispatch: dispatch, getState: getState });
+	                } else return _promise2.default.resolve();
+	            });
+	        } else {
+	            if (!(0, _user_patient.LoadedorLoadingUser)(getState())) {
+	                return __asyncEvent({ dispatch: dispatch, getState: getState });
+	            } else return _promise2.default.resolve();
+	        }
+	    }
+	}];
+	
+	var BasicInfo = (_dec = (0, _reduxConnect.asyncConnect)(asyncEvent), _dec2 = (0, _reactRedux.connect)(function (state) {
+	    var idx = state.getIn(['user_patient', 'frontuserinfo', 'idx']);
+	    return {
+	        auth: state.get('auth'),
+	        user: state.getIn(['user_patient', 'users', idx])
+	    };
+	}, { pushState: _reactRouterRedux.push, basicInfoEdit: _user_patient.basicInfoEdit, basicInfoSave: _user_patient.basicInfoSave }), _dec(_class = _dec2(_class = function (_Component) {
+	    (0, _inherits3.default)(BasicInfo, _Component);
+	
+	    function BasicInfo(props) {
+	        (0, _classCallCheck3.default)(this, BasicInfo);
+	
+	        var _this = (0, _possibleConstructorReturn3.default)(this, (BasicInfo.__proto__ || (0, _getPrototypeOf2.default)(BasicInfo)).call(this, props));
+	        // code
+	
+	
+	        _this.state = { check: true, edit: false, dateModal: { display: "none" } };
+	        return _this;
+	    }
+	
+	    (0, _createClass3.default)(BasicInfo, [{
+	        key: 'toEdit',
+	        value: function toEdit() {
+	            this.setState((0, _extends3.default)({}, this.state, { check: false, edit: true }));
+	        }
+	    }, {
+	        key: 'toSave',
+	        value: function toSave() {
+	            this.props.basicInfoSave();
+	            this.setState((0, _extends3.default)({}, this.state, { check: true, edit: false }));
+	        }
+	    }, {
+	        key: 'onChangeInfo',
+	        value: function onChangeInfo(ev, key) {
+	            this.props.basicInfoEdit([{ key: key, val: ev.target.value }]);
+	        }
+	    }, {
+	        key: 'onClickInfo',
+	        value: function onClickInfo(key, val) {
+	            console.log(key);
+	            console.log(val);
+	            this.props.basicInfoEdit([{ key: key, val: val }]);
+	        }
+	    }, {
+	        key: 'showDateModal',
+	        value: function showDateModal() {
+	            this.state.dateModal.display == 'block' ? this.setState((0, _extends3.default)({}, this.state, { dateModal: { display: 'none' } })) : this.setState((0, _extends3.default)({}, this.state, { dateModal: { display: 'block', position: 'absolute' } }));
+	        }
+	    }, {
+	        key: 'hangleSelectDate',
+	        value: function hangleSelectDate(date) {
+	
+	            var dated = new Date();
+	            var nowYear = dated.getFullYear();
+	            var age = nowYear - date.format('Y');
+	            this.props.basicInfoEdit([{ key: 'birthdate', val: date.format('DD/MM/YY').toString() }, { key: 'age', val: age }]);
+	        }
+	    }, {
+	        key: 'upLoadPhoto',
+	        value: function upLoadPhoto() {
+	            /*图片头像上传*/
+	            var comself = this;
+	            console.log(this.state);
+	            console.log("upLoadPhoto!!!!!!!!!!!!!");
+	            var options = {
+	                thumbBox: '.thumbBox',
+	                spinner: '.spinner',
+	                imgSrc: __webpack_require__(/*! ../../common/images/user.png */ 389)
+	            };
+	            console.log(window.$._data(window.$("#btnCrop").get(0), "events"));
+	            var cropper = window.$('.imageBox').cropbox(options);
+	            if (!window.$._data(window.$("#base_photo_choose").get(0), "events") || !window.$._data(window.$("#base_photo_choose").get(0), "events").change) {
+	                console.log("33344444444443333333333333");
+	                window.$('#base_photo_rechoose,#base_photo_choose').on('change', function () {
+	                    window.$('.new-create-opcity').show();
+	                    var reader = new FileReader();
+	                    reader.onload = function (e) {
+	                        options.imgSrc = e.target.result;
+	                        cropper = window.$('.imageBox').cropbox(options);
+	                    };
+	                    console.log(this.files);
+	                    var file = this.files[0];
+	                    console.log(this.files);
+	                    if (file) {
+	                        console.log("YYYYYYYY");
+	                        console.log(file);
+	                        reader.readAsDataURL(file);
+	                    }
+	                    //this.files = [];
+	                });
+	            }
+	            if (!window.$._data(window.$("#btnCrop").get(0), "events") || !window.$._data(window.$("#btnCrop").get(0), "events").click) window.$('#btnCrop').on('click', function () {
+	                var img = cropper.getDataURL();
+	                comself.props.basicInfoEdit([{ key: 'photo', val: img }]);
+	                window.$('.new-create-opcity').hide();
+	                console.log("eeeee");
+	                // AjaxObj.imgBase64Up(function(result) {
+	                //     if (result.Data.code == 1) {
+	                //         $('.new-create-opcity').hide()
+	                //         $('#base_photo_show img').attr('src', result.Data.photo_path)
+	                //         $('#file,#file2').val('');
+	                //     } else {
+	                //         $('#base_photo_show').siblings('p').html(result.Data.msg).show()
+	                //         $('#file,#file2').val('');
+	                //     }
+	                // }, img)
+	            });
+	            if (!window.$._data(window.$("#btnZoomIn").get(0), "events") || !window.$._data(window.$("#btnZoomIn").get(0), "events").click) window.$('#btnZoomIn').on('click', function () {
+	                cropper.zoomIn();
+	            });
+	            if (!window.$._data(window.$("#btnZoomOut").get(0), "events") || !window.$._data(window.$("#btnZoomOut").get(0), "events").click) window.$('#btnZoomOut').on('click', function () {
+	                cropper.zoomOut();
+	            });
+	            if (!window.$._data(window.$(".close_dialog").get(0), "events") || !window.$._data(window.$(".close_dialog").get(0), "events").click) window.$('.close_dialog').click(function () {
+	                window.$('.new-create-opcity').hide();
+	            });
+	            /*------图片头像上传结束----*/
+	        }
+	    }, {
+	        key: 'componentDidUpdate',
+	        value: function componentDidUpdate() {
+	            if (this.state.edit) {
+	                this.upLoadPhoto();
+	            }
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	
+	            if (this.props.auth.get('user')) {
+	
+	                var baseinfo = this.props.user.get('baseinfo').toJS();
+	                var baseinfoedit = this.props.user.get('baseinfoedit').toJS();
+	                return _react2.default.createElement(
+	                    'div',
+	                    null,
+	                    BaseInfoHead({
+	                        edit: this.state.edit,
+	                        check: this.state.check,
+	                        toEdit: this.toEdit.bind(this),
+	                        toSave: this.toSave.bind(this)
+	                    }),
+	                    this.state.check ? (0, _baseinfoshow.BaseInfoShow)((0, _extends3.default)({}, baseinfo)) : (0, _baseinfoedit.BaseInfoEdit)((0, _extends3.default)({}, baseinfoedit, {
+	                        change: this.onChangeInfo.bind(this),
+	                        click: this.onClickInfo.bind(this),
+	                        hangleSelectDate: this.hangleSelectDate.bind(this),
+	                        showDateModal: this.showDateModal.bind(this),
+	                        dateModal: this.state.dateModal,
+	                        birthdate: this.props.user.getIn(['baseinfoedit', 'birthdate'])
+	
+	                    }))
+	                );
+	            }
+	        }
+	    }]);
+	    return BasicInfo;
+	}(_react.Component)) || _class) || _class);
+	exports.default = BasicInfo;
+
+/***/ },
+/* 364 */,
+/* 365 */
+/*!*******************************************!*\
+  !*** ./backend/common/images/userPic.png ***!
+  \*******************************************/
+/***/ function(module, exports) {
+
+	module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAD4AAAA+CAYAAABzwahEAAAACXBIWXMAAAsTAAALEwEAmpwYAAAKTWlDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVN3WJP3Fj7f92UPVkLY8LGXbIEAIiOsCMgQWaIQkgBhhBASQMWFiApWFBURnEhVxILVCkidiOKgKLhnQYqIWotVXDjuH9yntX167+3t+9f7vOec5/zOec8PgBESJpHmomoAOVKFPDrYH49PSMTJvYACFUjgBCAQ5svCZwXFAADwA3l4fnSwP/wBr28AAgBw1S4kEsfh/4O6UCZXACCRAOAiEucLAZBSAMguVMgUAMgYALBTs2QKAJQAAGx5fEIiAKoNAOz0ST4FANipk9wXANiiHKkIAI0BAJkoRyQCQLsAYFWBUiwCwMIAoKxAIi4EwK4BgFm2MkcCgL0FAHaOWJAPQGAAgJlCLMwAIDgCAEMeE80DIEwDoDDSv+CpX3CFuEgBAMDLlc2XS9IzFLiV0Bp38vDg4iHiwmyxQmEXKRBmCeQinJebIxNI5wNMzgwAABr50cH+OD+Q5+bk4eZm52zv9MWi/mvwbyI+IfHf/ryMAgQAEE7P79pf5eXWA3DHAbB1v2upWwDaVgBo3/ldM9sJoFoK0Hr5i3k4/EAenqFQyDwdHAoLC+0lYqG9MOOLPv8z4W/gi372/EAe/tt68ABxmkCZrcCjg/1xYW52rlKO58sEQjFu9+cj/seFf/2OKdHiNLFcLBWK8ViJuFAiTcd5uVKRRCHJleIS6X8y8R+W/QmTdw0ArIZPwE62B7XLbMB+7gECiw5Y0nYAQH7zLYwaC5EAEGc0Mnn3AACTv/mPQCsBAM2XpOMAALzoGFyolBdMxggAAESggSqwQQcMwRSswA6cwR28wBcCYQZEQAwkwDwQQgbkgBwKoRiWQRlUwDrYBLWwAxqgEZrhELTBMTgN5+ASXIHrcBcGYBiewhi8hgkEQcgIE2EhOogRYo7YIs4IF5mOBCJhSDSSgKQg6YgUUSLFyHKkAqlCapFdSCPyLXIUOY1cQPqQ28ggMor8irxHMZSBslED1AJ1QLmoHxqKxqBz0XQ0D12AlqJr0Rq0Hj2AtqKn0UvodXQAfYqOY4DRMQ5mjNlhXIyHRWCJWBomxxZj5Vg1Vo81Yx1YN3YVG8CeYe8IJAKLgBPsCF6EEMJsgpCQR1hMWEOoJewjtBK6CFcJg4Qxwicik6hPtCV6EvnEeGI6sZBYRqwm7iEeIZ4lXicOE1+TSCQOyZLkTgohJZAySQtJa0jbSC2kU6Q+0hBpnEwm65Btyd7kCLKArCCXkbeQD5BPkvvJw+S3FDrFiOJMCaIkUqSUEko1ZT/lBKWfMkKZoKpRzame1AiqiDqfWkltoHZQL1OHqRM0dZolzZsWQ8ukLaPV0JppZ2n3aC/pdLoJ3YMeRZfQl9Jr6Afp5+mD9HcMDYYNg8dIYigZaxl7GacYtxkvmUymBdOXmchUMNcyG5lnmA+Yb1VYKvYqfBWRyhKVOpVWlX6V56pUVXNVP9V5qgtUq1UPq15WfaZGVbNQ46kJ1Bar1akdVbupNq7OUndSj1DPUV+jvl/9gvpjDbKGhUaghkijVGO3xhmNIRbGMmXxWELWclYD6yxrmE1iW7L57Ex2Bfsbdi97TFNDc6pmrGaRZp3mcc0BDsax4PA52ZxKziHODc57LQMtPy2x1mqtZq1+rTfaetq+2mLtcu0W7eva73VwnUCdLJ31Om0693UJuja6UbqFutt1z+o+02PreekJ9cr1Dund0Uf1bfSj9Rfq79bv0R83MDQINpAZbDE4Y/DMkGPoa5hpuNHwhOGoEctoupHEaKPRSaMnuCbuh2fjNXgXPmasbxxirDTeZdxrPGFiaTLbpMSkxeS+Kc2Ua5pmutG003TMzMgs3KzYrMnsjjnVnGueYb7ZvNv8jYWlRZzFSos2i8eW2pZ8ywWWTZb3rJhWPlZ5VvVW16xJ1lzrLOtt1ldsUBtXmwybOpvLtqitm63Edptt3xTiFI8p0in1U27aMez87ArsmuwG7Tn2YfYl9m32zx3MHBId1jt0O3xydHXMdmxwvOuk4TTDqcSpw+lXZxtnoXOd8zUXpkuQyxKXdpcXU22niqdun3rLleUa7rrStdP1o5u7m9yt2W3U3cw9xX2r+00umxvJXcM970H08PdY4nHM452nm6fC85DnL152Xlle+70eT7OcJp7WMG3I28Rb4L3Le2A6Pj1l+s7pAz7GPgKfep+Hvqa+It89viN+1n6Zfgf8nvs7+sv9j/i/4XnyFvFOBWABwQHlAb2BGoGzA2sDHwSZBKUHNQWNBbsGLww+FUIMCQ1ZH3KTb8AX8hv5YzPcZyya0RXKCJ0VWhv6MMwmTB7WEY6GzwjfEH5vpvlM6cy2CIjgR2yIuB9pGZkX+X0UKSoyqi7qUbRTdHF09yzWrORZ+2e9jvGPqYy5O9tqtnJ2Z6xqbFJsY+ybuIC4qriBeIf4RfGXEnQTJAntieTE2MQ9ieNzAudsmjOc5JpUlnRjruXcorkX5unOy553PFk1WZB8OIWYEpeyP+WDIEJQLxhP5aduTR0T8oSbhU9FvqKNolGxt7hKPJLmnVaV9jjdO31D+miGT0Z1xjMJT1IreZEZkrkj801WRNberM/ZcdktOZSclJyjUg1plrQr1zC3KLdPZisrkw3keeZtyhuTh8r35CP5c/PbFWyFTNGjtFKuUA4WTC+oK3hbGFt4uEi9SFrUM99m/ur5IwuCFny9kLBQuLCz2Lh4WfHgIr9FuxYji1MXdy4xXVK6ZHhp8NJ9y2jLspb9UOJYUlXyannc8o5Sg9KlpUMrglc0lamUycturvRauWMVYZVkVe9ql9VbVn8qF5VfrHCsqK74sEa45uJXTl/VfPV5bdra3kq3yu3rSOuk626s91m/r0q9akHV0IbwDa0b8Y3lG19tSt50oXpq9Y7NtM3KzQM1YTXtW8y2rNvyoTaj9nqdf13LVv2tq7e+2Sba1r/dd3vzDoMdFTve75TsvLUreFdrvUV99W7S7oLdjxpiG7q/5n7duEd3T8Wej3ulewf2Re/ranRvbNyvv7+yCW1SNo0eSDpw5ZuAb9qb7Zp3tXBaKg7CQeXBJ9+mfHvjUOihzsPcw83fmX+39QjrSHkr0jq/dawto22gPaG97+iMo50dXh1Hvrf/fu8x42N1xzWPV56gnSg98fnkgpPjp2Snnp1OPz3Umdx590z8mWtdUV29Z0PPnj8XdO5Mt1/3yfPe549d8Lxw9CL3Ytslt0utPa49R35w/eFIr1tv62X3y+1XPK509E3rO9Hv03/6asDVc9f41y5dn3m978bsG7duJt0cuCW69fh29u0XdwruTNxdeo94r/y+2v3qB/oP6n+0/rFlwG3g+GDAYM/DWQ/vDgmHnv6U/9OH4dJHzEfVI0YjjY+dHx8bDRq98mTOk+GnsqcTz8p+Vv9563Or59/94vtLz1j82PAL+YvPv655qfNy76uprzrHI8cfvM55PfGm/K3O233vuO+638e9H5ko/ED+UPPR+mPHp9BP9z7nfP78L/eE8/sl0p8zAAAAIGNIUk0AAHolAACAgwAA+f8AAIDpAAB1MAAA6mAAADqYAAAXb5JfxUYAAAfwSURBVHja1JtLbGRHFYa/qvvol923257udns89gCCQDZAgMCGhxAskIKElAAZhWyiIB5ZkAEkQkDisUAgQIhHCOL9UEhEghCbQLJAA0FBGkBBWWSULJJYM7HHzLTH/XI/7r1VLPrexu7xeNruuo7nSFeWrXbd+us/p+o/p06L06dPk6C9DrgdeDvwSqAApABr5HMh0AMuAc8DTwC/Ap5LamIiAeDvA+4B3gJkJhxrE/gn8DXgcZOTlIbGSQM/AZrAo8A7DIAGyALvBB6Lxr4fcA8D8AzwO6AB3AlMJRg2U8DHowV4cNKFnQT4l4B14IOAw8GZC9wavfvzBwm8Em06X45c/OWydBT7Z6JNM1HgdwAvAK/m8NhrgZeAjyQF/IfATw1tWqYtC/wa+IFp4I8AnwAEh9cEcBfwsCngDwE3c+3YLcBvJwV+P/Bhrj07AXxnv8DvBj7GtWufAj66V+DXAd845DE9Tsx/D1gcF7iIdLHLtW9p4NS4wL99pVW6Ru0VwFevlp1VgLNJS1AhtkeQ1jpp8D1gDtiI/2CPfOCXSYAWQqCUIgxDlFIopYZghRAIIZBSYlkWUsokgKcibB/YCXgVeK9pwGEY4vs+lmWRzWbJZDK4rotlDWoRSimCIKDX69Fut+n1eliWhW3bpsHfBMxEyc024PftUBmZzL8iEEeOHMHzPDKZDOl0Gtu2h8xqrQnDkH6/T6fTodVqcenSJTqdznABDIWCBXwfuG1rjMuo2pEy8QalFL7vk8vlKJVKzM7OkkqlrurG8SI0Gg0uXLjAxsYGYRjiuq4p8F0gByh7S9ZlDLRSikKhwPz8PJ7nDd16nNCwbZtisUg2myWdTrO2tka/3zcFPg18CHgopuAuE6C11iil8DyPpaUlisXi2KBHFyCdTlOtVqlWq1iWhe/7piLw5NZz/HoTI8buPT8/z/T09GXH1p5LLa5LpVKhVCqZPPbeEAN/qwmVppTCtm3K5TKe55mrM7ku5XKZfD5vinUXeLOMd7lJLQgCCoUCxWJxYqZHLZfLMTMzg2VZpli/VQJvMhHbtm2Tz+dxXfMSXwiB53kmWb9RAscnnVQQBGSzWXK5nHG2h9txOs309LQx/S4jNTNxfMfiJEl9n06ncRzHhLvPyEk3Nq01Wmtc101CZl52xjuOg1Jq4g1OYuAaSUqZVHKxXXOak7CWNMHEQZnB9FUYoWk01UzK4kzOwGJrCWgTrPf7fROxtyvbvu/j+76JsFISCEzEeLfbpdfrJQq82+3i+74JxoM4HZ1YvLTbbVqtVmLu3ul0aDabpoZrS+C8CVcPgoB6vZ4I61pr6vU6zWYTxzFSGTsvgWdNjGTbNvV6nfX1deOst9tt1tfXUUqZOkXOSAZtFpiI8yAIhpUTU9bv91lbW6PZbJoUSI9KBreL2hTrm5ubrKysUK/XJ2be931WV1e5ePHisBprInKAP0rgAlHl0USsSylpNBosLy9Tq9UIgmBfMd3pdFhZWeH8+fPDXN+QXQRq8YH4Z1OjxvXxZrPJ2bNnWVlZod1ujyVw4rO6VquxvLzM6uoqSilTiUlsj8D/q6xvBP6FufavoatKKcnn8+Tz+WEG5zjOjuXlzc1NWq0WjUYjifIygAJeBbwY+89TDPpIjpkE7jgOYRhSq9XY2Nggk8mQyWRwHGd4axKGIUEQ0O126XQ6w1q84zgIIUyfEC9Gz7YLha8z6CGZXAhvmayUcgg2jtMgCAjDECnlUObGaW0mk6Hf71+2N5jQ58AXh+NtuTTMMOgjnZsUsNYay7KGDKfT6eGTSqV2LDnH7h4zv/Xn1sRkggWIPVqPMt4BvgV8c6+sbwXsOA65XI6pqSmmpqbI5/NjTXbrQhWLRQDq9Trtdptms0m73R7W2/YBXjNoSNQ7MQ6D25T/MOgdG9vCMBwC9jyP2dlZo0XHeKdvNBo0m03CMNwr+KeB12/THCMf6AGfBv7AGFdKMdPZbJZCoUClUiGVSmHaHMdhbm6O2dlZ1tbWhpeKY7LfZYebop2Orz8Bv7mamlNKIaXE8zwWFxdZXFxMBPToAiwsLLC0tITneds2x11c/OfA3y8TW1foVy9EGv7GK4G2bZuZmRkWFhZMZUzsNbzOnTtHrVbbrTjxD+A9O6XeVxIsG8Dn4jNvFLRlWVSrVY4fP/6ygI43w6WlJY4ePYpt2zsx/wKDlq8d6w27KbVT0bn331H3XlhYoFqtHmih8UpWqVQ4duzYqNuvAV9g8O0G9goc4AHgXqAWb2bVapVSqXQoQMdWKpWYn5+Pf70QgX5w15xijHF/BtwbhuFKsVikVCrt6847SRNCUC6XKRaLL4VheE80ZyYFDvBjpdRnyuXys67rag6Zaa21lPKZubm5k9EujingAA+5rnsH8BelVHBYQEdzeUxKeZtS6uFx/2+vaeiTQoibpJT3KaXW9QF05u3GslLqopTyu0KI90eKk6SAx0robinlCeAJrXX3gAETvfOUlPIW4LPs425gksLD40KIdwkhTgJPR5PRSTKste4KIZ4SQnxSCPFu4K/7rhQZyHF/BNwghLgTeBJoa60Dg4ADrXVLCPE3IcTtwA3ALyYujJpSkNGZ/wDwGiHECQZ9o9cx6I2VUaorxlhIHZWIfOCMEOL3DL4e8rxJD0riJv854CvRUwXexqDP5noGLdRloBgVPgKgBdQj4bEMPAP8GzgNrCYVOv8bAL6PQy8sog2/AAAAAElFTkSuQmCC"
+
+/***/ },
+/* 366 */,
+/* 367 */
+/*!***********************************!*\
+  !*** external "react-date-range" ***!
+  \***********************************/
+/***/ function(module, exports) {
+
+	module.exports = require("react-date-range");
+
+/***/ },
+/* 368 */
+/*!************************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/baseinfo/header.js ***!
+  \************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.Header = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var Header = exports.Header = function Header(_ref) {
+	    var backToUsers = _ref.backToUsers,
+	        toMedRecord = _ref.toMedRecord,
+	        photo = _ref.photo,
+	        realname = _ref.realname,
+	        phone = _ref.phone,
+	        age = _ref.age;
+	
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'rtop rtop_edit' },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'but-box bj-none' },
+	            _react2.default.createElement(
+	                'p',
+	                null,
+	                _react2.default.createElement(
+	                    'a',
+	                    { onClick: backToUsers, className: 'back-but' },
+	                    '\u8FD4\u56DE'
+	                )
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'userInfobox' },
+	            _react2.default.createElement(
+	                'dl',
+	                null,
+	                _react2.default.createElement(
+	                    'dt',
+	                    null,
+	                    _react2.default.createElement('img', { src: !photo || photo == 'ssssss' ? __webpack_require__(/*! ../../../../common/images/user_default.png */ 309) : photo, alt: '' })
+	                ),
+	                _react2.default.createElement(
+	                    'dd',
+	                    null,
+	                    _react2.default.createElement(
+	                        'h3',
+	                        null,
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            realname
+	                        ),
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            age
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'p',
+	                        null,
+	                        phone
+	                    )
+	                )
+	            ),
+	            _react2.default.createElement(
+	                'a',
+	                { onClick: toMedRecord, className: 'default_inputbtn see-but' },
+	                '\u67E5\u770B\u75C5\u5386'
+	            )
+	        )
+	    );
+	};
+
+/***/ },
+/* 369 */
+/*!************************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/teeth/teethshow.js ***!
+  \************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.TeethShow = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var ToothAche = function ToothAche(_ref) {
+	    var tooth = _ref.tooth,
+	        ache_list = _ref.ache_list;
+	
+	
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'H_teeth_position_list_margin_bottom' },
+	        _react2.default.createElement(
+	            'label',
+	            null,
+	            '牙齿' + tooth.name + ':'
+	        ),
+	        _react2.default.createElement(
+	            'p',
+	            null,
+	            tooth.ache.map(function (idx) {
+	                return _react2.default.createElement(
+	                    'span',
+	                    { className: 'H_teeth_position_list_margin' },
+	                    ache_list[idx].name
+	                );
+	            })
+	        )
+	    );
+	};
+	
+	var TeethAche = function TeethAche(_ref2) {
+	    var teeth_ui = _ref2.teeth_ui;
+	
+	    var teethui = [];
+	    teeth_ui.teeth.forEach(function (tooth) {
+	        if (tooth.ache.length) teethui.push(ToothAche({ tooth: tooth, ache_list: teeth_ui.ache_list }));
+	    });
+	    return teethui;
+	};
+	
+	var TeethShow = exports.TeethShow = function TeethShow(_ref3) {
+	    var teethtype = _ref3.teethtype,
+	        mteeth_ui = _ref3.mteeth_ui,
+	        cteeth_ui = _ref3.cteeth_ui,
+	        toMteeth = _ref3.toMteeth,
+	        toCteeth = _ref3.toCteeth;
+	
+	    var height = window.innerHeight || document.documentElement.clientHeight;
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'userContain z_userContain_edit', style: { height: height - 260 + 'px' } },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'z_userContainMain' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'containb_right', style: { paddingBottom: "50px" } },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'H_teeth_position' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_teeth_position_left' },
+	                        _react2.default.createElement(
+	                            'span',
+	                            { onClick: toMteeth, className: 'man active', id: 'mantab' },
+	                            '\u6210\u4EBA\u7259\u4F4D\u56FE'
+	                        ),
+	                        _react2.default.createElement(
+	                            'span',
+	                            { onClick: toCteeth, className: 'child', id: 'childtab' },
+	                            '\u5E7C\u513F\u7259\u4F4D\u56FE'
+	                        )
+	                    ),
+	                    teethtype == 'M' ? _react2.default.createElement(
+	                        'div',
+	                        null,
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_pic' },
+	                            mteeth_ui.teeth.map(function (tooth) {
+	                                return _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name, style: tooth.ache.length > 0 ? { backgroundColor: '#cc6060' } : { backgroundColor: '#fafcff' } },
+	                                    tooth.name
+	                                );
+	                            })
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_list' },
+	                            TeethAche({ teeth_ui: mteeth_ui })
+	                        )
+	                    ) : _react2.default.createElement(
+	                        'div',
+	                        null,
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_pic H_teeth_position_pic_son' },
+	                            cteeth_ui.teeth.map(function (tooth) {
+	                                return _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name },
+	                                    tooth.name
+	                                );
+	                            })
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_list' },
+	                            TeethAche({ teeth_ui: cteeth_ui })
+	                        )
+	                    )
+	                )
+	            )
+	        )
+	    );
+	};
+
+/***/ },
+/* 370 */
+/*!************************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/teeth/teethedit.js ***!
+  \************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.TeethEdit = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var TeethEdit = exports.TeethEdit = function TeethEdit(_ref) {
+	    var teethtype = _ref.teethtype,
+	        mteeth_ui = _ref.mteeth_ui,
+	        cteeth_ui = _ref.cteeth_ui,
+	        toMteeth = _ref.toMteeth,
+	        toCteeth = _ref.toCteeth,
+	        clickOnTooth = _ref.clickOnTooth,
+	        curToothName = _ref.curToothName,
+	        clickOnMAche = _ref.clickOnMAche,
+	        clickOnCAche = _ref.clickOnCAche;
+	
+	    var height = window.innerHeight || document.documentElement.clientHeight;
+	    var macheidx = 0;
+	    var cacheidx = 0;
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'userContain z_userContain_edit', style: { height: height - 260 + 'px' } },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'z_userContainMain' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'containb_right', style: { paddingBottom: "50px" } },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'H_teeth_position' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_teeth_position_left' },
+	                        _react2.default.createElement(
+	                            'span',
+	                            { onClick: toMteeth, className: 'man active', id: 'mantab' },
+	                            '\u6210\u4EBA\u7259\u4F4D\u56FE'
+	                        ),
+	                        _react2.default.createElement(
+	                            'span',
+	                            { onClick: toCteeth, className: 'child', id: 'childtab' },
+	                            '\u5E7C\u513F\u7259\u4F4D\u56FE'
+	                        )
+	                    ),
+	                    teethtype == 'M' ? _react2.default.createElement(
+	                        'div',
+	                        null,
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_pic' },
+	                            mteeth_ui.teeth.map(function (tooth) {
+	                                return _react2.default.createElement(
+	                                    'div',
+	                                    { onClick: function onClick(ev) {
+	                                            clickOnTooth(ev, tooth.name);
+	                                        }, className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name, style: curToothName == tooth.name ? { backgroundColor: '#c1d5f2' } : tooth.ache.length > 0 ? { backgroundColor: '#cc6060' } : { backgroundColor: '#fafcff' } },
+	                                    tooth.name
+	                                );
+	                            })
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_list' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'H_teeth_position_list_title' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    { style: { fontSize: '18px' } },
+	                                    curToothName ? '牙齿：' + curToothName : '请选择左图的牙齿，进行添加'
+	                                )
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'H_teeth_position_list_item', style: curToothName ? {} : { pointerEvents: 'none' } },
+	                                mteeth_ui.ache_list.map(function (ache) {
+	                                    var _marchidx = macheidx++;
+	                                    return _react2.default.createElement(
+	                                        'div',
+	                                        { className: 'wrap' },
+	                                        _react2.default.createElement('input', { type: 'checkbox', id: _marchidx, checked: ache.bool }),
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { onClick: function onClick(ev) {
+	                                                    clickOnMAche(ev, _marchidx, curToothName, !ache.bool);
+	                                                }, htmlFor: _marchidx },
+	                                            _react2.default.createElement(
+	                                                'i',
+	                                                null,
+	                                                '\xA0',
+	                                                ache.name
+	                                            )
+	                                        )
+	                                    );
+	                                })
+	                            )
+	                        )
+	                    ) : _react2.default.createElement(
+	                        'div',
+	                        null,
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_pic H_teeth_position_pic_son' },
+	                            cteeth_ui.teeth.map(function (tooth) {
+	                                return _react2.default.createElement(
+	                                    'div',
+	                                    { onClick: function onClick(ev) {
+	                                            clickOnTooth(ev, tooth.name);
+	                                        }, className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name, style: curToothName == tooth.name ? { backgroundColor: '#c1d5f2' } : tooth.ache.length > 0 ? { backgroundColor: '#cc6060' } : { backgroundColor: '#fafcff' } },
+	                                    tooth.name
+	                                );
+	                            })
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_teeth_position_list' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'H_teeth_position_list_title' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    { style: { fontSize: '18px' } },
+	                                    curToothName ? '牙齿：' + curToothName : '请选择左图的牙齿，进行添加'
+	                                )
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'H_teeth_position_list_item', style: curToothName ? {} : { pointerEvents: 'none' } },
+	                                cteeth_ui.ache_list.map(function (ache) {
+	                                    cacheidx++;
+	                                    return _react2.default.createElement(
+	                                        'div',
+	                                        { className: 'wrap' },
+	                                        _react2.default.createElement('input', { type: 'checkbox', id: cacheidx, checked: ache.bool }),
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { onClick: function onClick(ev) {
+	                                                    clickOnCAche(ev, cacheidx - 1, curToothName, !ache.bool);
+	                                                }, htmlFor: cacheidx },
+	                                            _react2.default.createElement(
+	                                                'i',
+	                                                null,
+	                                                '\xA0',
+	                                                ache.name
+	                                            )
+	                                        )
+	                                    );
+	                                })
+	                            )
+	                        )
+	                    )
+	                )
+	            )
+	        )
+	    );
+	};
+
+/***/ },
+/* 371 */
+/*!**************************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/teeth/teethheader.js ***!
+  \**************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.TeethHeader = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var TeethHeader = exports.TeethHeader = function TeethHeader(_ref) {
+	    var edit = _ref.edit,
+	        check = _ref.check,
+	        add = _ref.add,
+	        addTime = _ref.addTime,
+	        teeth_ui = _ref.teeth_ui,
+	        toAdd = _ref.toAdd,
+	        toEdit = _ref.toEdit,
+	        toCheck = _ref.toCheck,
+	        saveTeethGraph = _ref.saveTeethGraph,
+	        changeCheckTime = _ref.changeCheckTime,
+	        changeEditTime = _ref.changeEditTime;
+	
+	    if (check) {
+	        var index = 0;
+	        return _react2.default.createElement(
+	            'div',
+	            { className: 'time z_time_edit', style: { top: '215px' } },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'z_time_btn', style: { border: 'none' } },
+	                _react2.default.createElement(
+	                    'p',
+	                    null,
+	                    _react2.default.createElement(
+	                        'b',
+	                        null,
+	                        '\u66F4\u65B0\u8BB0\u5F55\uFF1A'
+	                    ),
+	                    _react2.default.createElement(
+	                        'select',
+	                        { onChange: changeCheckTime },
+	                        teeth_ui.timelist.map(function (time) {
+	                            index++;
+	                            return _react2.default.createElement(
+	                                'option',
+	                                { value: index },
+	                                time
+	                            );
+	                        })
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'label',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        { onClick: toAdd, className: 'default_inputbtn z_add_btn' },
+	                        '\u6DFB\u52A0'
+	                    ),
+	                    _react2.default.createElement(
+	                        'span',
+	                        { onClick: toEdit, className: 'default_inputbtn z_edit_btn' },
+	                        '\u7F16\u8F91'
+	                    ),
+	                    _react2.default.createElement(
+	                        'span',
+	                        { id: 'pick', className: 'default_inputbtn z_add_btn' },
+	                        'test'
+	                    )
+	                )
+	            )
+	        );
+	    } else if (edit) {
+	        return _react2.default.createElement(
+	            'div',
+	            { className: 'time z_time_edit' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'z_time_btn' },
+	                _react2.default.createElement(
+	                    'p',
+	                    null,
+	                    _react2.default.createElement(
+	                        'b',
+	                        null,
+	                        '\u66F4\u65B0\u8BB0\u5F55\uFF1A'
+	                    ),
+	                    _react2.default.createElement(
+	                        'select',
+	                        { onChange: changeEditTime },
+	                        teeth_ui.timelist.map(function (time) {
+	                            return _react2.default.createElement(
+	                                'option',
+	                                { value: index },
+	                                time
+	                            );
+	                        })
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'label',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        { onClick: saveTeethGraph, className: 'default_inputbtn z_save_btn' },
+	                        '\u4FDD\u5B58'
+	                    )
+	                )
+	            )
+	        );
+	    } else if (add) {
+	        return _react2.default.createElement(
+	            'div',
+	            { className: 'time z_time_edit' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'z_time_btn' },
+	                _react2.default.createElement(
+	                    'p',
+	                    null,
+	                    _react2.default.createElement(
+	                        'em',
+	                        { className: 'see_page_em' },
+	                        '\u57FA\u4E8E\u6700\u65B0\uFF08',
+	                        _react2.default.createElement(
+	                            'font',
+	                            { className: 'new_time' },
+	                            addTime
+	                        ),
+	                        '\uFF09\u4FE1\u606F\u4E0A\u8FDB\u884C\u6DFB\u52A0'
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'label',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        { onClick: toCheck, className: 'default_inputbtn z_save_btn' },
+	                        '\u4FDD\u5B58'
+	                    )
+	                )
+	            )
+	        );
+	    }
+	};
+	//import WebUploader from 'backend/modules/uploader/Components/WebUploader.jsx';
+
+/***/ },
+/* 372 */
+/*!******************************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/baseinfo/baseinfoedit.js ***!
+  \******************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.BaseInfoEdit = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	var _reactDateRange = __webpack_require__(/*! react-date-range */ 367);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function photoBox() {
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'new-create-opcity', style: { display: "none", position: 'absolute' } },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'new-uppic-bj' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'new-uppic-box' },
+	                _react2.default.createElement(
+	                    'h4',
+	                    { className: 'toph4 nomargin' },
+	                    '\u4E0A\u4F20\u5934\u50CF',
+	                    _react2.default.createElement('span', { className: 'close_dialog' })
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'imageBox' },
+	                    _react2.default.createElement('div', { className: 'thumbBox' }),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'spinner', style: { display: "none" } },
+	                        'Loading...'
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'action' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'filebut' },
+	                        _react2.default.createElement('input', { type: 'file', id: 'base_photo_rechoose', className: 'choose-file' }),
+	                        '\u91CD\u65B0\u9009\u62E9'
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'zoom-box' },
+	                        _react2.default.createElement('span', { id: 'btnZoomOut', className: 'btnZoomOut' }),
+	                        _react2.default.createElement('span', { id: 'btnZoomIn', className: 'btnZoomIn' })
+	                    ),
+	                    _react2.default.createElement('input', { type: 'button', id: 'btnCrop', value: '\u786E\u8BA4\u4E0A\u4F20', className: 'btnCrop' })
+	                )
+	            )
+	        )
+	    );
+	}
+	
+	var BaseInfoEdit = exports.BaseInfoEdit = function BaseInfoEdit(_ref) {
+	    var photo = _ref.photo,
+	        password = _ref.password,
+	        account = _ref.account,
+	        phone = _ref.phone,
+	        name = _ref.name,
+	        real_name = _ref.real_name,
+	        birth = _ref.birth,
+	        race = _ref.race,
+	        card_type = _ref.card_type,
+	        card_id = _ref.card_id,
+	        sex = _ref.sex,
+	        age = _ref.age,
+	        married = _ref.married,
+	        have_child = _ref.have_child,
+	        company_name = _ref.company_name,
+	        job = _ref.job,
+	        email = _ref.email,
+	        society_number = _ref.society_number,
+	        post_address = _ref.post_address,
+	        remark = _ref.remark,
+	        change = _ref.change,
+	        click = _ref.click,
+	        hangleSelectDate = _ref.hangleSelectDate,
+	        showDateModal = _ref.showDateModal,
+	        dateModal = _ref.dateModal,
+	        birthdate = _ref.birthdate;
+	
+	    var height = window.innerHeight || document.documentElement.clientHeight;
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'userContain z_userContain_edit', style: { height: height - 260 + 'px' } },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'z_userContainMain' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'containb_right' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'z_left_box' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_headerPic' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { id: 'base_photo_show', className: 'z_touxiang' },
+	                            _react2.default.createElement('img', { src: photo ? photo : __webpack_require__(/*! ../../../../common/images/userPic.png */ 365), alt: '' })
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_but-input' },
+	                            _react2.default.createElement('input', { id: 'base_photo_choose', type: 'file', className: 'but-input upfile-butt' }),
+	                            '\u4E0A\u4F20\u5934\u50CF'
+	                        )
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'z_right_rbox' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_main_contain' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_main_left' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    _react2.default.createElement(
+	                                        'em',
+	                                        { className: 'emx' },
+	                                        '\u8D26\u53F7\uFF1A'
+	                                    )
+	                                ),
+	                                _react2.default.createElement('input', { type: 'text', value: account, className: 'text-input', maxLength: '11', placeholder: '\u53EA\u80FD\u8F93\u5165\u624B\u673A\u53F7', onChange: function onChange(ev) {
+	                                        change(ev, 'account');
+	                                    } }),
+	                                _react2.default.createElement('div', { className: 'clear' }),
+	                                _react2.default.createElement('p', { className: 'z_error' })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u624B\u673A\uFF1A'
+	                                ),
+	                                _react2.default.createElement('input', { type: 'text', value: phone, className: 'text-input', onChange: function onChange(ev) {
+	                                        ev.target.value = ev.target.value.replace(/\D/g, '');change(ev, 'phone');
+	                                    }, maxLength: '11' }),
+	                                _react2.default.createElement('div', { className: 'clear' }),
+	                                _react2.default.createElement('p', { className: 'z_error' })
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_main_right' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u7528\u6237\u540D\uFF1A'
+	                                ),
+	                                _react2.default.createElement('input', { type: 'text', className: 'text-input yongHuming readonly', autocomplete: 'off', disabled: true }),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_default_desc' },
+	                                    '\u9ED8\u8BA4\u8BFB\u53D6\u79FB\u52A8\u7AEF\u7528\u6237\u59D3\u540D'
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' }),
+	                                _react2.default.createElement('p', { className: 'z_error' })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u5BC6\u7801\u8BBE\u7F6E\uFF1A'
+	                                ),
+	                                _react2.default.createElement('input', { type: 'password', value: password, className: 'text-input Mima', placeholder: '6\uFF5E20\u4E2A\u5B57\u7B26', autocomplete: 'off', onChange: function onChange(ev) {
+	                                        change(ev, 'password');
+	                                    } }),
+	                                _react2.default.createElement('div', { className: 'clear' }),
+	                                _react2.default.createElement('p', { className: 'z_error' })
+	                            )
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_main_contain' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_main_left' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u771F\u5B9E\u59D3\u540D\uFF1A'
+	                                ),
+	                                _react2.default.createElement('input', { type: 'text', className: 'text-input', value: real_name, onChange: function onChange(ev) {
+	                                        change(ev, 'real_name');
+	                                    } }),
+	                                _react2.default.createElement('div', { className: 'clear' }),
+	                                _react2.default.createElement('p', null)
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u51FA\u751F\u5E74\u6708\uFF1A'
+	                                ),
+	                                _react2.default.createElement('input', { value: birthdate, type: 'text', className: 'text-input layicon', readonly: 'readonly', onClick: showDateModal }),
+	                                _react2.default.createElement('div', { className: 'clear' }),
+	                                _react2.default.createElement('p', null)
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { style: dateModal },
+	                                _react2.default.createElement(_reactDateRange.Calendar, { onInit: hangleSelectDate, onChange: hangleSelectDate, date: birthdate })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u6C11\u65CF\uFF1A'
+	                                ),
+	                                _react2.default.createElement('input', { type: 'text', className: 'text-input', value: race, onChange: function onChange(ev) {
+	                                        change(ev, 'race');
+	                                    } }),
+	                                _react2.default.createElement('div', { className: 'clear' }),
+	                                _react2.default.createElement('p', null)
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u8BC1\u4EF6\u79CD\u7C7B\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'select',
+	                                    { className: 'select-div', onChange: function onChange(ev) {
+	                                            change(ev, 'card_type');
+	                                        } },
+	                                    _react2.default.createElement(
+	                                        'option',
+	                                        { value: '', selected: card_type == '' ? 'selected' : '' },
+	                                        '\u8BF7\u9009\u62E9'
+	                                    ),
+	                                    _react2.default.createElement(
+	                                        'option',
+	                                        { value: '1', selected: card_type == '1' ? 'selected' : '' },
+	                                        '\u8EAB\u4EFD\u8BC1'
+	                                    ),
+	                                    _react2.default.createElement(
+	                                        'option',
+	                                        { value: '3', selected: card_type == '3' ? 'selected' : '' },
+	                                        '\u62A4\u7167'
+	                                    )
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' }),
+	                                _react2.default.createElement('p', null)
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u8BC1\u4EF6\u53F7\u7801\uFF1A'
+	                                ),
+	                                _react2.default.createElement('input', { type: 'text', value: card_id, className: 'text-input', maxLength: '18', onChange: function onChange(ev) {
+	                                        change(ev, 'card_id');
+	                                    } }),
+	                                _react2.default.createElement('div', { className: 'clear' }),
+	                                _react2.default.createElement('p', null)
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_main_right' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u6027\u522B\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'radio-box' },
+	                                    _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        _react2.default.createElement('input', { type: 'radio', className: 'radio1', name: 'radio2', id: 'checkboxa', checked: sex == '1' ? 'checked' : '' }),
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { htmlFor: 'checkboxa', onClick: function onClick() {
+	                                                    click('sex', '1');
+	                                                } },
+	                                            '\u7537'
+	                                        )
+	                                    ),
+	                                    _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        _react2.default.createElement('input', { type: 'radio', className: 'radio1', name: 'radio2', id: 'checkboxb', checked: sex == '2' ? 'checked' : '' }),
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { htmlFor: 'checkboxb', onClick: function onClick() {
+	                                                    click('sex', '2');
+	                                                } },
+	                                            '\u5973'
+	                                        )
+	                                    )
+	                                ),
+	                                _react2.default.createElement('p', { className: 'errorTip' })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u5E74\u9F84\uFF1A'
+	                                ),
+	                                _react2.default.createElement('input', { type: 'text', value: age, className: 'text-input', disabled: 'disabled' }),
+	                                _react2.default.createElement('div', { className: 'clear' }),
+	                                _react2.default.createElement('p', null)
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u5A5A\u59FB\u72B6\u51B5\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'radio-box' },
+	                                    _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        _react2.default.createElement('input', { type: 'radio', checked: married == '1' ? 'checked' : '', className: 'radio1', name: 'married', id: 'checkboxc' }),
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { htmlFor: 'checkboxc', onClick: function onClick() {
+	                                                    click('married', '1');
+	                                                } },
+	                                            '\u5DF2\u5A5A'
+	                                        )
+	                                    ),
+	                                    _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        _react2.default.createElement('input', { type: 'radio', checked: married == '0' ? 'checked' : '', className: 'radio1', name: 'married', id: 'checkboxd' }),
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { htmlFor: 'checkboxd', onClick: function onClick() {
+	                                                    click('married', '0');
+	                                                } },
+	                                            '\u672A\u5A5A'
+	                                        )
+	                                    )
+	                                ),
+	                                _react2.default.createElement('p', { className: 'errorTip' })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u6709\u65E0\u5B50\u5973\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'radio-box' },
+	                                    _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        _react2.default.createElement('input', { type: 'radio', checked: have_child == '1' ? 'checked' : '', className: 'radio1', name: 'have_child', id: 'checkboxe' }),
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { htmlFor: 'checkboxe', onClick: function onClick() {
+	                                                    click('have_child', '1');
+	                                                } },
+	                                            '\u6709'
+	                                        )
+	                                    ),
+	                                    _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        _react2.default.createElement('input', { type: 'radio', checked: have_child == '0' ? 'checked' : '', className: 'radio1', name: 'have_child', id: 'checkboxf' }),
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { htmlFor: 'checkboxf', onClick: function onClick() {
+	                                                    click('have_child', '0');
+	                                                } },
+	                                            '\u65E0'
+	                                        )
+	                                    )
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' }),
+	                                _react2.default.createElement('p', null)
+	                            )
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_main_contain no_border' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_main_left' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u5DE5\u4F5C\u5355\u4F4D\uFF1A'
+	                                ),
+	                                _react2.default.createElement('input', { type: 'text', value: company_name, className: 'text-input', onChange: function onChange(ev) {
+	                                        change(ev, 'company_name');
+	                                    } }),
+	                                _react2.default.createElement('div', { className: 'clear' }),
+	                                _react2.default.createElement('p', null)
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u804C\u4E1A\uFF1A'
+	                                ),
+	                                _react2.default.createElement('input', { type: 'text', value: job, className: 'text-input', onChange: function onChange(ev) {
+	                                        change(ev, 'job');
+	                                    } }),
+	                                _react2.default.createElement('div', { className: 'clear' }),
+	                                _react2.default.createElement('p', null)
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_main_right' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    'Email\uFF1A'
+	                                ),
+	                                _react2.default.createElement('input', { type: 'text', value: email, className: 'text-input', onChange: function onChange(ev) {
+	                                        change(ev, 'email');
+	                                    } }),
+	                                _react2.default.createElement('div', { className: 'clear' }),
+	                                _react2.default.createElement('p', null)
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u793E\u4FDD\u53F7\uFF1A'
+	                                ),
+	                                _react2.default.createElement('input', { type: 'text', value: society_number, className: 'text-input', onChange: function onChange(ev) {
+	                                        change(ev, 'society_number');
+	                                    } }),
+	                                _react2.default.createElement('div', { className: 'clear' }),
+	                                _react2.default.createElement('p', null)
+	                            )
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' }),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'input-box h25' },
+	                            _react2.default.createElement(
+	                                'span',
+	                                null,
+	                                '\u90AE\u5BC4\u5730\u5740\uFF1A'
+	                            ),
+	                            _react2.default.createElement('input', { type: 'text', value: post_address, className: 'text-input W475', onChange: function onChange(ev) {
+	                                    change(ev, 'post_address');
+	                                } }),
+	                            _react2.default.createElement('div', { className: 'clear' }),
+	                            _react2.default.createElement('p', null)
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'input-box h25' },
+	                            _react2.default.createElement(
+	                                'span',
+	                                null,
+	                                '\u5907\u6CE8\uFF1A'
+	                            ),
+	                            _react2.default.createElement('input', { type: 'text', value: remark, className: 'text-input W475', onChange: function onChange(ev) {
+	                                    change(ev, 'remark');
+	                                } }),
+	                            _react2.default.createElement('div', { className: 'clear' }),
+	                            _react2.default.createElement('p', null)
+	                        )
+	                    )
+	                )
+	            )
+	        ),
+	        photoBox()
+	    );
+	};
+
+/***/ },
+/* 373 */
+/*!******************************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/baseinfo/baseinfoshow.js ***!
+  \******************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.BaseInfoShow = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var BaseInfoShow = exports.BaseInfoShow = function BaseInfoShow(_ref) {
+	    var photo = _ref.photo,
+	        account = _ref.account,
+	        phone = _ref.phone,
+	        name = _ref.name,
+	        real_name = _ref.real_name,
+	        birth = _ref.birth,
+	        race = _ref.race,
+	        card_type = _ref.card_type,
+	        card_id = _ref.card_id,
+	        sex = _ref.sex,
+	        age = _ref.age,
+	        married = _ref.married,
+	        have_child = _ref.have_child,
+	        company_name = _ref.company_name,
+	        job = _ref.job,
+	        email = _ref.email,
+	        society_number = _ref.society_number,
+	        post_address = _ref.post_address,
+	        remark = _ref.remark,
+	        birthdate = _ref.birthdate;
+	
+	    var height = window.innerHeight || document.documentElement.clientHeight;
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'userContain z_userContain_edit', style: { height: height - 260 + 'px' } },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'z_userContainMain' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'containb_right' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'z_left_box' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_headerPic' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_touxiang' },
+	                            _react2.default.createElement('img', { src: photo ? photo : __webpack_require__(/*! ../../../../common/images/userPic.png */ 365), alt: '' })
+	                        )
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'z_right_rbox' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_main_contain' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_main_left' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u8D26\u53F7\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    account
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u624B\u673A\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    phone
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_main_right' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u7528\u6237\u540D\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    name
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            )
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_main_contain' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_main_left' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u771F\u5B9E\u59D3\u540D\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    real_name
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u51FA\u751F\u5E74\u6708\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    birthdate
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u6C11\u65CF\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    race
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u8BC1\u4EF6\u79CD\u7C7B\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    card_type == '3' ? '护照' : card_type == '1' ? '身份证' : ''
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u8BC1\u4EF6\u53F7\u7801\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    card_id
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_main_right' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u6027\u522B\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    sex == '1' ? '男' : sex == '2' ? '女' : ''
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u5E74\u9F84\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    age
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u5A5A\u59FB\u72B6\u51B5\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    married == '1' ? '已婚' : married == '0' ? '未婚' : ''
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u6709\u65E0\u5B50\u5973\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    have_child == '1' ? '有' : have_child == '0' ? '无' : ''
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            )
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_main_contain no_border' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_main_left' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u5DE5\u4F5C\u5355\u4F4D\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    company_name
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u804C\u4E1A\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    job
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_main_right' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    'Email\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    email
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'input-box h25 chakanspan' },
+	                                _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    '\u793E\u4FDD\u53F7\uFF1A'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'div',
+	                                    { className: 'z_textinfo' },
+	                                    society_number
+	                                ),
+	                                _react2.default.createElement('div', { className: 'clear' })
+	                            )
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' }),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'input-box h25 chakanspan' },
+	                            _react2.default.createElement(
+	                                'span',
+	                                null,
+	                                '\u90AE\u5BC4\u5730\u5740\uFF1A'
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'z_textinfo W520' },
+	                                post_address
+	                            ),
+	                            _react2.default.createElement('div', { className: 'clear' })
+	                        ),
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'input-box h25 chakanspan' },
+	                            _react2.default.createElement(
+	                                'span',
+	                                null,
+	                                '\u5907\u6CE8\uFF1A'
+	                            ),
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'z_textinfo W520' },
+	                                remark
+	                            ),
+	                            _react2.default.createElement('div', { className: 'clear' })
+	                        )
+	                    )
+	                )
+	            )
+	        )
+	    );
+	};
+
+/***/ },
+/* 374 */
+/*!**************************************!*\
+  !*** ./backend/util/apiinterface.js ***!
+  \**************************************/
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.default = getApiIp;
+	function getApiIp() {
+		return '172.16.37.45';
+	}
+
+/***/ },
+/* 375 */
+/*!***********************************************!*\
+  !*** ./backend/useradmin/userinfo/history.js ***!
+  \***********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.HistoryHead = exports.default = exports.asyncEvent = undefined;
+	
+	var _typeof2 = __webpack_require__(/*! babel-runtime/helpers/typeof */ 251);
+	
+	var _typeof3 = _interopRequireDefault(_typeof2);
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 284);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 288);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 289);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 293);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 294);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _promise = __webpack_require__(/*! babel-runtime/core-js/promise */ 312);
+	
+	var _promise2 = _interopRequireDefault(_promise);
+	
+	var _dec, _dec2, _class;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	var _auth = __webpack_require__(/*! ../../redux/reducers/auth */ 241);
+	
+	var _user_patient = __webpack_require__(/*! ../../redux/reducers/user_patient */ 247);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	var _historyedit = __webpack_require__(/*! ./view/history/historyedit */ 376);
+	
+	var _historyshow = __webpack_require__(/*! ./view/history/historyshow */ 378);
+	
+	var _historytable = __webpack_require__(/*! ./config/historytable.js */ 377);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var __asyncEvent = function __asyncEvent(_ref) {
+	    var dispatch = _ref.dispatch,
+	        getState = _ref.getState;
+	
+	
+	    var state = getState();
+	    var id = state.getIn(['user_patient', 'frontuserinfo', 'id']);
+	    return dispatch((0, _user_patient.load_detail_history)({ id: id }));
+	};
+	var asyncEvent = exports.asyncEvent = [{
+	    promise: function promise(_ref2) {
+	        var _ref2$store = _ref2.store,
+	            dispatch = _ref2$store.dispatch,
+	            getState = _ref2$store.getState,
+	            params = _ref2.params;
+	
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            console.log("his login!!!!!!!!!!!!!!!!!!11");
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                if (!(0, _user_patient.LoadedorLoadingUser_History)(getState())) {
+	                    console.log("his login!!!!!!!!!!!!!!!!!!22");
+	                    return __asyncEvent({ dispatch: dispatch, getState: getState });
+	                } else return _promise2.default.resolve();
+	            });
+	        } else {
+	            console.log("his login!!!!!!!!!!!!!!!!!!33");
+	            if (!(0, _user_patient.LoadedorLoadingUser_History)(getState())) {
+	                console.log("his login!!!!!!!!!!!!!!!!!!44");
+	                return __asyncEvent({ dispatch: dispatch, getState: getState });
+	            } else return _promise2.default.resolve();
+	        }
+	    }
+	}];
+	
+	var History = (_dec = (0, _reduxConnect.asyncConnect)(asyncEvent), _dec2 = (0, _reactRedux.connect)(function (state) {
+	    var idx = state.getIn(['user_patient', 'frontuserinfo', 'idx']);
+	    return {
+	        auth: state.get('auth'),
+	        historyedit: state.getIn(['user_patient', 'users', idx, 'historyedit'])
+	    };
+	}, { pushState: _reactRouterRedux.push, historyFlush: _user_patient.historyFlush, historyEditADD: _user_patient.historyEditADD, historyEditDEL: _user_patient.historyEditDEL, changeTime: _user_patient.changeTime }), _dec(_class = _dec2(_class = function (_Component) {
+	    (0, _inherits3.default)(History, _Component);
+	
+	    function History(props) {
+	        (0, _classCallCheck3.default)(this, History);
+	
+	        var _this = (0, _possibleConstructorReturn3.default)(this, (History.__proto__ || (0, _getPrototypeOf2.default)(History)).call(this, props));
+	        // code
+	
+	
+	        _this.state = { check: true, edit: false, add: false, refresh: 0 };
+	        return _this;
+	    }
+	
+	    (0, _createClass3.default)(History, [{
+	        key: 'toAdd',
+	        value: function toAdd() {
+	
+	            var addtime = this.props.historyedit.get('time');
+	
+	            this.setState((0, _extends3.default)({}, this.state, { check: false, edit: false, add: true, addTime: addtime }));
+	        }
+	    }, {
+	        key: 'toEdit',
+	        value: function toEdit() {
+	            this.setState((0, _extends3.default)({}, this.state, { check: false, edit: true, add: false }));
+	        }
+	    }, {
+	        key: 'toCheck',
+	        value: function toCheck() {
+	            this.toSave();
+	            this.setState((0, _extends3.default)({}, this.state, { check: true, edit: false, add: false }));
+	        }
+	    }, {
+	        key: 'toSave',
+	        value: function toSave() {
+	            this.props.historyFlush();
+	        }
+	    }, {
+	        key: 'onChangeInfo',
+	        value: function onChangeInfo(key, val, ev) {
+	            console.log('onChange0000000000');
+	            console.log(val);
+	            var value = { name: val.name, describe: ev.target.value };
+	            this.props.historyEditADD({ key: key, val: value });
+	        }
+	    }, {
+	        key: 'onClickInfo',
+	        value: function onClickInfo(key, val) {
+	            var value = { name: val.name };
+	            if (val.check == 0) {
+	                console.log("onClickInfo!!!!");
+	                this.props.historyEditADD({ key: key, val: value });
+	            } else {
+	                this.props.historyEditDEL({ key: key, val: value });
+	            }
+	        }
+	    }, {
+	        key: 'changeCheckTime',
+	        value: function changeCheckTime(e) {
+	            console.log('zdhzdhzdhzdh');
+	            this.props.changeTime({ idx: e.target.value - 1 });
+	        }
+	    }, {
+	        key: 'changeEditTime',
+	        value: function changeEditTime(e) {
+	            console.log('zdhzdhzdhzdh');
+	            this.props.changeTime({ idx: e.target.value - 1 });
+	        }
+	    }, {
+	        key: 'showDateModalBodyCon',
+	        value: function showDateModalBodyCon(item) {
+	            item.dateUI.display == 'none' ? item.dateUI.display = 'block' : item.dateUI.display = 'none';
+	            this.setState((0, _extends3.default)({}, this.state, { refresh: 0 }));
+	        }
+	    }, {
+	        key: 'handleSelectDateBodyCon',
+	        value: function handleSelectDateBodyCon(item, date) {
+	            item.dateUI.display == 'none' ? item.dateUI.display = 'block' : item.dateUI.display = 'none';
+	            console.log("handleSelectDateBodyCon!!!!!!");
+	            console.log(item);
+	            item.date = date.format('DD/MM/YY').toString();
+	            this.setState((0, _extends3.default)({}, this.state, { refresh: 0 }));
+	            this.props.historyEditADD({ key: 'body_condition', val: item });
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	
+	            if (this.props.auth.get('user')) {
+	
+	                var historyedit = this.props.historyedit.toJS();
+	                return _react2.default.createElement(
+	                    'div',
+	                    null,
+	                    HistoryHead({
+	                        historyedit: historyedit,
+	                        edit: this.state.edit,
+	                        check: this.state.check,
+	                        add: this.state.add,
+	                        addTime: this.state.addTime,
+	                        toEdit: this.toEdit.bind(this),
+	                        toAdd: this.toAdd.bind(this),
+	                        toCheck: this.toCheck.bind(this),
+	                        changeCheckTime: this.changeCheckTime.bind(this),
+	                        changeEditTime: this.changeEditTime.bind(this)
+	
+	                    }),
+	                    this.state.check ? (0, _historyshow.HistoryShow)({
+	                        historyedit: historyedit
+	                    }) : (0, _historyedit.HistoryEdit)({
+	                        historytable: _historytable.table,
+	                        historyedit: historyedit,
+	                        change: this.onChangeInfo.bind(this),
+	                        click: this.onClickInfo.bind(this),
+	                        handleSelectDateBodyCon: this.handleSelectDateBodyCon.bind(this),
+	                        showDateModalBodyCon: this.showDateModalBodyCon.bind(this),
+	                        dateModalBodyTest: this.state.dateModalBodyTest,
+	                        dateModalToothWash: this.state.dateModalToothWash
+	                        //dateToothWash:
+	                    })
+	                );
+	            }
+	        }
+	    }]);
+	    return History;
+	}(_react.Component)) || _class) || _class);
+	exports.default = History;
+	var HistoryHead = exports.HistoryHead = function HistoryHead(_ref3) {
+	    var historyedit = _ref3.historyedit,
+	        edit = _ref3.edit,
+	        check = _ref3.check,
+	        add = _ref3.add,
+	        addTime = _ref3.addTime,
+	        toAdd = _ref3.toAdd,
+	        toEdit = _ref3.toEdit,
+	        toCheck = _ref3.toCheck,
+	        changeCheckTime = _ref3.changeCheckTime,
+	        changeEditTime = _ref3.changeEditTime;
+	
+	    if (check) {
+	        var _ret = function () {
+	            var index = 0;
+	            return {
+	                v: _react2.default.createElement(
+	                    'div',
+	                    { className: 'time z_time_edit', style: { top: '215px' } },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_time_btn', style: { border: 'none' } },
+	                        _react2.default.createElement(
+	                            'p',
+	                            null,
+	                            _react2.default.createElement(
+	                                'b',
+	                                null,
+	                                '\u66F4\u65B0\u8BB0\u5F55\uFF1A'
+	                            ),
+	                            _react2.default.createElement(
+	                                'select',
+	                                { onChange: function onChange(e) {
+	                                        changeCheckTime(e);
+	                                    } },
+	                                historyedit.timelist.map(function (time) {
+	                                    index++;
+	                                    if (historyedit.idx + 1 == index) return _react2.default.createElement(
+	                                        'option',
+	                                        { selected: 'selected', value: index },
+	                                        time
+	                                    );else return _react2.default.createElement(
+	                                        'option',
+	                                        { value: index },
+	                                        time
+	                                    );
+	                                })
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'label',
+	                            null,
+	                            _react2.default.createElement(
+	                                'span',
+	                                { onClick: toAdd, className: 'default_inputbtn z_add_btn' },
+	                                '\u6DFB\u52A0'
+	                            ),
+	                            _react2.default.createElement(
+	                                'span',
+	                                { onClick: toEdit, className: 'default_inputbtn z_edit_btn' },
+	                                '\u7F16\u8F91'
+	                            )
+	                        )
+	                    )
+	                )
+	            };
+	        }();
+	
+	        if ((typeof _ret === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret)) === "object") return _ret.v;
+	    } else if (edit) {
+	        var _ret2 = function () {
+	            var index = 0;
+	            return {
+	                v: _react2.default.createElement(
+	                    'div',
+	                    { className: 'time z_time_edit' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_time_btn' },
+	                        _react2.default.createElement(
+	                            'p',
+	                            null,
+	                            _react2.default.createElement(
+	                                'b',
+	                                null,
+	                                '\u66F4\u65B0\u8BB0\u5F55\uFF1A'
+	                            ),
+	                            _react2.default.createElement(
+	                                'select',
+	                                { onChange: function onChange(e) {
+	                                        changeEditTime(e);
+	                                    } },
+	                                historyedit.timelist.map(function (time) {
+	                                    index++;
+	                                    if (historyedit.idx + 1 == index) return _react2.default.createElement(
+	                                        'option',
+	                                        { selected: 'selected', value: index },
+	                                        time
+	                                    );else return _react2.default.createElement(
+	                                        'option',
+	                                        { value: index },
+	                                        time
+	                                    );
+	                                })
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'label',
+	                            null,
+	                            _react2.default.createElement(
+	                                'span',
+	                                { onClick: toCheck, className: 'default_inputbtn z_save_btn' },
+	                                '\u4FDD\u5B58'
+	                            )
+	                        )
+	                    )
+	                )
+	            };
+	        }();
+	
+	        if ((typeof _ret2 === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret2)) === "object") return _ret2.v;
+	    } else if (add) {
+	        return _react2.default.createElement(
+	            'div',
+	            { className: 'time z_time_edit' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'z_time_btn' },
+	                _react2.default.createElement(
+	                    'p',
+	                    null,
+	                    _react2.default.createElement(
+	                        'em',
+	                        { className: 'see_page_em' },
+	                        '\u57FA\u4E8E\u6700\u65B0\uFF08',
+	                        _react2.default.createElement(
+	                            'font',
+	                            { className: 'new_time' },
+	                            addTime
+	                        ),
+	                        '\uFF09\u4FE1\u606F\u4E0A\u8FDB\u884C\u6DFB\u52A0'
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'label',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        { onClick: toCheck, className: 'default_inputbtn z_save_btn' },
+	                        '\u4FDD\u5B58'
+	                    )
+	                )
+	            )
+	        );
+	    }
+	};
+
+/***/ },
+/* 376 */
+/*!****************************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/history/historyedit.js ***!
+  \****************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.HistoryEdit = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	var _reactDateRange = __webpack_require__(/*! react-date-range */ 367);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function infoGet(subtable, name) {
+	    var retitem;
+	    subtable.map(function (item) {
+	        if (item.name == name) {
+	            retitem = item;
+	        }
+	    });
+	    return retitem;
+	}
+	
+	var HistoryEdit = exports.HistoryEdit = function HistoryEdit(_ref) {
+	    var historytable = _ref.historytable,
+	        historyedit = _ref.historyedit,
+	        change = _ref.change,
+	        click = _ref.click,
+	        handleSelectDateBodyCon = _ref.handleSelectDateBodyCon,
+	        showDateModalBodyCon = _ref.showDateModalBodyCon,
+	        dateModalBodyTest = _ref.dateModalBodyTest,
+	        dateModalToothWash = _ref.dateModalToothWash,
+	        dateBodyTest = _ref.dateBodyTest,
+	        dateToothWash = _ref.dateToothWash;
+	
+	    var height = window.innerHeight || document.documentElement.clientHeight;
+	    var count = 0;
+	    var _count = 0;
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'userContain z_userContain_edit', style: { height: height - 260 + 'px' } },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'z_userContainMain' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'containb_right' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'z_jws_main' },
+	                    _react2.default.createElement(
+	                        'h2',
+	                        { className: 'no_border', style: { borderTop: 'none' } },
+	                        _react2.default.createElement('i', { className: 'row_1' }),
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            '\u5168\u8EAB\u60C5\u51B5'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_checkbox_main' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'checkbox-box' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'checkBone' },
+	                                historytable.body_condition.map(function (item) {
+	                                    count++;
+	                                    return _react2.default.createElement(
+	                                        'span',
+	                                        { className: 'W120', style: item.dateUI ? { height: '30px', width: '300px' } : {} },
+	                                        function (item) {
+	                                            var metaitem = historyedit.history && historyedit.history.body_condition ? infoGet(historyedit.history.body_condition, item.name) : undefined;
+	                                            return item.dateUI ? _react2.default.createElement(
+	                                                'div',
+	                                                null,
+	                                                _react2.default.createElement(
+	                                                    'b',
+	                                                    null,
+	                                                    item.name
+	                                                ),
+	                                                _react2.default.createElement('input', { type: 'text', className: 'layicon', readonly: '', value: metaitem ? metaitem.date : '', onClick: function onClick() {
+	                                                        showDateModalBodyCon(item);
+	                                                    } }),
+	                                                _react2.default.createElement(
+	                                                    'div',
+	                                                    { style: item.dateUI },
+	                                                    _react2.default.createElement(_reactDateRange.Calendar, { onChange: function onChange(date) {
+	                                                            handleSelectDateBodyCon(item, date);
+	                                                        }, date: metaitem ? metaitem.date : '' })
+	                                                )
+	                                            ) : _react2.default.createElement(
+	                                                'div',
+	                                                null,
+	                                                _react2.default.createElement('input', { type: 'checkbox', className: 'checkbox', id: "checkboxa_" + count, checked: metaitem ? 'checked' : '' }),
+	                                                _react2.default.createElement(
+	                                                    'label',
+	                                                    { htmlFor: "checkboxa_" + count, onClick: function onClick() {
+	                                                            metaitem ? item.check = 1 : item.check = 0;click('body_condition', item);
+	                                                        } },
+	                                                    _react2.default.createElement(
+	                                                        'i',
+	                                                        null,
+	                                                        item.name
+	                                                    )
+	                                                )
+	                                            );
+	                                        }(item)
+	                                    );
+	                                })
+	                            )
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'h2',
+	                        null,
+	                        _react2.default.createElement('i', { className: 'row_2' }),
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            '\u5BB6\u65CF\u53F2'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_checkbox_main', id: 'family_history' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'checkbox-box' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'checkBone' },
+	                                historytable.family_history.map(function (item) {
+	                                    count++;
+	                                    var metaitem = historyedit.history && historyedit.history.family_history ? infoGet(historyedit.history.family_history, item.name) : undefined;
+	                                    return _react2.default.createElement(
+	                                        'span',
+	                                        { className: 'W120' },
+	                                        _react2.default.createElement('input', { type: 'checkbox', className: 'checkbox', id: "checkboxb_" + count, checked: metaitem ? 'checked' : '' }),
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { htmlFor: "checkboxb_" + count, onClick: function onClick() {
+	                                                    metaitem ? item.check = 1 : item.check = 0;click('family_history', item);
+	                                                } },
+	                                            _react2.default.createElement(
+	                                                'i',
+	                                                null,
+	                                                item.name
+	                                            )
+	                                        )
+	                                    );
+	                                })
+	                            )
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'h2',
+	                        null,
+	                        _react2.default.createElement('i', { className: 'row_3' }),
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            '\u7528\u836F\u53F2'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_checkbox_main', id: 'medicine' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'checkbox-box' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'checkBone clear_checkbox' },
+	                                historytable.medicine.map(function (item) {
+	                                    count++;
+	                                    var metaitem = historyedit.history && historyedit.history.medicine ? infoGet(historyedit.history.medicine, item.name) : undefined;
+	
+	                                    return _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        _react2.default.createElement('input', { type: 'checkbox', className: 'checkbox', id: "checkboxc_" + count, checked: metaitem ? 'checked' : '' }),
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { htmlFor: "checkboxc_" + count, onClick: function onClick() {
+	                                                    metaitem ? item.check = 1 : item.check = 0;click('medicine', item);
+	                                                } },
+	                                            _react2.default.createElement(
+	                                                'i',
+	                                                null,
+	                                                item.name
+	                                            )
+	                                        )
+	                                    );
+	                                })
+	                            )
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'h2',
+	                        null,
+	                        _react2.default.createElement('i', { className: 'row_4' }),
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            '\u624B\u672F\u53F2'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_checkbox_main', id: 'surgery' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'checkbox-box' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'checkBone clear_checkbox' },
+	                                historytable.surgery.map(function (item) {
+	                                    count++;
+	                                    var metaitem = historyedit.history && historyedit.history.surgery ? infoGet(historyedit.history.surgery, item.name) : undefined;
+	                                    return _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        _react2.default.createElement('input', { type: 'checkbox', className: 'checkbox', id: 'checkboxd_' + count, checked: metaitem ? 'checked' : '' }),
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { htmlFor: "checkboxd_" + count, onClick: function onClick() {
+	                                                    metaitem ? item.check = 1 : item.check = 0;click('surgery', item);
+	                                                } },
+	                                            _react2.default.createElement(
+	                                                'i',
+	                                                null,
+	                                                item.name
+	                                            )
+	                                        ),
+	                                        _react2.default.createElement(
+	                                            'b',
+	                                            null,
+	                                            '\xA0'
+	                                        ),
+	                                        function (item) {
+	                                            var describe = '';
+	                                            historyedit.history.surgery ? historyedit.history.surgery.map(function (info) {
+	                                                console.log(info);
+	                                                if (info.name == '近期做过手术') {
+	                                                    describe = info.describe;
+	                                                }
+	                                            }) : '';
+	
+	                                            return item.name == '近期做过手术' ? _react2.default.createElement('input', { className: 'Wid480', type: 'text', value: describe, onChange: function onChange(ev) {
+	                                                    change('surgery', item, ev);
+	                                                }, style: metaitem ? { display: 'inline-block' } : { display: 'none' } }) : '';
+	                                        }(item)
+	                                    );
+	                                })
+	                            )
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'h2',
+	                        null,
+	                        _react2.default.createElement('i', { className: 'row_5' }),
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            '\u8FC7\u654F\u60C5\u51B5'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_checkbox_main' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'checkbox-box' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'checkBone' },
+	                                historytable.allergy.map(function (item) {
+	                                    count++;
+	                                    var metaitem = historyedit.history && historyedit.history.allergy ? infoGet(historyedit.history.allergy, item.name) : undefined;
+	
+	                                    return _react2.default.createElement(
+	                                        'span',
+	                                        { className: 'W120' },
+	                                        _react2.default.createElement('input', { type: 'checkbox', className: 'checkbox', id: "checkboxe_" + count, checked: metaitem ? 'checked' : '' }),
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { htmlFor: "checkboxe_" + count, onClick: function onClick() {
+	                                                    metaitem ? item.check = 1 : item.check = 0;click('allergy', item);
+	                                                } },
+	                                            _react2.default.createElement(
+	                                                'i',
+	                                                null,
+	                                                item.name
+	                                            )
+	                                        ),
+	                                        function (item) {
+	                                            var describe = '';
+	                                            historyedit.history.allergy ? historyedit.history.allergy.map(function (info) {
+	                                                console.log("1111111111111111111111111");
+	                                                console.log(info);
+	                                                if (info.name == '其他过敏情况') {
+	                                                    describe = info.describe;
+	                                                }
+	                                            }) : '';
+	                                            return item.name == '其他过敏情况' ? _react2.default.createElement('input', { className: 'Wid480', type: 'text', value: describe, onChange: function onChange(ev) {
+	                                                    change('allergy', item, ev);
+	                                                }, style: metaitem ? { display: 'inline-block' } : { display: 'none' } }) : '';
+	                                        }(item)
+	                                    );
+	                                })
+	                            )
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'h2',
+	                        null,
+	                        _react2.default.createElement('i', { className: 'row_6' }),
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            '\u4F20\u67D3\u75C5'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_checkbox_main pbtom30', id: 'infection' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'checkbox-box' },
+	                            _react2.default.createElement(
+	                                'div',
+	                                { className: 'checkBone' },
+	                                historytable.infection.map(function (item) {
+	                                    count++;
+	                                    var metaitem = historyedit.history && historyedit.history.infection ? infoGet(historyedit.history.infection, item.name) : undefined;
+	                                    return _react2.default.createElement(
+	                                        'span',
+	                                        { className: 'W120' },
+	                                        _react2.default.createElement('input', { type: 'checkbox', className: 'checkbox', id: "checkboxf_" + count, checked: metaitem ? 'checked' : '' }),
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { htmlFor: "checkboxf_" + count, onClick: function onClick() {
+	                                                    metaitem ? item.check = 1 : item.check = 0;click('infection', item);
+	                                                } },
+	                                            _react2.default.createElement(
+	                                                'i',
+	                                                null,
+	                                                item.name
+	                                            )
+	                                        ),
+	                                        function (item) {
+	                                            var describe = '';
+	                                            historyedit.history.infection ? historyedit.history.infection.map(function (info) {
+	
+	                                                if (info.name == '其他传染病') {
+	                                                    describe = info.describe;
+	                                                }
+	                                                console.log(describe);
+	                                            }) : '';
+	                                            return item.name == '其他传染病' ? _react2.default.createElement('input', { className: 'Wid480', type: 'text', value: describe, onChange: function onChange(ev) {
+	                                                    change('infection', item, ev);
+	                                                }, style: metaitem ? { display: 'inline-block' } : { display: 'none' } }) : '';
+	                                        }(item)
+	                                    );
+	                                })
+	                            )
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    )
+	                )
+	            )
+	        )
+	    );
+	};
+
+/***/ },
+/* 377 */
+/*!***********************************************************!*\
+  !*** ./backend/useradmin/userinfo/config/historytable.js ***!
+  \***********************************************************/
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	var table = exports.table = {
+	
+		allergy: [{
+			name: "青霉素类",
+			check: '0'
+		}, {
+			name: "磺胺类",
+			check: '0'
+		}, {
+			name: "局麻药",
+			check: '0'
+		}, {
+			name: "酒精",
+			check: '0'
+		}, {
+			name: "其他过敏情况",
+			check: '0',
+			describe: ''
+		}],
+		body_condition: [{
+			name: "心脏病史",
+			check: '0'
+		}, {
+			name: "高血压病史",
+			check: '0'
+		}, {
+			name: "糖尿病史",
+			check: '0'
+		}, {
+			name: "风湿病",
+			check: '0'
+		}, {
+			name: "癫痫病",
+			check: '0'
+		}, {
+			name: "在妊娠期",
+			check: '0'
+		}, {
+			name: "在哺乳期",
+			check: '0'
+		}, {
+			name: "定期体检",
+			check: '0'
+		}, {
+			name: "最近一次体检日期",
+			date: '',
+			dateUI: { display: 'none', position: 'absolute' }
+		}, {
+			name: "定期洗牙",
+			check: '0'
+		}, {
+			name: "最近一次洗牙日期:",
+			date: '',
+			dateUI: { display: 'none', position: 'absolute' }
+		}],
+		family_history: [{
+			name: "牙周病",
+			check: '0'
+		}, {
+			name: "牙列不齐",
+			check: '0'
+		}, {
+			name: "颌骨发育异常",
+			check: '0'
+		}],
+		infection: [{
+			name: "肝炎",
+			check: '0'
+		}, {
+			name: "结核",
+			check: '0'
+		}, {
+			name: "艾滋病",
+			check: '0'
+		}, {
+			name: "其他传染病",
+			check: '0',
+			describe: ''
+		}],
+		medicine: [{
+			name: "在服用抗凝药（阿司匹林/华法林等）",
+			check: '0'
+		}, {
+			name: "在服用免疫抑制剂（如环磷酰胺，他克莫司等）",
+			check: '0'
+		}, {
+			name: "在服用骨质疏松类治疗药物（如福善美）",
+			check: '0'
+		}, {
+			name: "近期在服用消炎止痛药",
+			check: '0'
+		}],
+		surgery: [{
+			name: "近期做过手术",
+			check: '0',
+			describe: ''
+		}]
+	};
+
+/***/ },
+/* 378 */
+/*!****************************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/history/historyshow.js ***!
+  \****************************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.HistoryShow = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var HistoryShow = exports.HistoryShow = function HistoryShow(_ref) {
+	    var historyedit = _ref.historyedit;
+	
+	    var height = window.innerHeight || document.documentElement.clientHeight;
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'userContain z_userContain_edit z_userContain_see', style: { height: "523px;" } },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'z_userContainMain' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'containb_right', style: { minHeight: "520px;" } },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'z_no_past_data', style: { display: "none" } },
+	                    _react2.default.createElement(
+	                        'p',
+	                        null,
+	                        _react2.default.createElement('img', { src: '../../images/nodata.png', alt: '' }),
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            '\u6B64\u9879\u76EE\u6682\u65E0\u6570\u636E'
+	                        ),
+	                        _react2.default.createElement(
+	                            'a',
+	                            { href: 'javascript:;', className: 'default_inputbtn z_add_btn2' },
+	                            '\u6DFB\u52A0'
+	                        )
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'z_jws_main' },
+	                    _react2.default.createElement(
+	                        'h2',
+	                        { className: 'no_border' },
+	                        _react2.default.createElement('i', { className: 'row_1' }),
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            '\u5168\u8EAB\u60C5\u51B5'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_checkbox_main see_hide' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_past_desc' },
+	                            historyedit.history.body_condition.map(function (item) {
+	                                return _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        item.name
+	                                    ),
+	                                    _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        item.date
+	                                    )
+	                                );
+	                            })
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'h2',
+	                        null,
+	                        _react2.default.createElement('i', { className: 'row_2' }),
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            '\u5BB6\u65CF\u53F2'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_checkbox_main see_hide' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_past_desc' },
+	                            historyedit.history.family_history.map(function (item) {
+	                                return _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    item.name
+	                                );
+	                            })
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'h2',
+	                        null,
+	                        _react2.default.createElement('i', { className: 'row_3' }),
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            '\u7528\u836F\u53F2'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_checkbox_main see_hide' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_past_desc' },
+	                            historyedit.history.medicine.map(function (item) {
+	                                return _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    item.name
+	                                );
+	                            })
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'h2',
+	                        null,
+	                        _react2.default.createElement('i', { className: 'row_4' }),
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            '\u624B\u672F\u53F2'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_checkbox_main see_hide' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_past_desc' },
+	                            historyedit.history.surgery.map(function (item) {
+	                                return _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        item.name
+	                                    ),
+	                                    _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        item.describe
+	                                    )
+	                                );
+	                            })
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'h2',
+	                        null,
+	                        _react2.default.createElement('i', { className: 'row_5' }),
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            '\u8FC7\u654F\u60C5\u51B5'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_checkbox_main see_hide' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_past_desc' },
+	                            historyedit.history.allergy.map(function (item) {
+	                                console.log("EEEEEWWWQQQQQ");
+	                                console.log(item);
+	                                return _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        item.name
+	                                    ),
+	                                    _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        item.describe
+	                                    )
+	                                );
+	                            })
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'h2',
+	                        null,
+	                        _react2.default.createElement('i', { className: 'row_6' }),
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            '\u4F20\u67D3\u75C5'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_checkbox_main see_hide pbtom30' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'z_past_desc' },
+	                            historyedit.history.infection.map(function (item) {
+	                                return _react2.default.createElement(
+	                                    'span',
+	                                    null,
+	                                    _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        item.name
+	                                    ),
+	                                    _react2.default.createElement(
+	                                        'span',
+	                                        null,
+	                                        item.describe
+	                                    )
+	                                );
+	                            })
+	                        ),
+	                        _react2.default.createElement('div', { className: 'clear' })
+	                    )
+	                )
+	            )
+	        ),
+	        _react2.default.createElement('div', { className: 'clear' })
+	    );
+	};
+
+/***/ },
+/* 379 */,
+/* 380 */
+/*!***************************************************!*\
+  !*** ./backend/useradmin/userinfo/teethstatus.js ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.TeethStatusHead = exports.default = exports.asyncEvent = undefined;
+	
+	var _typeof2 = __webpack_require__(/*! babel-runtime/helpers/typeof */ 251);
+	
+	var _typeof3 = _interopRequireDefault(_typeof2);
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 284);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 288);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 289);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 293);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 294);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _promise = __webpack_require__(/*! babel-runtime/core-js/promise */ 312);
+	
+	var _promise2 = _interopRequireDefault(_promise);
+	
+	var _dec, _dec2, _class;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	var _auth = __webpack_require__(/*! ../../redux/reducers/auth */ 241);
+	
+	var _user_patient = __webpack_require__(/*! ../../redux/reducers/user_patient */ 247);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	var _oraledit = __webpack_require__(/*! ./view/oral/oraledit.js */ 381);
+	
+	var _oralshow = __webpack_require__(/*! ./view/oral/oralshow.js */ 383);
+	
+	var _oraltable = __webpack_require__(/*! ./config/oraltable.js */ 382);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var __asyncEvent = function __asyncEvent(_ref) {
+	    var dispatch = _ref.dispatch,
+	        getState = _ref.getState;
+	
+	    var state = getState();
+	    var id = state.getIn(['user_patient', 'frontuserinfo', 'id']);
+	    return dispatch((0, _user_patient.load_detail_oral)({ id: id }));
+	};
+	var asyncEvent = exports.asyncEvent = [{
+	    promise: function promise(_ref2) {
+	        var _ref2$store = _ref2.store,
+	            dispatch = _ref2$store.dispatch,
+	            getState = _ref2$store.getState,
+	            params = _ref2.params;
+	
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            console.log("his login!!!!!!!!!!!!!!!!!!11");
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                if (!(0, _user_patient.LoadedorLoadingUser_Oral)(getState())) {
+	                    console.log("his login!!!!!!!!!!!!!!!!!!22");
+	                    return __asyncEvent({ dispatch: dispatch, getState: getState });
+	                } else return _promise2.default.resolve();
+	            });
+	        } else {
+	            console.log("his login!!!!!!!!!!!!!!!!!!33");
+	            if (!(0, _user_patient.LoadedorLoadingUser_Oral)(getState())) {
+	                console.log("his login!!!!!!!!!!!!!!!!!!44");
+	                return __asyncEvent({ dispatch: dispatch, getState: getState });
+	            } else return _promise2.default.resolve();
+	        }
+	    }
+	}];
+	
+	var TeethStatus = (_dec = (0, _reduxConnect.asyncConnect)(asyncEvent), _dec2 = (0, _reactRedux.connect)(function (state) {
+	    var idx = state.getIn(['user_patient', 'frontuserinfo', 'idx']);
+	    return {
+	        auth: state.get('auth'),
+	        oraledit: state.getIn(['user_patient', 'users', idx, 'oraledit'])
+	    };
+	}, { pushState: _reactRouterRedux.push, oralEditADD: _user_patient.oralEditADD, oralFlush: _user_patient.oralFlush, changeOralTime: _user_patient.changeOralTime, oralEditDEL: _user_patient.oralEditDEL }), _dec(_class = _dec2(_class = function (_Component) {
+	    (0, _inherits3.default)(TeethStatus, _Component);
+	
+	    function TeethStatus(props) {
+	        (0, _classCallCheck3.default)(this, TeethStatus);
+	
+	        var _this = (0, _possibleConstructorReturn3.default)(this, (TeethStatus.__proto__ || (0, _getPrototypeOf2.default)(TeethStatus)).call(this, props));
+	        // code
+	
+	
+	        _this.state = { check: true, edit: false, add: false, refresh: 0 };
+	        return _this;
+	    }
+	
+	    (0, _createClass3.default)(TeethStatus, [{
+	        key: 'toAdd',
+	        value: function toAdd() {
+	            var addtime = this.props.oraledit.get('time');
+	            this.setState((0, _extends3.default)({}, this.state, { check: false, edit: false, add: true, addTime: addtime }));
+	        }
+	    }, {
+	        key: 'toEdit',
+	        value: function toEdit() {
+	            this.setState((0, _extends3.default)({}, this.state, { check: false, edit: true, add: false }));
+	        }
+	    }, {
+	        key: 'toCheck',
+	        value: function toCheck() {
+	            this.toSave();
+	            this.setState((0, _extends3.default)({}, this.state, { check: true, edit: false, add: false }));
+	        }
+	    }, {
+	        key: 'toSave',
+	        value: function toSave() {
+	            this.props.oralFlush();
+	        }
+	    }, {
+	        key: 'changeCheckTime',
+	        value: function changeCheckTime(e) {
+	            this.props.changeOralTime({ idx: e.target.value - 1 });
+	        }
+	    }, {
+	        key: 'changeEditTime',
+	        value: function changeEditTime(e) {
+	            this.props.changeOralTime({ idx: e.target.value - 1 });
+	        }
+	    }, {
+	        key: 'onClickInfo',
+	        value: function onClickInfo(key, val, id) {
+	            var tmp = {};
+	            tmp[id] = val.name;
+	            var value = { name: val.title, val: tmp };
+	            console.log("onClickInfo!!!!");
+	            console.log(tmp);
+	            console.log(value);
+	            if (val.check == 0) {
+	                this.props.oralEditADD({ key: key, val: value });
+	            } else {
+	                this.props.oralEditDEL({ key: key, val: value });
+	            }
+	        }
+	    }, {
+	        key: 'onChangeInfo',
+	        value: function onChangeInfo(name, e) {
+	            var value = { name: name, val: { content: e.target.value } };
+	            this.props.oralEditADD({ key: 'repairhis', val: value });
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var oraledit = this.props.oraledit.toJS();
+	            return _react2.default.createElement(
+	                'div',
+	                null,
+	                TeethStatusHead({
+	                    oraledit: oraledit,
+	                    edit: this.state.edit,
+	                    check: this.state.check,
+	                    add: this.state.add,
+	                    addTime: this.state.addTime,
+	                    toEdit: this.toEdit.bind(this),
+	                    toAdd: this.toAdd.bind(this),
+	                    toCheck: this.toCheck.bind(this),
+	                    changeCheckTime: this.changeCheckTime.bind(this),
+	                    changeEditTime: this.changeEditTime.bind(this)
+	                }),
+	                this.state.check ? (0, _oralshow.OralShow)({
+	                    oraledit: oraledit
+	                }) : (0, _oraledit.OralEdit)({
+	                    oraltable: _oraltable.table,
+	                    oraledit: oraledit,
+	                    click: this.onClickInfo.bind(this),
+	                    change: this.onChangeInfo.bind(this)
+	                })
+	            );
+	        }
+	    }]);
+	    return TeethStatus;
+	}(_react.Component)) || _class) || _class);
+	exports.default = TeethStatus;
+	var TeethStatusHead = exports.TeethStatusHead = function TeethStatusHead(_ref3) {
+	    var oraledit = _ref3.oraledit,
+	        edit = _ref3.edit,
+	        check = _ref3.check,
+	        add = _ref3.add,
+	        addTime = _ref3.addTime,
+	        toAdd = _ref3.toAdd,
+	        toEdit = _ref3.toEdit,
+	        toCheck = _ref3.toCheck,
+	        changeCheckTime = _ref3.changeCheckTime,
+	        changeEditTime = _ref3.changeEditTime;
+	
+	    if (check) {
+	        var _ret = function () {
+	            var index = 0;
+	            return {
+	                v: _react2.default.createElement(
+	                    'div',
+	                    { className: 'time z_time_edit', style: { top: '215px' } },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_time_btn', style: { border: 'none' } },
+	                        _react2.default.createElement(
+	                            'p',
+	                            null,
+	                            _react2.default.createElement(
+	                                'b',
+	                                null,
+	                                '\u66F4\u65B0\u8BB0\u5F55\uFF1A'
+	                            ),
+	                            _react2.default.createElement(
+	                                'select',
+	                                { onChange: function onChange(e) {
+	                                        changeCheckTime(e);
+	                                    } },
+	                                oraledit.timelist.map(function (time) {
+	                                    index++;
+	                                    if (oraledit.idx + 1 == index) return _react2.default.createElement(
+	                                        'option',
+	                                        { selected: 'selected', value: index },
+	                                        time
+	                                    );else return _react2.default.createElement(
+	                                        'option',
+	                                        { value: index },
+	                                        time
+	                                    );
+	                                })
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'label',
+	                            null,
+	                            _react2.default.createElement(
+	                                'span',
+	                                { onClick: toAdd, className: 'default_inputbtn z_add_btn' },
+	                                '\u6DFB\u52A0'
+	                            ),
+	                            _react2.default.createElement(
+	                                'span',
+	                                { onClick: toEdit, className: 'default_inputbtn z_edit_btn' },
+	                                '\u7F16\u8F91'
+	                            )
+	                        )
+	                    )
+	                )
+	            };
+	        }();
+	
+	        if ((typeof _ret === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret)) === "object") return _ret.v;
+	    } else if (edit) {
+	        var _ret2 = function () {
+	            var index = 0;
+	            return {
+	                v: _react2.default.createElement(
+	                    'div',
+	                    { className: 'time z_time_edit' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'z_time_btn' },
+	                        _react2.default.createElement(
+	                            'p',
+	                            null,
+	                            _react2.default.createElement(
+	                                'b',
+	                                null,
+	                                '\u66F4\u65B0\u8BB0\u5F55\uFF1A'
+	                            ),
+	                            _react2.default.createElement(
+	                                'select',
+	                                { onChange: function onChange(e) {
+	                                        changeEditTime(e);
+	                                    } },
+	                                oraledit.timelist.map(function (time) {
+	                                    index++;
+	                                    if (oraledit.idx + 1 == index) return _react2.default.createElement(
+	                                        'option',
+	                                        { selected: 'selected', value: index },
+	                                        time
+	                                    );else return _react2.default.createElement(
+	                                        'option',
+	                                        { value: index },
+	                                        time
+	                                    );
+	                                })
+	                            )
+	                        ),
+	                        _react2.default.createElement(
+	                            'label',
+	                            null,
+	                            _react2.default.createElement(
+	                                'span',
+	                                { onClick: toCheck, className: 'default_inputbtn z_save_btn' },
+	                                '\u4FDD\u5B58'
+	                            )
+	                        )
+	                    )
+	                )
+	            };
+	        }();
+	
+	        if ((typeof _ret2 === 'undefined' ? 'undefined' : (0, _typeof3.default)(_ret2)) === "object") return _ret2.v;
+	    } else if (add) {
+	        return _react2.default.createElement(
+	            'div',
+	            { className: 'time z_time_edit' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'z_time_btn' },
+	                _react2.default.createElement(
+	                    'p',
+	                    null,
+	                    _react2.default.createElement(
+	                        'em',
+	                        { className: 'see_page_em' },
+	                        '\u57FA\u4E8E\u6700\u65B0\uFF08',
+	                        _react2.default.createElement(
+	                            'font',
+	                            { className: 'new_time' },
+	                            addTime
+	                        ),
+	                        '\uFF09\u4FE1\u606F\u4E0A\u8FDB\u884C\u6DFB\u52A0'
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'label',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        { onClick: toCheck, className: 'default_inputbtn z_save_btn' },
+	                        '\u4FDD\u5B58'
+	                    )
+	                )
+	            )
+	        );
+	    }
+	};
+
+/***/ },
+/* 381 */
+/*!**********************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/oral/oraledit.js ***!
+  \**********************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.OralEdit = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/* item_lv2 is group  item_lv0_name 'surgery'*/
+	function infoGet(datalv0, item_lv3, item_lv2, item_lv1) {
+	    var retdata;
+	    datalv0.map(function (data) {
+	
+	        if (data.name == item_lv1.name) {
+	
+	            if (item_lv2.type == 'm') {
+	                if (data.val[item_lv3.id] && item_lv3.name == data.val[item_lv3.id]) {
+	                    retdata = true;
+	                }
+	            } else {
+	                if (data.val[item_lv2.id] && item_lv3.name == data.val[item_lv2.id]) {
+	                    retdata = true;
+	                }
+	            }
+	        }
+	    });
+	    return retdata;
+	}
+	
+	/* item_lv1 '面型'' item_lv0_name 'surgery' */
+	function oral(item_lv1, item_lv0_name, click, oraledit) {
+	    return _react2.default.createElement(
+	        'div',
+	        { style: { marginTop: '10px' } },
+	        item_lv0_name != 'mucosa' ? _react2.default.createElement(
+	            'span',
+	            { className: 'H_content_radio_title' },
+	            item_lv1.name
+	        ) : '',
+	
+	        /*item_lv2  group has no name */
+	        item_lv1.groups.map(function (item_lv2) {
+	            if (item_lv0_name != 'mucosa') {
+	                return _react2.default.createElement(
+	                    'div',
+	                    { style: { marginTop: '10px', marginLeft: '129px' } },
+	                    group(item_lv2, item_lv1, item_lv0_name, click, oraledit)
+	                );
+	            } else {
+	                return _react2.default.createElement(
+	                    'div',
+	                    null,
+	                    group(item_lv2, item_lv1, item_lv0_name, click, oraledit)
+	                );
+	            }
+	        })
+	    );
+	}
+	/*item_lv2 is a group has no name */
+	function group(item_lv2, item_lv1, item_lv0_name, click, oraledit) {
+	    console.log(oraledit);
+	    if (item_lv2.type == 's') {
+	        return item_lv2.group.map(function (item_lv3) {
+	            var metaitem = oraledit.oral && oraledit.oral[item_lv0_name] ? infoGet(oraledit.oral[item_lv0_name], item_lv3, item_lv2, item_lv1) : undefined;
+	            return _react2.default.createElement(
+	                'span',
+	                { className: 'H_content_list_item H_content_list_item_radio' },
+	                _react2.default.createElement('input', { type: 'radio', className: 'radio radio2', id: item_lv0_name + item_lv3.id, name: item_lv0_name + item_lv2.id, checked: metaitem ? 'checked' : '' }),
+	                _react2.default.createElement(
+	                    'label',
+	                    { htmlFor: item_lv0_name + item_lv3.id, onClick: function onClick() {
+	                            metaitem ? item_lv3.check = 1 : item_lv3.check = 0;click(item_lv0_name, item_lv3, item_lv2.id);
+	                        } },
+	                    _react2.default.createElement(
+	                        'i',
+	                        null,
+	                        '\xA0',
+	                        item_lv3.name
+	                    )
+	                )
+	            );
+	        });
+	    } else {
+	        return item_lv2.group.map(function (item_lv3) {
+	            var metaitem = oraledit.oral && oraledit.oral[item_lv0_name] ? infoGet(oraledit.oral[item_lv0_name], item_lv3, item_lv2, item_lv1) : undefined;
+	            return _react2.default.createElement(
+	                'span',
+	                { className: 'H_content_list_item H_content_list_item_radio' },
+	                _react2.default.createElement('input', { type: 'checkbox', id: item_lv0_name + item_lv3.id, checked: metaitem ? 'checked' : '' }),
+	                _react2.default.createElement(
+	                    'label',
+	                    { htmlFor: item_lv0_name + item_lv3.id, onClick: function onClick() {
+	                            metaitem ? item_lv3.check = 1 : item_lv3.check = 0;click(item_lv0_name, item_lv3, item_lv3.id);
+	                        } },
+	                    _react2.default.createElement(
+	                        'i',
+	                        null,
+	                        '\xA0',
+	                        item_lv3.name
+	                    )
+	                )
+	            );
+	        });
+	    }
+	}
+	var OralEdit = exports.OralEdit = function OralEdit(_ref) {
+	    var oraltable = _ref.oraltable,
+	        oraledit = _ref.oraledit,
+	        click = _ref.click,
+	        change = _ref.change;
+	
+	    var height = window.innerHeight || document.documentElement.clientHeight;
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'userContain z_userContain_edit', style: { height: height - 260 + 'px' } },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'z_userContainMain' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'containb_right', id: 'edit_page' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'H_content' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_title' },
+	                        _react2.default.createElement(
+	                            'span',
+	                            { className: 'H_title_span H_title_color2' },
+	                            '\u7259\u5468'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_list', id: 'teeth_around' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_small_box H_margin_bottom20' },
+	                            oraltable.teetharound.map(function (item_lv1) {
+	                                return oral(item_lv1, "teetharound", click, oraledit);
+	                            })
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_title' },
+	                        _react2.default.createElement(
+	                            'span',
+	                            { className: 'H_title_span H_title_color2' },
+	                            '\u7C98\u819C'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_list', id: 'teeth_around' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_small_box H_margin_bottom20' },
+	                            oraltable.mucosa.map(function (item_lv1) {
+	                                return oral(item_lv1, "mucosa", click, oraledit);
+	                            })
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_title' },
+	                        _react2.default.createElement(
+	                            'span',
+	                            { className: 'H_title_span H_title_color2' },
+	                            '\u5916\u79D1'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_list', id: 'teeth_around' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_small_box H_margin_bottom20' },
+	                            oraltable.surgery.map(function (item_lv1) {
+	                                return oral(item_lv1, "surgery", click, oraledit);
+	                            })
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_title' },
+	                        _react2.default.createElement(
+	                            'span',
+	                            { className: 'H_title_span H_title_color2' },
+	                            '\u7259\u75C5\u6CBB\u7597\u53CA\u4FEE\u590D\u53F2'
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'H_content_list', id: 'teeth_around' },
+	                        _react2.default.createElement(
+	                            'div',
+	                            { className: 'H_small_box H_margin_bottom20' },
+	                            _react2.default.createElement(
+	                                'span',
+	                                { className: 'H_content_list_item H_margin_bottom_none padding_left0' },
+	                                '\u6CBB\u7597\u53CA\u4FEE\u590D\u53F2',
+	                                _react2.default.createElement('textarea', { className: 'teeth_repair_textarea', style: { border: '1px solid rgb(204, 204, 204' }, value: oraledit.oral.repairhis[0] && oraledit.oral.repairhis[0].val ? oraledit.oral.repairhis[0].val.content : '', onChange: function onChange(e) {
+	                                        change('治疗及修复史', e);
+	                                    } })
+	                            )
+	                        )
+	                    )
+	                )
+	            )
+	        )
+	    );
+	};
+
+/***/ },
+/* 382 */
+/*!********************************************************!*\
+  !*** ./backend/useradmin/userinfo/config/oraltable.js ***!
+  \********************************************************/
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	var table = exports.table = {
+	
+		teetharound: [{
+			name: '牙石',
+			id: "0",
+			groups: [{
+				type: 's',
+				id: "00",
+				group: [{
+					name: 'Ⅰ',
+					id: "000",
+					title: '牙石',
+					check: '0'
+				}, {
+					name: 'Ⅱ',
+					id: "001",
+					title: '牙石',
+					check: '0'
+				}, {
+					name: 'Ⅲ',
+					id: "002",
+					title: '牙石',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: '松动',
+			id: "1",
+			groups: [{
+				type: 's',
+				id: '10',
+				group: [{
+					name: 'Ⅰ',
+					id: "010",
+					title: '松动',
+					check: '0'
+				}, {
+					name: 'Ⅱ',
+					id: "011",
+					title: '松动',
+					check: '0'
+				}, {
+					name: 'Ⅲ',
+					id: "012",
+					title: '松动',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: '出血',
+			id: "2",
+			groups: [{
+				type: 's',
+				id: '20',
+				group: [{
+					name: 'Ⅰ',
+					id: "020",
+					title: '出血',
+					check: '0'
+				}, {
+					name: 'Ⅱ',
+					id: "021",
+					title: '出血',
+					check: '0'
+				}, {
+					name: 'Ⅲ',
+					id: "022",
+					title: '出血',
+					check: '0'
+				}, {
+					name: 'Ⅳ',
+					id: "023",
+					title: '出血',
+					check: '0'
+				}, {
+					name: 'Ⅴ',
+					id: "024",
+					title: '出血',
+					check: '0'
+				}]
+			}]
+		}],
+		mucosa: [{
+			name: '粘膜',
+			id: '0',
+			groups: [{
+				type: 'm',
+				id: '00',
+				group: [{
+					name: '正常',
+					id: "000",
+					title: '粘膜',
+					check: '0'
+				}, {
+					name: '白色斑块',
+					id: "001",
+					title: '粘膜',
+					check: '0'
+				}, {
+					name: '红色斑块',
+					id: "002",
+					title: '粘膜',
+					check: '0'
+				}, {
+					name: '扁平苔藓',
+					id: "003",
+					title: '粘膜',
+					check: '0'
+				}, {
+					name: '溃疡',
+					id: "004",
+					title: '粘膜',
+					check: '0'
+				}, {
+					name: '其他',
+					id: "005",
+					title: '粘膜',
+					check: '0',
+					describe: ''
+				}]
+			}]
+		}],
+		surgery: [{
+			name: '开口度',
+			id: "1",
+			groups: [{
+				type: 's',
+				id: "10",
+				group: [{
+					name: '三指宽度',
+					id: "100",
+					title: '开口度',
+					check: '0'
+				}, {
+					name: '两指宽度',
+					id: "101",
+					title: '开口度',
+					check: '0'
+				}, {
+					name: '一指宽度，甚至更小',
+					id: "102",
+					title: '开口度',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: '开口型',
+			id: "2",
+			groups: [{
+				type: 's',
+				id: '20',
+				group: [{
+					name: '直线',
+					id: "200",
+					title: '开口型',
+					check: '0'
+				}, {
+					name: '偏左',
+					id: "201",
+					title: '开口型',
+					check: '0'
+				}, {
+					name: '偏右',
+					id: "202",
+					title: '开口型',
+					check: '0'
+				}]
+			}]
+		}, { /* lv1 */
+			name: '面型',
+			id: "3",
+			groups: [{ /*    lv2 */
+				type: 's',
+				id: '30',
+				group: [{ /*  lv3 */
+					name: '大致对称',
+					id: "300",
+					title: '面型',
+					check: '0'
+				}, { /*  lv3 */
+					name: '中线偏左',
+					id: "301",
+					title: '面型',
+					check: '0'
+				}, { /*  lv3 */
+					name: '中线偏右',
+					id: "302",
+					title: '面型',
+					check: '0'
+				}]
+			}, { /*    lv2 */
+				type: 's',
+				id: '31',
+				group: [{
+					name: '直面型',
+					id: "310",
+					title: '面型',
+					check: '0'
+				}, {
+					name: '凹面型',
+					id: "311",
+					title: '面型',
+					check: '0'
+				}, {
+					name: '凸面型',
+					id: "312",
+					title: '面型',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: '牙列',
+			id: '4',
+			groups: [{
+				type: 's',
+				id: '40',
+				group: [{
+					name: '正常',
+					id: '400',
+					title: '牙列',
+					check: '0'
+				}, {
+					name: '拥挤',
+					id: '401',
+					title: '牙列',
+					check: '0'
+				}, {
+					name: '间隙',
+					id: '402',
+					title: '牙列',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: '磨牙关系',
+			id: '5',
+			groups: [{
+				type: 's',
+				id: '50',
+				group: [{
+					name: 'Ⅰ',
+					id: '500',
+					title: '磨牙关系',
+					check: '0'
+				}, {
+					name: 'Ⅱ',
+					id: '501',
+					title: '磨牙关系',
+					check: '0'
+				}, {
+					name: 'Ⅲ',
+					id: '502',
+					title: '磨牙关系',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: "前牙关系",
+			id: '6',
+			groups: [{
+				type: 's',
+				id: '60',
+				group: [{
+					name: '正常',
+					id: '600',
+					title: '前牙关系',
+					check: '0'
+				}, {
+					name: '反合',
+					id: "601",
+					title: '前牙关系',
+					check: '0'
+				}, {
+					name: '开合',
+					id: "602",
+					title: '前牙关系',
+					check: '0'
+				}, {
+					name: '对刃',
+					id: "603",
+					title: '前牙关系',
+					check: '0'
+				}]
+			}, {
+				type: 'm',
+				id: '61',
+				group: [{
+					name: '深覆盖',
+					id: "610",
+					title: '前牙关系',
+					check: '0'
+				}, {
+					name: '深覆合',
+					id: '611',
+					title: '前牙关系',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: '系带',
+			id: '7',
+			groups: [{
+				type: 'm',
+				id: '70',
+				group: [{
+					name: '唇系带过低',
+					id: "700",
+					title: '系带',
+					check: '0'
+				}, {
+					name: '舌系带过短',
+					id: '701',
+					title: '系带',
+					check: '0'
+				}, {
+					name: '正常',
+					id: '702',
+					title: '系带',
+					check: '0'
+				}]
+			}]
+		}, {
+			name: 'TMG',
+			id: '8',
+			groups: [{
+				type: 'm',
+				id: '80',
+				group: [{
+					name: '关节弹响',
+					id: '800',
+					title: 'TMG',
+					check: '0'
+				}, {
+					name: '关节压痛',
+					id: '801',
+					title: 'TMG',
+					check: '0'
+				}, {
+					name: '关节脱位',
+					id: '802',
+					title: 'TMG',
+					check: '0'
+				}]
+			}]
+		}]
+	};
+
+/***/ },
+/* 383 */
+/*!**********************************************************!*\
+  !*** ./backend/useradmin/userinfo/view/oral/oralshow.js ***!
+  \**********************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.OralShow = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function checkDom(val) {
+		console.log(val);
+		var arr = [];
+		for (var i in val) {
+			arr.push(_react2.default.createElement(
+				'span',
+				{ className: 'H_content_list_item H_content_list_item_radio', style: { lineHeight: "19px" } },
+				_react2.default.createElement(
+					'span',
+					null,
+					val[i]
+				)
+			));
+		}
+		return arr;
+	}
+	var OralShow = exports.OralShow = function OralShow(_ref) {
+		var oraledit = _ref.oraledit;
+	
+		var height = window.innerHeight || document.documentElement.clientHeight;
+		return _react2.default.createElement(
+			'div',
+			{ className: 'userContain z_userContain_edit z_userContain_see', style: { height: height - 260 + 'px' } },
+			_react2.default.createElement(
+				'div',
+				{ className: 'z_userContainMain' },
+				_react2.default.createElement(
+					'div',
+					{ className: 'containb_right', style: { minHeight: "520px;" } },
+					_react2.default.createElement(
+						'div',
+						{ className: 'H_content' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_title' },
+							_react2.default.createElement(
+								'span',
+								{ className: 'H_title_span H_title_color2' },
+								'\u7259\u5468'
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_list' },
+							oraledit.oral.teetharound ? oraledit.oral.teetharound.map(function (item) {
+								console.log('ZZZZZDDDDDDHHHHHH');
+								console.log(item);
+								return _react2.default.createElement(
+									'div',
+									{ className: 'H_small_box H_margin_bottom20' },
+									_react2.default.createElement(
+										'span',
+										{ className: 'H_content_radio_title' },
+										item.name
+									),
+									checkDom(item.val)
+								);
+							}) : ''
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'H_content' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_title' },
+							_react2.default.createElement(
+								'span',
+								{ className: 'H_title_span H_title_color3' },
+								'\u7C98\u819C'
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_list' },
+							oraledit.oral.mucosa ? oraledit.oral.mucosa.map(function (item) {
+								console.log('ZZZZZDDDDDDHHHHHH');
+								console.log(item);
+								return _react2.default.createElement(
+									'div',
+									{ className: 'H_small_box H_margin_bottom20' },
+									checkDom(item.val)
+								);
+							}) : ''
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'H_content' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_title' },
+							_react2.default.createElement(
+								'span',
+								{ className: 'H_title_span H_title_color4' },
+								'\u5916\u79D1'
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_list' },
+							oraledit.oral.surgery ? oraledit.oral.surgery.map(function (item) {
+								console.log('ZZZZZDDDDDDHHHHHH');
+								console.log(item);
+								return _react2.default.createElement(
+									'div',
+									{ className: 'H_small_box H_margin_bottom20' },
+									_react2.default.createElement(
+										'span',
+										{ className: 'H_content_radio_title' },
+										item.name
+									),
+									checkDom(item.val)
+								);
+							}) : ''
+						)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'H_content' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_title' },
+							_react2.default.createElement(
+								'span',
+								{ className: 'H_title_span H_title_color5' },
+								'\u7259\u75C5\u6CBB\u7597\u53CA\u4FEE\u590D\u53F2'
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'H_content_list' },
+							oraledit.oral.repairhis ? oraledit.oral.repairhis.map(function (item) {
+								console.log('ZZZZZDDDDDDHHHHHH');
+								console.log(item);
+								return _react2.default.createElement(
+									'div',
+									{ className: 'H_small_box H_margin_bottom20' },
+									_react2.default.createElement(
+										'span',
+										{ className: 'H_content_radio_title' },
+										item.name
+									),
+									checkDom(item.val)
+								);
+							}) : ''
+						)
+					)
+				)
+			)
+		);
+	};
+
+/***/ },
+/* 384 */
+/*!***********************************************!*\
+  !*** ./backend/redux/reducers/user_doctor.js ***!
+  \***********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = reducer;
+	exports.LoadedorLoading = LoadedorLoading;
+	exports.load = load;
+	
+	var _immutable = __webpack_require__(/*! immutable */ 46);
+	
+	var _immutable2 = _interopRequireDefault(_immutable);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _apiinterface = __webpack_require__(/*! ../../util/apiinterface.js */ 374);
+	
+	var _apiinterface2 = _interopRequireDefault(_apiinterface);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var LOAD = 'bohe/user_doctor/LOAD';
+	var LOAD_SUCCESS = 'bohe/user_doctor/LOAD_SUCCESS';
+	var LOAD_FAIL = 'bohe/user_doctor/LOAD_FAIL';
+	
+	var initialState = _immutable2.default.Map({
+	    loaded: false,
+	    loading: false
+	});
+	
+	function reducer() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+	    var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	
+	    switch (action.type) {
+	        case LOAD:
+	            return state.merge({ loading: true });
+	        case LOAD_SUCCESS:
+	            return state.merge({ loading: false, loaded: true, doctors: action.result });
+	        case LOAD_FAIL:
+	            return state.merge({ loading: false, loaded: false, error: action.error });
+	        default:
+	            return state;
+	    }
+	}
+	
+	function LoadedorLoading(state) {
+	    var loaded = false;
+	    var loading = false;
+	    if (state.hasIn(['user_doctor', 'loaded'])) {
+	        loaded = state.getIn(['user_doctor', 'loaded']);
+	    }
+	    if (state.hasIn(['user_doctor', 'loading'])) {
+	        loading = state.getIn(['user_doctor', 'loading']);
+	    }
+	    return loaded || loading;
+	}
+	
+	/* 当 直接采用 浏览器发起域名访问时 不会携带本地Token 所以在鉴权阶段 会转入login 登录后得到新的签发token
+	   当采用 微信公众号直接跳转时 鉴权阶段使用openid 通过鉴权，签发新的token到state的user中
+	   所以本地token最大的作用是在进入usercenter时 快捷判断是否登录过
+	*/
+	function load(_ref) {
+	    var user = _ref.user,
+	        req = _ref.req;
+	
+	    var params = {};
+	
+	    if (typeof window === 'undefined' || window.__SERVER__ == true) {
+	        ///server side
+	        if (user.token) ///  鉴权通过 已经持有 token
+	            {
+	                params.token = user.token;
+	            } else {
+	            // server side none key to login
+	
+	            return {
+	                type: LOAD_FAIL,
+	                promise: function promise() {
+	                    return _bluebird2.default.reject({ info: 'auth' });
+	                }
+	            };
+	        }
+	    } else {}
+	
+	    return {
+	        types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
+	        promise: function promise(client) {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/user_doctor/rest?', { params: params }, {
+	                format: function format(response) {
+	                    if (response.status >= 400) {
+	                        throw new Error("Bad response from server");
+	                    }
+	                    return response.json();
+	                },
+	                done: function done(res) {
+	
+	                    console.log(res);
+	
+	                    if (res.valid == 1) {
+	
+	                        return _bluebird2.default.resolve(res.doctors);
+	                    } else {
+	                        //var err = { info: 'auth' }
+	                        return _bluebird2.default.reject({ info: 'notvalid' });
+	                    }
+	                },
+	                error: function error(err) {
+	                    return _bluebird2.default.reject({ info: 'wire' });
+	                }
+	            });
+	        }
+	    };
+	}
+
+/***/ },
+/* 385 */
+/*!***********************************************!*\
+  !*** ./backend/redux/reducers/user_clinic.js ***!
+  \***********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = reducer;
+	exports.LoadedorLoading = LoadedorLoading;
+	exports.load = load;
+	
+	var _immutable = __webpack_require__(/*! immutable */ 46);
+	
+	var _immutable2 = _interopRequireDefault(_immutable);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _apiinterface = __webpack_require__(/*! ../../util/apiinterface.js */ 374);
+	
+	var _apiinterface2 = _interopRequireDefault(_apiinterface);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var LOAD = 'bohe/user_clinic/LOAD';
+	var LOAD_SUCCESS = 'bohe/user_clinic/LOAD_SUCCESS';
+	var LOAD_FAIL = 'bohe/user_clinic/LOAD_FAIL';
+	
+	var initialState = _immutable2.default.Map({
+	    loaded: false,
+	    loading: false
+	});
+	
+	function reducer() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+	    var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	
+	    switch (action.type) {
+	        case LOAD:
+	            return state.merge({ loading: true });
+	        case LOAD_SUCCESS:
+	            return state.merge({ loading: false, loaded: true, clinics: action.result });
+	        case LOAD_FAIL:
+	            return state.merge({ loading: false, loaded: false, error: action.error });
+	        default:
+	            return state;
+	    }
+	}
+	
+	function LoadedorLoading(state) {
+	    var loaded = false;
+	    var loading = false;
+	    if (state.hasIn(['user_clinic', 'loaded'])) {
+	        loaded = state.getIn(['user_clinic', 'loaded']);
+	    }
+	    if (state.hasIn(['user_clinic', 'loading'])) {
+	        loading = state.getIn(['user_clinic', 'loading']);
+	    }
+	    return loaded || loading;
+	}
+	
+	/* 当 直接采用 浏览器发起域名访问时 不会携带本地Token 所以在鉴权阶段 会转入login 登录后得到新的签发token
+	   当采用 微信公众号直接跳转时 鉴权阶段使用openid 通过鉴权，签发新的token到state的user中
+	   所以本地token最大的作用是在进入usercenter时 快捷判断是否登录过
+	*/
+	function load(_ref) {
+	    var user = _ref.user,
+	        req = _ref.req;
+	
+	    var params = {};
+	
+	    if (typeof window === 'undefined' || window.__SERVER__ == true) {
+	        ///server side
+	        if (user.token) ///  鉴权通过 已经持有 token
+	            {
+	                params.token = user.token;
+	            } else {
+	            // server side none key to login
+	
+	            return {
+	                type: LOAD_FAIL,
+	                promise: function promise() {
+	                    return _bluebird2.default.reject({ info: 'auth' });
+	                }
+	            };
+	        }
+	    } else {}
+	
+	    return {
+	        types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
+	        promise: function promise(client) {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/user_clinic/rest?', { params: params }, {
+	                format: function format(response) {
+	                    if (response.status >= 400) {
+	                        throw new Error("Bad response from server");
+	                    }
+	                    return response.json();
+	                },
+	                done: function done(res) {
+	
+	                    console.log(res);
+	
+	                    if (res.valid == 1) {
+	
+	                        return _bluebird2.default.resolve(res.clinics);
+	                    } else {
+	                        //var err = { info: 'auth' }
+	                        return _bluebird2.default.reject({ info: 'notvalid' });
+	                    }
+	                },
+	                error: function error(err) {
+	                    return _bluebird2.default.reject({ info: 'wire' });
+	                }
+	            });
+	        }
+	    };
+	}
+
+/***/ },
+/* 386 */
+/*!************************************************!*\
+  !*** ./backend/redux/reducers/user_company.js ***!
+  \************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = reducer;
+	exports.LoadedorLoading = LoadedorLoading;
+	exports.load = load;
+	
+	var _immutable = __webpack_require__(/*! immutable */ 46);
+	
+	var _immutable2 = _interopRequireDefault(_immutable);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _apiinterface = __webpack_require__(/*! ../../util/apiinterface.js */ 374);
+	
+	var _apiinterface2 = _interopRequireDefault(_apiinterface);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var LOAD = 'bohe/user_company/LOAD';
+	var LOAD_SUCCESS = 'bohe/user_company/LOAD_SUCCESS';
+	var LOAD_FAIL = 'bohe/user_company/LOAD_FAIL';
+	
+	var initialState = _immutable2.default.Map({
+	    loaded: false,
+	    loading: false
+	});
+	
+	function reducer() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+	    var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	
+	    switch (action.type) {
+	        case LOAD:
+	            return state.merge({ loading: true });
+	        case LOAD_SUCCESS:
+	            return state.merge({ loading: false, loaded: true, companys: action.result });
+	        case LOAD_FAIL:
+	            return state.merge({ loading: false, loaded: false, error: action.error });
+	        default:
+	            return state;
+	    }
+	}
+	
+	function LoadedorLoading(state) {
+	    var loaded = false;
+	    var loading = false;
+	    if (state.hasIn(['user_company', 'loaded'])) {
+	        loaded = state.getIn(['user_company', 'loaded']);
+	    }
+	    if (state.hasIn(['user_company', 'loading'])) {
+	        loading = state.getIn(['user_company', 'loading']);
+	    }
+	    return loaded || loading;
+	}
+	
+	/* 当 直接采用 浏览器发起域名访问时 不会携带本地Token 所以在鉴权阶段 会转入login 登录后得到新的签发token
+	   当采用 微信公众号直接跳转时 鉴权阶段使用openid 通过鉴权，签发新的token到state的user中
+	   所以本地token最大的作用是在进入usercenter时 快捷判断是否登录过
+	*/
+	function load(_ref) {
+	    var user = _ref.user,
+	        req = _ref.req;
+	
+	    var params = {};
+	
+	    if (typeof window === 'undefined' || window.__SERVER__ == true) {
+	        ///server side
+	        if (user.token) ///  鉴权通过 已经持有 token
+	            {
+	                params.token = user.token;
+	            } else {
+	            // server side none key to login
+	
+	            return {
+	                type: LOAD_FAIL,
+	                promise: function promise() {
+	                    return _bluebird2.default.reject({ info: 'auth' });
+	                }
+	            };
+	        }
+	    } else {}
+	
+	    return {
+	        types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
+	        promise: function promise(client) {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/user_company/rest?', { params: params }, {
+	                format: function format(response) {
+	                    if (response.status >= 400) {
+	                        throw new Error("Bad response from server");
+	                    }
+	                    return response.json();
+	                },
+	                done: function done(res) {
+	
+	                    console.log(res);
+	
+	                    if (res.valid == 1) {
+	
+	                        return _bluebird2.default.resolve(res.companys);
+	                    } else {
+	                        //var err = { info: 'auth' }
+	                        return _bluebird2.default.reject({ info: 'notvalid' });
+	                    }
+	                },
+	                error: function error(err) {
+	                    return _bluebird2.default.reject({ info: 'wire' });
+	                }
+	            });
+	        }
+	    };
+	}
+
+/***/ },
+/* 387 */
+/*!*********************************!*\
+  !*** external "react-paginate" ***!
+  \*********************************/
+/***/ function(module, exports) {
+
+	module.exports = require("react-paginate");
+
+/***/ },
+/* 388 */
+/*!***************************************************!*\
+  !*** ./~/babel-runtime/helpers/defineProperty.js ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	exports.__esModule = true;
+	
+	var _defineProperty = __webpack_require__(/*! ../core-js/object/define-property */ 290);
+	
+	var _defineProperty2 = _interopRequireDefault(_defineProperty);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	exports.default = function (obj, key, value) {
+	  if (key in obj) {
+	    (0, _defineProperty2.default)(obj, key, {
+	      value: value,
+	      enumerable: true,
+	      configurable: true,
+	      writable: true
+	    });
+	  } else {
+	    obj[key] = value;
+	  }
+	
+	  return obj;
+	};
+
+/***/ },
+/* 389 */
+/*!****************************************!*\
+  !*** ./backend/common/images/user.png ***!
+  \****************************************/
+/***/ function(module, exports) {
+
+	module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAIAAAAFYYeqAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyhpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDIxIDc5LjE1NTc3MiwgMjAxNC8wMS8xMy0xOTo0NDowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTQgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QUY5QjhBQzgwRjgzMTFFNkEwRUJFNzZCNTZFRkYwNkEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QUY5QjhBQzkwRjgzMTFFNkEwRUJFNzZCNTZFRkYwNkEiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDoxMzM4MTNGRjBGNjMxMUU2QTBFQkU3NkI1NkVGRjA2QSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDoxMzM4MTQwMDBGNjMxMUU2QTBFQkU3NkI1NkVGRjA2QSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Po+NWz8AAAs9SURBVHja7J13Wxs7E8WNiSkGYwgmgdAJnTyUh3z/z5AKBBxCCy30YjDF3N/rfe/euWvj67KWxFrzB4+9gFerozlzRhrJdU9PTyFrui1su8DCYM3CYGGwZmGwMFizMFgYrFkYLAzWLAwWBmsWhpdor15KQ+/v79Pp9PX19fn5OT9vb2/v7u4eHx+fnp7q6urq6+sjkUhTU1M0Gm1ra4vFYo2NjQ0NDS/l6erMn+g+zdrh4SEAFP9fIJFIJF5nLRwOWxjKNBq2t7d3cHAAAJV8Tmdn59u3b3t6el69emVhKM0AYHNzs6Th/5/O0dfXNzAwYGEoyuD91dXVP3/+5DaMGMCIjmWNGAD78xbCyWQyBAlCRSqVurq6uri4IJBwMffDOzo6JiYm4vG4haGQ7e7uggGh2HOdTm9vb4db+EkoBo8CVAYkuNH+/j4RBVA9f0AwHx0dHRoasjDkt5WVFYgol0y6u7v7+/vp/TKiy/b2toOH51eEiunpaXOihREwMH6/fv1KNJYXkZuMWQCovLMAY2NjA8qSF3Gsubk5NK6F4X/28PDw5csXgoG8CP+MjY21tLT4dRfyjPX1dfDwuNrCwkJzc3Otw8Dd8QN0kbwIdw8PD1dD7AMD1CejN1nF/Px8GYwXqMkMArLEgK6fmZl5//59lRIuKI5Olyx3cnKyvLys3Rt0woAugrIlBrOzs6j7qt60q6trcXFRDn/GAXxVozAgJZeWluQV/ICQoODWBGePTySTSdyiFmGAjhBI7luI6N27d8ruTkiYnJyUIYqYIdtTEzAcZs19m0gkCMuK29Db20uocN9eXl56dFTAYUCoSC6GHMbHx7U8PC4o1erW1tbd3V2twHB0dCTn7AYHB9HvWh6+sbERL3SnRm5ubjzSObAwwMJyxoLBSIqgMTYSkORMHw5BOhl8GKBgqUlg5/r6er1iUc5+p1IpLZJJNQxy4ggAenp6tKdOqORoNCrlQ/BhIDDI54ed9Wew4XB3d7dsoXpeUgoDKRth0H375s2bAisHKo2WuK/T6fTFxUWQYTg7O3MHGjq1tbU1ZIZBSlK55q5PBAoG4rM7odvW1mbIXD8WiUTIq2U7gwyDZCQGoHaN5HGIvO0MIAz39/fua3Ncwc1gZDsVL8Oog8FZrJc8YBQMssQvk8nkliUEBAYwkMteRjGSI1ufGzFB8wb51hCp+lx7AktKDDf5qHnLuTSap98Vl71qg0HjGktek8OCpiouYQqr9Hr5bLpm9p+z29tb2VTFCkKp68kZJPXavLDJYjLaqTh0KYVBpkhXV1cyjdDOSLTHfetjmZqJMMRiMXeU8diSB/Taw8PD2dmZbGeQYXDqsV1lon4i8zm7vLyUsaqjoyPIMMC5cqDt7e0ZIlvlEnRL1oIMQ+jfM/vHx8eSkXUZfiALmWmh+gxfAwzyIXd2drTD8Pv3b8lIcqAEFoampiZZIQkbeLYdqNdIskqMqKClWkdDnZKslUOiJJNJjTCsr6/LDEZXpYgGGOLxuFyCxyE8e0yUGZFJlpS3tbVpYSQ9MJA6jIyMyImN5eVl9Un14+Pj0tKSp5xZ1/S7nlJi+FdSExisrq4qbsPPnz/l0j8RS5crhDQW1uMQMhju7++vrKwou/vm5uavX79kQqOrnFkzDJDShw8fJAnQNWtrawpu7eyAk1empqbkfFcNweCExJmZGY9u8WwB8t1wAs8txsbG1OwyKhQvtW/IRav8+PFDXuns7AQe3/fJ3t/fcyOSNXlxYGAAV9CeQhqxPR0n8NARWR5kja71a97/6OiIW3gmE/v6+jzuWNMwhLIbC3I3xsIVg4ODFc530vU7Ozu5G6r4ZLn9zcLwfzs4OIC1cxdHe3p63mSt1GV6PIDEEAByl/snJiaMOtTHrBNkrq+voe+8SXU8a+3t7ThHgYo/UDw/Pz85OeHn2dlZ7tOhCwgGfE7IJDPuPKVMJkMUJbeiQ/MeqeQcoxSJRBC7dVl7yhr/SBB+eHhIp9N5lzH4r8GsmVYwGDL2dDE6lFABTfmyLgRUqC8igfr1nGKzKNMahBNcXl4SVxnXjHdfYCAYPD4+7u7uOodS6s3UTPeGw8PD4+Pj09PTqm4vIB3BMwgwxHx7rNW/+AcxQ1iWtRGFh7ZL7m5W4T4FPlRkPWBra+vr16/RSyYwlU4YUqmUcwhbgUoZBiy6CDKJ/m0NDQ0FlCskBhKprN3c3KCXeOGcmpv37/k0nIO4zS00VjfrgYF+J6Xa3NzMu+eS7mCEQuIdWaPryy7s5em4F0SHhIXrEMR5fYU7kp04YNQEDI4eXV9fz+sBzgmTsHaV5toAA/VVIPyMjIz09/er34mkFAYisGexxbVEIsF4hKwVdAHRiJYQjdBOub/FEQFD5alC6mDgLmtra1tbW7mc0NXVxQCEoNWfpI0ogBs9c67udBZ5hjK3UAEDDLCyspJ7FgVdPzw8DPvrPcqcME6UQil4ugIMpqam1KyMVh0GZ3XTs6MP8T40NGTU5BoxA8LMjRljY2OMlWqLqOrCkEwmeTbPxb6+vtHRURNOy8hlTlq7sbHhYc7u7u6ZmZmq5nrVggFFtLS05KFduh43177i+J8BY3l52bNAFI/H5+bmqndwblVgQIp8//7dc9gzoRgMTDgCuJj2r66ueuprUVDz8/NVOufDfxjyHvZMJIBkzf9WEWnoOqKa7B+QwCeqUeTqMwyw6ufPnz0YjI+P6z3JrRJ98e3bNxkq8IaFhQXf52j9hIGP+vTpkzydi+E/PT3d29sberGGzsa5pdIDiY8fP/orMfxkCVxYYoC0wIVfNAah7MG5i4uLns2TeLy/J5D5BgMZEGT6j5fV1eEHGqtCfTSCAeNJDv/T01N/Sz39geHo6MjTrMnJSROOM/TLnAJDmcShxWVRvn4Ybm9vc8sRjf1OqbINwT07OyuvIGr9Oi3UBxjAQO5OIBiMjIyEgmik07LwG0nCs/uyyb5SGAgJUp46VUCh4BrKW25Vur6+9iVIVAQDmkFOGSGNIFDTzqvy3RhnMpfe3d2t/ATdimAAA+mShARdi4gqraGhASRkuF5bW6vwXKLyYTg+PibJlPpa7qMKtnkeFlaQYl0dDJlMRpbCO8W5pp3bVlVDhshMAvFayUksZcJwcHAgv4MBeVoLdCQNDCBh9+3d3V3uVzhWFwZcQe7fa25uDqpCLWxIc7n3Ynt7u+wTD8qBAWEgFwtxBQNrpNWY/IpXonTe6oJqwSB3ziAbFNeSmJZay60SwFBeNlcyDM5Xyst0Rp7nW2vmnHjgvk2n03lrn/yHAcDdJYqmpiaZUtamJRIJ6RAqYABtOZmFS5p24rkWh5C0TA5Rxtc/lAYDGMhZPAZCyFo2m3OncJCRZcxtlAyD+zoWi8mvnqhla2lpgRhk+Cx1k1IJMJChSHfr7Ow0Z7eMCZLJfY2aL3LLTDkwOPsDnNf4oGUkaeRx7twGriCnGHyGQRayIVLllwdaa25ulrPfpR4xWywMntNrYUPLSB6TMKCXSjoLvlgYnN33UhvYfs/lJXeOGfYuaX6pWBjI0V2pGg6HTTvswASjT9zwAHmUdHpgsTDIDwUGY7fbazTnFAn3bVW8wdVIufez5pqcU6gKDHJpKRqN1tRCW0l5nOyx4heoLQx+mix1TafTxde5lqCU8rqeNU94cAfoc+cJVaqUZIi2PZ7XCJkuDLiC/zBI/7Lx+TnzlMr5D4PJ3yNpFAwyaha/hcfC4DMpya733xtkaZQN0c9ZJGtuBC2+YKVYGKanp1FjoG3yiXUmeAMdxTAFAKfHivxHQ488rDWz0tPCYM3CYGGwZmGwMFizMFgYrFkYXoT9JcAARV761lPquUAAAAAASUVORK5CYII="
+
+/***/ },
+/* 390 */
+/*!*****************************************!*\
+  !*** ./backend/ordertable/orderlist.js ***!
+  \*****************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = exports.asyncEvent = undefined;
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 284);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 288);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 289);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 293);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 294);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _dec, _dec2, _class, _class2, _temp;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reactList = __webpack_require__(/*! react-list */ 303);
+	
+	var _reactList2 = _interopRequireDefault(_reactList);
+	
+	var _reactHammerjs = __webpack_require__(/*! react-hammerjs */ 304);
+	
+	var _reactHammerjs2 = _interopRequireDefault(_reactHammerjs);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _immutable = __webpack_require__(/*! immutable */ 46);
+	
+	var _immutable2 = _interopRequireDefault(_immutable);
+	
+	var _orderlistpage = __webpack_require__(/*! ./view/orderlistpage.js */ 391);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	var _auth = __webpack_require__(/*! ../redux/reducers/auth */ 241);
+	
+	var _order_patient = __webpack_require__(/*! ../redux/reducers/order_patient */ 243);
+	
+	var _user_doctor = __webpack_require__(/*! ../redux/reducers/user_doctor */ 384);
+	
+	var _user_clinic = __webpack_require__(/*! ../redux/reducers/user_clinic */ 385);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	var _check = __webpack_require__(/*! ./orderinfo/check.js */ 393);
+	
+	var _check2 = _interopRequireDefault(_check);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var asyncEvent = exports.asyncEvent = [{
+	    promise: function promise(_ref) {
+	        var _ref$store = _ref.store,
+	            dispatch = _ref$store.dispatch,
+	            getState = _ref$store.getState,
+	            params = _ref.params;
+	
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                if (!(0, _order_patient.LoadedorLoading)(getState())) {
+	                    var state = getState();
+	                    var user = state.getIn(['auth', 'user']).toJS();
+	                    return dispatch((0, _order_patient.load)({ user: user, num: 10, begin: 0, refresh: { flag: true } }));
+	                } else return _bluebird2.default.resolve();
+	            });
+	        } else {
+	            if (!(0, _order_patient.LoadedorLoading)(getState())) {
+	                var state = getState();
+	                var user = state.getIn(['auth', 'user']).toJS();
+	                return dispatch((0, _order_patient.load)({ user: user, num: 10, begin: 0, refresh: { flag: true } }));
+	            } else return _bluebird2.default.resolve();
+	        }
+	    }
+	}, {
+	    promise: function promise(_ref2) {
+	        var _ref2$store = _ref2.store,
+	            dispatch = _ref2$store.dispatch,
+	            getState = _ref2$store.getState,
+	            params = _ref2.params;
+	
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                if (!(0, _user_doctor.LoadedorLoading)(getState())) {
+	                    var state = getState();
+	                    var user = state.getIn(['auth', 'user']).toJS();
+	                    return dispatch((0, _user_doctor.load)({ user: user }));
+	                } else return _bluebird2.default.resolve();
+	            });
+	        } else {
+	            if (!(0, _user_doctor.LoadedorLoading)(getState())) {
+	                var state = getState();
+	                var user = state.getIn(['auth', 'user']).toJS();
+	                return dispatch((0, _user_doctor.load)({ user: user }));
+	            } else return _bluebird2.default.resolve();
+	        }
+	    }
+	}, {
+	    promise: function promise(_ref3) {
+	        var _ref3$store = _ref3.store,
+	            dispatch = _ref3$store.dispatch,
+	            getState = _ref3$store.getState,
+	            params = _ref3.params;
+	
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                if (!(0, _user_clinic.LoadedorLoading)(getState())) {
+	                    var state = getState();
+	                    var user = state.getIn(['auth', 'user']).toJS();
+	                    return dispatch((0, _user_clinic.load)({ user: user }));
+	                } else return _bluebird2.default.resolve();
+	            });
+	        } else {
+	            if (!(0, _user_clinic.LoadedorLoading)(getState())) {
+	                var state = getState();
+	                var user = state.getIn(['auth', 'user']).toJS();
+	                return dispatch((0, _user_clinic.load)({ user: user }));
+	            } else return _bluebird2.default.resolve();
+	        }
+	    }
+	}];
+	
+	var OrderListCom = (_dec = (0, _reduxConnect.asyncConnect)(asyncEvent), _dec2 = (0, _reactRedux.connect)(function (state) {
+	    return {
+	        auth: state.get('auth'),
+	        orderRepo: state.get('order_patient'),
+	        doctorRepo: state.get('user_doctor'),
+	        clinicRepo: state.get('user_clinic')
+	    };
+	}, { pushState: _reactRouterRedux.push, load: _order_patient.load, toDetail: _order_patient.frontOrder, nextGroupOrders: _order_patient.nextGroupOrders }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
+	    (0, _inherits3.default)(OrderListCom, _Component);
+	
+	    function OrderListCom() {
+	        (0, _classCallCheck3.default)(this, OrderListCom);
+	        return (0, _possibleConstructorReturn3.default)(this, (OrderListCom.__proto__ || (0, _getPrototypeOf2.default)(OrderListCom)).apply(this, arguments));
+	    }
+	
+	    (0, _createClass3.default)(OrderListCom, [{
+	        key: 'handlePan',
+	
+	        // methods
+	        value: function handlePan(ev) {}
+	    }, {
+	        key: 'handleRefresh',
+	        value: function handleRefresh(resolve, reject) {
+	
+	            this.props.load({ num: 10, begin: 0, refresh: { flag: true, resolve: resolve, reject: reject } });
+	        }
+	    }, {
+	        key: 'componentWillMount',
+	        value: function componentWillMount() {
+	            if (this.props.auth.has('user')) {
+	                return;
+	            } else {
+	                if (this.props.auth.getIn(['error', 'info']) == 'auth') {
+	                    this.props.pushState('/login');
+	                }
+	            }
+	            return;
+	        }
+	    }, {
+	        key: 'toAddOrder',
+	        value: function toAddOrder() {}
+	    }, {
+	        key: 'toDeleteOrder',
+	        value: function toDeleteOrder() {}
+	    }, {
+	        key: 'toEditOrder',
+	        value: function toEditOrder() {}
+	    }, {
+	        key: 'toSearch',
+	        value: function toSearch() {}
+	    }, {
+	        key: 'toOrderInfo',
+	        value: function toOrderInfo(ev, idx, id) {
+	
+	            this.props.toDetail({ idx: idx, id: id });
+	
+	            this.context.showRight({
+	                asyncProcess: _check.asyncEvent,
+	                comCreater: function comCreater() {
+	                    return _react2.default.createElement(_check2.default, null);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'handlePageClick',
+	        value: function handlePageClick(data) {
+	            var selected = data.selected;
+	
+	            this.props.load({ num: 10, begin: selected * 10, showbegin: selected * 10 });
+	        }
+	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            !/* require.ensure */(function (require) {
+	
+	                __webpack_require__(/*! ../modules/fillter/tabcomplete.min.js */ 397), __webpack_require__(/*! ../modules/fillter/livefilter.min.js */ 398);
+	                __webpack_require__(/*! ../modules/fillter/src/bootstrap-select.js */ 399);
+	            }(__webpack_require__));
+	        }
+	    }, {
+	        key: 'moreSlider',
+	        value: function moreSlider() {
+	            console.log("uuuuu!!!!!!!!!!!");
+	            window.$('.moreboxhide').slideToggle();
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            console.log(this.props.orderRepo.toJS());
+	            if (this.props.auth.has('user')) {
+	                console.log("PPPPPPPPPPPPPPPPPPPPPPPPPP");
+	                var size = this.props.orderRepo.get('orders').size;
+	                var showbegin = this.props.orderRepo.get('showbegin');
+	                console.log("PPPPPPPPPPPPPPPPPPPPPPPPPP1");
+	                console.log(size);
+	                var nodata = size == 0 ? true : false;
+	                var options = {
+	                    touchAction: 'pan-y'
+	                };
+	                var height = window.innerHeight || document.documentElement.clientHeight;
+	                var orders = [];
+	                var doctors = this.props.doctorRepo.get('doctors') ? this.props.doctorRepo.get('doctors').toJS() : [];
+	                var clinics = this.props.clinicRepo.get('clinics') ? this.props.clinicRepo.get('clinics').toJS() : [];;
+	
+	                for (var i = 0; i < 10 && showbegin + i < size; i++) {
+	                    orders.push(this.props.orderRepo.getIn(['orders', showbegin + i]).toJS());
+	                }
+	
+	                console.log("ffffggg");
+	                console.log(doctors);
+	                console.log(clinics);
+	
+	                return (0, _orderlistpage.OrderList)({ moreSlider: this.moreSlider.bind(this), handlePageClick: this.handlePageClick.bind(this), toOrderInfo: this.toOrderInfo.bind(this), toSearch: this.toSearch.bind(this), toAddOrder: this.toAddOrder.bind(this), toDeleteOrder: this.toDeleteOrder.bind(this), toEditOrder: this.toEditOrder.bind(this), doctors: doctors, clinics: clinics, orders: orders, nodata: nodata, options: options, length: size, handlePan: this.handlePan.bind(this), handleRefresh: this.handleRefresh.bind(this) });
+	            } else {
+	                return _react2.default.createElement('div', null);
+	            }
+	        }
+	    }]);
+	    return OrderListCom;
+	}(_react.Component), _class2.propTypes = {
+	    orderRepo: _react2.default.PropTypes.object.isRequired
+	}, _class2.contextTypes = {
+	    showRight: _react.PropTypes.func.isRequired
+	}, _temp)) || _class) || _class);
+	exports.default = OrderListCom;
+
+/***/ },
+/* 391 */
+/*!**************************************************!*\
+  !*** ./backend/ordertable/view/orderlistpage.js ***!
+  \**************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.OrderList = undefined;
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reactList = __webpack_require__(/*! react-list */ 303);
+	
+	var _reactList2 = _interopRequireDefault(_reactList);
+	
+	var _reactHammerjs = __webpack_require__(/*! react-hammerjs */ 304);
+	
+	var _reactHammerjs2 = _interopRequireDefault(_reactHammerjs);
+	
+	var _orderdata = __webpack_require__(/*! ./orderdata.js */ 392);
+	
+	var _reactPaginate = __webpack_require__(/*! react-paginate */ 387);
+	
+	var _reactPaginate2 = _interopRequireDefault(_reactPaginate);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var OrderList = exports.OrderList = function OrderList(_ref) {
+	  var orders = _ref.orders,
+	      doctors = _ref.doctors,
+	      clinics = _ref.clinics,
+	      nodata = _ref.nodata,
+	      length = _ref.length,
+	      toAddOrder = _ref.toAddOrder,
+	      toDeleteOrder = _ref.toDeleteOrder,
+	      toEditOrder = _ref.toEditOrder,
+	      toOrderInfo = _ref.toOrderInfo,
+	      handlePageClick = _ref.handlePageClick,
+	      pageNum = _ref.pageNum,
+	      moreSlider = _ref.moreSlider;
+	
+	  var rowidx = 0;
+	  return _react2.default.createElement(
+	    'div',
+	    null,
+	    _react2.default.createElement(
+	      'div',
+	      { className: 'rtop rtop2' },
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'but-box' },
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          _react2.default.createElement(
+	            'a',
+	            { onClick: toAddOrder, className: 'add-but' },
+	            '\u65B0\u5EFA'
+	          ),
+	          _react2.default.createElement(
+	            'a',
+	            { onClick: toEditOrder, className: 'edit-but' },
+	            '\u4FEE\u6539'
+	          ),
+	          _react2.default.createElement(
+	            'a',
+	            { onClick: toDeleteOrder, className: 'delete-but' },
+	            '\u5220\u9664'
+	          )
+	        )
+	      ),
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'top-input-box' },
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          '\u9884\u7EA6\u5355\u53F7\uFF1A',
+	          _react2.default.createElement('input', { type: 'text', id: 'reserve_number' })
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          '\u5C31\u8BCA\u4EBA\uFF1A ',
+	          _react2.default.createElement('input', { type: 'text', id: 'patient_name' })
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          '\u9884\u7EA6\u65F6\u95F4\uFF1A',
+	          _react2.default.createElement('input', { type: 'text', id: 'timeStart', readonly: true, className: 'riliicon' }),
+	          _react2.default.createElement(
+	            'span',
+	            null,
+	            ' \u81F3 '
+	          ),
+	          _react2.default.createElement('input', { type: 'text', id: 'timeEnd', readonly: true, className: 'riliicon' })
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          '\u6240\u5C5E\u516C\u53F8\uFF1A',
+	          _react2.default.createElement('input', { type: 'text', id: 'company_name' })
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'moresel' },
+	          _react2.default.createElement(
+	            'span',
+	            { onClick: moreSlider, className: 'moreButspan' },
+	            _react2.default.createElement(
+	              'b',
+	              null,
+	              '\u66F4\u591A'
+	            ),
+	            _react2.default.createElement('i', null)
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'moreboxhide' },
+	            _react2.default.createElement(
+	              'p',
+	              null,
+	              '\u9879\u76EE\uFF1A',
+	              _react2.default.createElement('input', { type: 'text', id: 'project_name' })
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'orderDoctor' },
+	              _react2.default.createElement(
+	                'span',
+	                { className: 'doctorspan' },
+	                '\u533B\u751F\uFF1A'
+	              ),
+	              _react2.default.createElement(
+	                'div',
+	                { className: 'col-sm-9', id: 'DocInputbox' },
+	                _react2.default.createElement(
+	                  'div',
+	                  { id: 'bts-ex-5', className: 'selectpicker', 'data-clear': 'true', 'data-live': 'true' },
+	                  _react2.default.createElement(
+	                    'button',
+	                    { 'data-id': 'prov', type: 'button', className: 'btn btn-lg btn-block btn-default dropdown-toggle' },
+	                    _react2.default.createElement(
+	                      'span',
+	                      { className: 'placeholder', id: 'DovVal', 'data-val': '' },
+	                      '\u8BF7\u9009\u62E9'
+	                    ),
+	                    _react2.default.createElement('span', { className: 'caret' })
+	                  ),
+	                  _react2.default.createElement(
+	                    'div',
+	                    { className: 'dropdown-menu' },
+	                    _react2.default.createElement(
+	                      'div',
+	                      { className: 'live-filtering', 'data-clear': 'true', 'data-autocomplete': 'true', 'data-keys': 'true' },
+	                      _react2.default.createElement('label', { className: 'sr-only', 'for': 'input-bts-ex-5' }),
+	                      _react2.default.createElement(
+	                        'div',
+	                        { className: 'search-box' },
+	                        _react2.default.createElement(
+	                          'div',
+	                          { className: 'input-group' },
+	                          _react2.default.createElement('input', { type: 'text', placeholder: '\u8BF7\u8F93\u5165\u641C\u7D22\u5185\u5BB9', id: 'input-bts-ex-5', className: 'form-control live-search form-control3', 'aria-describedby': 'search-icon5', tabindex: '1' })
+	                        )
+	                      ),
+	                      _react2.default.createElement(
+	                        'div',
+	                        { className: 'list-to-filter' },
+	                        _react2.default.createElement(
+	                          'ul',
+	                          { className: 'list-unstyled', id: 'doctor_id' },
+	                          doctors.map(function (doctor) {
+	                            return _react2.default.createElement(
+	                              'li',
+	                              { className: 'filter-item items', 'data-filter': doctor.name, 'data-value': doctor.id },
+	                              doctor.name
+	                            );
+	                          })
+	                        ),
+	                        _react2.default.createElement(
+	                          'div',
+	                          { className: 'no-search-results' },
+	                          _react2.default.createElement(
+	                            'div',
+	                            { className: 'alert alert-warning', role: 'alert' },
+	                            _react2.default.createElement('i', { className: 'fa fa-warning margin-right-sm' }),
+	                            '\u6CA1\u6709\u627E\u5230 ',
+	                            _react2.default.createElement(
+	                              'strong',
+	                              null,
+	                              '\'',
+	                              _react2.default.createElement('span', null),
+	                              '\''
+	                            ),
+	                            '\u76F8\u5173\u6570\u636E'
+	                          )
+	                        )
+	                      )
+	                    )
+	                  ),
+	                  _react2.default.createElement('input', { type: 'hidden', name: 'bts-ex-5', value: '' })
+	                )
+	              ),
+	              _react2.default.createElement('p', null)
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'orderDoctor' },
+	              _react2.default.createElement(
+	                'span',
+	                { className: 'doctorspan' },
+	                '\u8BCA\u6240\uFF1A'
+	              ),
+	              _react2.default.createElement(
+	                'div',
+	                { className: 'col-sm-9', id: 'DocInputbox' },
+	                _react2.default.createElement(
+	                  'div',
+	                  { id: 'bts-ex-5', className: 'selectpicker', 'data-clear': 'true', 'data-live': 'true' },
+	                  _react2.default.createElement(
+	                    'button',
+	                    { 'data-id': 'prov', type: 'button', className: 'btn btn-lg btn-block btn-default dropdown-toggle' },
+	                    _react2.default.createElement(
+	                      'span',
+	                      { className: 'placeholder', id: 'DovVal', 'data-val': '' },
+	                      '\u8BF7\u9009\u62E9'
+	                    ),
+	                    _react2.default.createElement('span', { className: 'caret' })
+	                  ),
+	                  _react2.default.createElement(
+	                    'div',
+	                    { className: 'dropdown-menu' },
+	                    _react2.default.createElement(
+	                      'div',
+	                      { className: 'live-filtering', 'data-clear': 'true', 'data-autocomplete': 'true', 'data-keys': 'true' },
+	                      _react2.default.createElement('label', { className: 'sr-only', 'for': 'input-bts-ex-5' }),
+	                      _react2.default.createElement(
+	                        'div',
+	                        { className: 'search-box' },
+	                        _react2.default.createElement(
+	                          'div',
+	                          { className: 'input-group' },
+	                          _react2.default.createElement('input', { type: 'text', placeholder: '\u8BF7\u8F93\u5165\u641C\u7D22\u5185\u5BB9', id: 'input-bts-ex-5', className: 'form-control live-search form-control3', 'aria-describedby': 'search-icon5', tabindex: '1' })
+	                        )
+	                      ),
+	                      _react2.default.createElement(
+	                        'div',
+	                        { className: 'list-to-filter' },
+	                        _react2.default.createElement(
+	                          'ul',
+	                          { className: 'list-unstyled', id: 'doctor_id' },
+	                          clinics.map(function (clinic) {
+	                            return _react2.default.createElement(
+	                              'li',
+	                              { className: 'filter-item items', 'data-filter': clinic.name, 'data-value': clinic.id },
+	                              clinic.name
+	                            );
+	                          })
+	                        ),
+	                        _react2.default.createElement(
+	                          'div',
+	                          { className: 'no-search-results' },
+	                          _react2.default.createElement(
+	                            'div',
+	                            { className: 'alert alert-warning', role: 'alert' },
+	                            _react2.default.createElement('i', { className: 'fa fa-warning margin-right-sm' }),
+	                            '\u6CA1\u6709\u627E\u5230 ',
+	                            _react2.default.createElement(
+	                              'strong',
+	                              null,
+	                              '\'',
+	                              _react2.default.createElement('span', null),
+	                              '\''
+	                            ),
+	                            '\u76F8\u5173\u6570\u636E'
+	                          )
+	                        )
+	                      )
+	                    )
+	                  ),
+	                  _react2.default.createElement('input', { type: 'hidden', name: 'bts-ex-5', value: '' })
+	                )
+	              ),
+	              _react2.default.createElement('p', null)
+	            )
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          _react2.default.createElement(
+	            'a',
+	            { href: 'javascript:void(0)', className: 'search-but', id: 'search' },
+	            '\u641C\u7D22'
+	          ),
+	          _react2.default.createElement(
+	            'a',
+	            { href: 'javascript:void(0)', className: 'reset-but', id: 'reset' },
+	            '\u91CD\u7F6E'
+	          )
+	        )
+	      )
+	    ),
+	    _react2.default.createElement(
+	      'div',
+	      { className: 'table-box' },
+	      _react2.default.createElement(
+	        'table',
+	        { className: 'table table-bordered table-hover table-height table-height4 mtop100 Mbtom50' },
+	        _react2.default.createElement(
+	          'thead',
+	          null,
+	          _react2.default.createElement(
+	            'tr',
+	            null,
+	            _react2.default.createElement(
+	              'th',
+	              { width: '60px' },
+	              '\u9009\u62E9'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '80px' },
+	              '\u9884\u7EA6\u5355\u53F7'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '100px' },
+	              '\u5C31\u8BCA\u4EBA'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '120px' },
+	              '\u9884\u7EA6\u65F6\u95F4'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '80px' },
+	              '\u63D0\u4EA4\u65E5\u671F'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              '\u6240\u5C5E\u516C\u53F8'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '80px' },
+	              '\u533B\u751F'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '100px' },
+	              '\u8BCA\u6240'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '80px' },
+	              '\u9879\u76EE'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '80px' },
+	              '\u9884\u7EA6\u72B6\u6001'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '100px' },
+	              '\u8054\u7CFB\u65B9\u5F0F'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '80px' },
+	              '\u662F\u5426\u672C\u4EBA'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              '\u5907\u6CE8'
+	            )
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'tbody',
+	          { id: 'accountTbody' },
+	          orders.map(function (row) {
+	            var ret = (0, _orderdata.OrderData)((0, _extends3.default)({}, row, { rowidx: rowidx, toOrderInfo: toOrderInfo }));
+	            rowidx++;
+	            return ret;
+	          })
+	        )
+	      ),
+	      _react2.default.createElement(_reactPaginate2.default, { previousLabel: "previous",
+	        nextLabel: "next",
+	        breakLabel: _react2.default.createElement(
+	          'a',
+	          null,
+	          '...'
+	        ),
+	        breakClassName: "break-me",
+	        pageNum: 110,
+	        marginPagesDisplayed: 2,
+	        pageRangeDisplayed: 5,
+	        clickCallback: handlePageClick,
+	        containerClassName: "pagination",
+	        subContainerClassName: "pages pagination",
+	        activeClassName: "active" })
+	    )
+	  );
+	};
+
+/***/ },
+/* 392 */
+/*!**********************************************!*\
+  !*** ./backend/ordertable/view/orderdata.js ***!
+  \**********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.OrderData = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var OrderData = exports.OrderData = function OrderData(_ref) {
+	    var id = _ref.id,
+	        reserve_number = _ref.reserve_number,
+	        patient_name = _ref.patient_name,
+	        visit_time = _ref.visit_time,
+	        create_time = _ref.create_time,
+	        doctor_name = _ref.doctor_name,
+	        clinic_name = _ref.clinic_name,
+	        project_name = _ref.project_name,
+	        status = _ref.status,
+	        contact_tel = _ref.contact_tel,
+	        company_name = _ref.company_name,
+	        remark = _ref.remark,
+	        is_self = _ref.is_self,
+	        rowidx = _ref.rowidx,
+	        toOrderInfo = _ref.toOrderInfo;
+	
+	    return _react2.default.createElement(
+	        'tr',
+	        null,
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                { className: 'radio-span' },
+	                _react2.default.createElement('input', { type: 'radio', className: 'radio', name: 'radio', id: 'radioInputa_' + rowidx, value: id }),
+	                _react2.default.createElement('label', { htmlFor: 'radioInputa_' + rowidx })
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                { style: { paddingRight: '5px' } },
+	                reserve_number
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                { onClick: function onClick(ev) {
+	                        toOrderInfo(ev, rowidx, id);
+	                    }, className: 'spanName', id: 'goSee', 'data-id': id },
+	                patient_name
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            { className: 'W110' },
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                visit_time
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            { className: 'W110' },
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                create_time
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            { className: 'W150' },
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                company_name
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                { className: 'doctor_name' },
+	                doctor_name
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            { className: 'W110' },
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                clinic_name
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                project_name
+	            )
+	        ),
+	        function () {
+	            if (status == 1) {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        null,
+	                        '\u9884\u7EA6\u4E2D'
+	                    )
+	                );
+	            } else if (status == 2) {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        null,
+	                        '\u5DF2\u5B8C\u6210'
+	                    )
+	                );
+	            } else if (status == 3) {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        null,
+	                        '\u5DF2\u8FC7\u671F'
+	                    )
+	                );
+	            } else if (status == 4) {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        null,
+	                        '\u5DF2\u53D6\u6D88'
+	                    )
+	                );
+	            } else {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement('span', null)
+	                );
+	            }
+	        }(),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                contact_tel
+	            )
+	        ),
+	        function () {
+	            if (is_self == 1) {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        null,
+	                        '\u662F'
+	                    )
+	                );
+	            } else if (is_self == 2) {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        null,
+	                        '\u5426'
+	                    )
+	                );
+	            } else {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement('span', null)
+	                );
+	            }
+	        }(),
+	        _react2.default.createElement(
+	            'td',
+	            { className: 'W100' },
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                remark
+	            )
+	        )
+	    );
+	};
+
+/***/ },
+/* 393 */
+/*!***********************************************!*\
+  !*** ./backend/ordertable/orderinfo/check.js ***!
+  \***********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = exports.asyncEvent = undefined;
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 284);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 288);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 289);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 293);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 294);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _dec, _dec2, _class, _class2, _temp;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _check = __webpack_require__(/*! ./view/check.js */ 394);
+	
+	var _edit = __webpack_require__(/*! ./edit.js */ 395);
+	
+	var _edit2 = _interopRequireDefault(_edit);
+	
+	var _order_patient = __webpack_require__(/*! ../../redux/reducers/order_patient.js */ 243);
+	
+	var _auth = __webpack_require__(/*! ../../redux/reducers/auth */ 241);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var asyncEvent = exports.asyncEvent = [{
+	    promise: function promise(_ref) {
+	        var _ref$store = _ref.store,
+	            dispatch = _ref$store.dispatch,
+	            getState = _ref$store.getState,
+	            params = _ref.params;
+	
+	        var state = getState();
+	        var id = state.getIn(['order_patient', 'frontorder', 'id']);
+	        var idx = state.getIn(['order_patient', 'frontorder', 'idx']);
+	        if (!(0, _auth.isLoaded)(state)) return dispatch((0, _auth.load)(params)).then(function () {
+	            if (!(0, _order_patient.LoadedorLoading_order)(state, idx, id)) return dispatch((0, _order_patient.load_detail)({ id: id, idx: idx, extract: true }));else return _bluebird2.default.resolve();
+	        });else if (!(0, _order_patient.LoadedorLoading_order)(state, idx, id)) return dispatch((0, _order_patient.load_detail)({ id: id, idx: idx, extract: true }));else return _bluebird2.default.resolve();
+	    }
+	}];
+	
+	var Check = (_dec = (0, _reduxConnect.asyncConnect)(asyncEvent), _dec2 = (0, _reactRedux.connect)(function (state) {
+	    return {
+	        auth: state.get('auth'),
+	        detailEdit: state.getIn(['order_patient', 'detailedit'])
+	    };
+	}, { pushState: _reactRouterRedux.push }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
+	    (0, _inherits3.default)(Check, _Component);
+	
+	    function Check(props) {
+	        (0, _classCallCheck3.default)(this, Check);
+	
+	        // code
+	        return (0, _possibleConstructorReturn3.default)(this, (Check.__proto__ || (0, _getPrototypeOf2.default)(Check)).call(this, props));
+	    }
+	
+	    (0, _createClass3.default)(Check, [{
+	        key: 'toEdit',
+	        value: function toEdit() {
+	
+	            this.context.showRight({
+	                asyncProcess: _edit.asyncEvent,
+	                comCreater: function comCreater() {
+	                    return _react2.default.createElement(_edit2.default, null);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var orderdata = this.props.detailEdit.get('data').toJS();
+	            return (0, _check.CheckOrder)((0, _extends3.default)({}, orderdata, { toEdit: this.toEdit.bind(this) }));
+	        }
+	    }]);
+	    return Check;
+	}(_react.Component), _class2.contextTypes = {
+	    store: _react.PropTypes.object.isRequired
+	}, _class2.contextTypes = {
+	    showRight: _react.PropTypes.func.isRequired
+	}, _temp)) || _class) || _class);
+	exports.default = Check;
+
+/***/ },
+/* 394 */
+/*!****************************************************!*\
+  !*** ./backend/ordertable/orderinfo/view/check.js ***!
+  \****************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.CheckOrder = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var CheckOrder = exports.CheckOrder = function CheckOrder(_ref) {
+		var patient_name = _ref.patient_name,
+		    appointment_name = _ref.appointment_name,
+		    contact_tel = _ref.contact_tel,
+		    is_self = _ref.is_self,
+		    company_name = _ref.company_name,
+		    project_name = _ref.project_name,
+		    visit_time = _ref.visit_time,
+		    doctor_name = _ref.doctor_name,
+		    doctor_phone = _ref.doctor_phone,
+		    clinic_name = _ref.clinic_name,
+		    remark = _ref.remark,
+		    toEdit = _ref.toEdit;
+	
+		return _react2.default.createElement(
+			'div',
+			null,
+			_react2.default.createElement(
+				'div',
+				{ className: 'rtop rtop4' },
+				_react2.default.createElement(
+					'div',
+					{ className: 'but-box bj-none' },
+					_react2.default.createElement(
+						'p',
+						null,
+						_react2.default.createElement(
+							'a',
+							{ href: 'javascript:void(0)', className: 'back-but', id: 'back' },
+							'\u8FD4\u56DE'
+						),
+						_react2.default.createElement(
+							'a',
+							{ onClick: toEdit, className: 'edit-but', id: 'edit-but' },
+							'\u7F16\u8F91'
+						)
+					)
+				)
+			),
+			_react2.default.createElement(
+				'div',
+				{ className: 'add-box-container', style: { minHeight: '500px' } },
+				_react2.default.createElement(
+					'div',
+					{ className: 'add-h3 add-main-box1 mtop45' },
+					_react2.default.createElement(
+						'h3',
+						{ className: 'box5-h3' },
+						'\u57FA\u672C\u4FE1\u606F',
+						_react2.default.createElement('span', null)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'main-input' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u5C31\u8BCA\u4EBA\u59D3\u540D\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								patient_name
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u9884\u7EA6\u4EBA\u59D3\u540D\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								appointment_name
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u8054\u7CFB\u65B9\u5F0F\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								contact_tel
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u662F\u5426\u672C\u4EBA\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								is_self
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u6240\u5C5E\u516C\u53F8\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								company_name
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u670D\u52A1\u9879\u76EE\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								project_name
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u9884\u7EA6\u65E5\u671F\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								visit_time
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u533B\u751F\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								_react2.default.createElement(
+									'label',
+									null,
+									doctor_name + '(' + doctor_phone + ')'
+								),
+								_react2.default.createElement(
+									'a',
+									{ href: 'javascript:;', className: 'checktimea' },
+									'\u67E5\u770B\u533B\u751F\u7684\u51FA\u8BCA\u65F6\u95F4'
+								)
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u8BCA\u6240\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								clinic_name
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u5907\u6CE8\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								remark
+							)
+						)
+					)
+				)
+			)
+		);
+	};
+
+/***/ },
+/* 395 */
+/*!**********************************************!*\
+  !*** ./backend/ordertable/orderinfo/edit.js ***!
+  \**********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = exports.asyncEvent = undefined;
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 284);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 288);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 289);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 293);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 294);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _dec, _dec2, _class, _class2, _temp;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _auth = __webpack_require__(/*! ../../redux/reducers/auth */ 241);
+	
+	var _edit = __webpack_require__(/*! ./view/edit.js */ 396);
+	
+	var _order_patient = __webpack_require__(/*! ../../redux/reducers/order_patient.js */ 243);
+	
+	var _user_company = __webpack_require__(/*! ../../redux/reducers/user_company */ 386);
+	
+	var _user_doctor = __webpack_require__(/*! ../../redux/reducers/user_doctor */ 384);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var asyncEvent = exports.asyncEvent = [{
+	    promise: function promise(_ref) {
+	        var _ref$store = _ref.store,
+	            dispatch = _ref$store.dispatch,
+	            getState = _ref$store.getState,
+	            params = _ref.params;
+	
+	        var state = getState();
+	        var id = state.getIn(['order_patient', 'frontorder', 'id']);
+	        var idx = state.getIn(['order_patient', 'frontorder', 'idx']);
+	        if (!(0, _auth.isLoaded)(state)) return dispatch((0, _auth.load)(params)).then(function () {
+	            if (!(0, _order_patient.LoadedorLoading_order)(state, idx, id)) return dispatch((0, _order_patient.load_detail)({ id: id, idx: idx, extract: true }));else return _bluebird2.default.resolve();
+	        });else if (!(0, _order_patient.LoadedorLoading_order)(state, idx, id)) return dispatch((0, _order_patient.load_detail)({ id: id, idx: idx, extract: true }));else return _bluebird2.default.resolve();
+	    }
+	}, {
+	    promise: function promise(_ref2) {
+	        var _ref2$store = _ref2.store,
+	            dispatch = _ref2$store.dispatch,
+	            getState = _ref2$store.getState,
+	            params = _ref2.params;
+	
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                if (!(0, _user_company.LoadedorLoading)(getState())) {
+	                    var state = getState();
+	                    var user = state.getIn(['auth', 'user']).toJS();
+	                    return dispatch((0, _user_company.load)({ user: user }));
+	                } else return _bluebird2.default.resolve();
+	            });
+	        } else {
+	            if (!(0, _user_company.LoadedorLoading)(getState())) {
+	                var state = getState();
+	                var user = state.getIn(['auth', 'user']).toJS();
+	                return dispatch((0, _user_company.load)({ user: user }));
+	            } else return _bluebird2.default.resolve();
+	        }
+	    }
+	}, {
+	    promise: function promise(_ref3) {
+	        var _ref3$store = _ref3.store,
+	            dispatch = _ref3$store.dispatch,
+	            getState = _ref3$store.getState,
+	            params = _ref3.params;
+	
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                if (!(0, _user_doctor.LoadedorLoading)(getState())) {
+	                    var state = getState();
+	                    var user = state.getIn(['auth', 'user']).toJS();
+	                    return dispatch((0, _user_doctor.load)({ user: user }));
+	                } else return _bluebird2.default.resolve();
+	            });
+	        } else {
+	            if (!(0, _user_doctor.LoadedorLoading)(getState())) {
+	                var state = getState();
+	                var user = state.getIn(['auth', 'user']).toJS();
+	                return dispatch((0, _user_doctor.load)({ user: user }));
+	            } else return _bluebird2.default.resolve();
+	        }
+	    }
+	}];
+	
+	var Edit = (_dec = (0, _reduxConnect.asyncConnect)(asyncEvent), _dec2 = (0, _reactRedux.connect)(function (state) {
+	    return {
+	        auth: state.get('auth'),
+	        detailEdit: state.getIn(['order_patient', 'detailedit']),
+	        doctorRepo: state.get('user_doctor'),
+	        companyRepo: state.get('user_company')
+	    };
+	}, { pushState: _reactRouterRedux.push }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
+	    (0, _inherits3.default)(Edit, _Component);
+	
+	    function Edit(props) {
+	        (0, _classCallCheck3.default)(this, Edit);
+	
+	        // code
+	        return (0, _possibleConstructorReturn3.default)(this, (Edit.__proto__ || (0, _getPrototypeOf2.default)(Edit)).call(this, props));
+	    }
+	
+	    (0, _createClass3.default)(Edit, [{
+	        key: 'change',
+	        value: function change() {}
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var orderdata = this.props.detailEdit.get('data').toJS();
+	            return (0, _edit.EditOrder)((0, _extends3.default)({}, orderdata, { change: this.change.bind(this) }));
+	        }
+	    }]);
+	    return Edit;
+	}(_react.Component), _class2.contextTypes = {
+	    store: _react.PropTypes.object.isRequired
+	}, _class2.contextTypes = {
+	    showRight: _react.PropTypes.func.isRequired
+	}, _temp)) || _class) || _class);
+	exports.default = Edit;
+
+/***/ },
+/* 396 */
+/*!***************************************************!*\
+  !*** ./backend/ordertable/orderinfo/view/edit.js ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+			value: true
+	});
+	exports.EditOrder = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var EditOrder = exports.EditOrder = function EditOrder(_ref) {
+			var change = _ref.change,
+			    relations = _ref.relations,
+			    patient_name = _ref.patient_name,
+			    doctors = _ref.doctors,
+			    companys = _ref.companys,
+			    chooseDoctor = _ref.chooseDoctor,
+			    clinic_name = _ref.clinic_name;
+	
+			return _react2.default.createElement(
+					'div',
+					null,
+					_react2.default.createElement(
+							'div',
+							{ className: 'rtop rtop4' },
+							_react2.default.createElement(
+									'div',
+									{ className: 'but-box bj-none' },
+									_react2.default.createElement(
+											'p',
+											null,
+											_react2.default.createElement(
+													'a',
+													{ href: 'javascript:void(0)', className: 'back-but', id: 'back' },
+													'\u8FD4\u56DE'
+											),
+											_react2.default.createElement(
+													'a',
+													{ href: 'javascript:void(0)', className: 'save-but', id: 'save-but' },
+													'\u4FDD\u5B58'
+											)
+									)
+							)
+					),
+					_react2.default.createElement(
+							'div',
+							{ className: 'add-box-container', style: { minHeight: '700px' } },
+							_react2.default.createElement(
+									'div',
+									{ className: 'add-h3 add-main-box1 mtop45' },
+									_react2.default.createElement(
+											'h3',
+											{ className: 'box5-h3' },
+											'\u57FA\u672C\u4FE1\u606F',
+											_react2.default.createElement('span', null)
+									),
+									_react2.default.createElement(
+											'div',
+											{ className: 'main-input' },
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u5C31\u8BCA\u4EBA\u59D3\u540D\uFF1A'
+															)
+													),
+													_react2.default.createElement('input', { type: 'text', onChange: function onChange(ev) {
+																	change(ev, 'patient_name');
+															}, value: patient_name, className: 'text-input' }),
+													_react2.default.createElement('p', null)
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u9884\u7EA6\u4EBA\u59D3\u540D\uFF1A'
+															)
+													),
+													_react2.default.createElement(
+															'div',
+															{ className: 'col-sm-8', id: 'PatInputbox' },
+															_react2.default.createElement(
+																	'div',
+																	{ id: 'bts-ex-5', className: 'selectpicker', 'data-clear': 'true', 'data-live': 'true' },
+																	_react2.default.createElement(
+																			'button',
+																			{ 'data-id': 'prov', type: 'button', className: 'btn btn-lg btn-block btn-default dropdown-toggle' },
+																			_react2.default.createElement(
+																					'span',
+																					{ className: 'placeholder', id: 'PatVal', 'data-val': '' },
+																					'\u8BF7\u9009\u62E9'
+																			),
+																			_react2.default.createElement('span', { className: 'caret' })
+																	),
+																	_react2.default.createElement(
+																			'div',
+																			{ className: 'dropdown-menu' },
+																			_react2.default.createElement(
+																					'div',
+																					{ className: 'live-filtering', 'data-clear': 'true', 'data-autocomplete': 'true', 'data-keys': 'true' },
+																					_react2.default.createElement('label', { className: 'sr-only', htmlFor: 'input-bts-ex-5' }),
+																					_react2.default.createElement(
+																							'div',
+																							{ className: 'search-box' },
+																							_react2.default.createElement(
+																									'div',
+																									{ className: 'input-group' },
+																									_react2.default.createElement('input', { type: 'text', placeholder: '\u8BF7\u8F93\u5165\u641C\u7D22\u5185\u5BB9', id: 'input-bts-ex-5', className: 'form-control live-search', 'aria-describedby': 'search-icon5', tabindex: '1' })
+																							)
+																					),
+																					_react2.default.createElement(
+																							'div',
+																							{ className: 'list-to-filter' },
+																							_react2.default.createElement('ul', { className: 'list-unstyled', id: 'patient_id' }),
+																							_react2.default.createElement(
+																									'div',
+																									{ className: 'no-search-results' },
+																									_react2.default.createElement(
+																											'div',
+																											{ className: 'alert alert-warning', role: 'alert' },
+																											_react2.default.createElement('i', { className: 'fa fa-warning margin-right-sm' }),
+																											'\u6CA1\u6709\u627E\u5230 ',
+																											_react2.default.createElement(
+																													'strong',
+																													null,
+																													'\'',
+																													_react2.default.createElement('span', null),
+																													'\''
+																											),
+																											'\u76F8\u5173\u6570\u636E'
+																									)
+																							)
+																					)
+																			)
+																	),
+																	_react2.default.createElement('input', { type: 'hidden', name: 'bts-ex-5', value: '' })
+															)
+													),
+													_react2.default.createElement('p', null)
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															'\u8054\u7CFB\u65B9\u5F0F\uFF1A'
+													),
+													_react2.default.createElement('input', { type: 'text', className: 'text-input readonly', id: 'contact_tel', readonly: true }),
+													_react2.default.createElement('p', null)
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u662F\u5426\u672C\u4EBA\uFF1A'
+															)
+													),
+													_react2.default.createElement(
+															'div',
+															{ className: 'radio-box', id: 'is_self' },
+															_react2.default.createElement(
+																	'span',
+																	null,
+																	_react2.default.createElement('input', { type: 'radio', className: 'radio1', name: 'radio2', id: 'checkbox10', value: '1' }),
+																	_react2.default.createElement('label', { 'for': 'checkbox10' }),
+																	'\u662F'
+															),
+															_react2.default.createElement(
+																	'span',
+																	null,
+																	_react2.default.createElement('input', { type: 'radio', className: 'radio1', name: 'radio2', id: 'checkbox11', value: '2' }),
+																	_react2.default.createElement('label', { 'for': 'checkbox11' }),
+																	'\u5426'
+															)
+													),
+													_react2.default.createElement('p', { className: 'errorTip' })
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30', id: 'guanxi', style: { display: 'none' } },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u4E0E\u9884\u7EA6\u4EBA\u5173\u7CFB\uFF1A'
+															)
+													),
+													_react2.default.createElement('input', { value: relations, type: 'text', className: 'text-input', id: 'relations' }),
+													_react2.default.createElement('p', null)
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u6240\u5C5E\u516C\u53F8\uFF1A'
+															)
+													),
+													_react2.default.createElement(
+															'select',
+															{ name: '', id: 'company_name', className: 'select-div' },
+															_react2.default.createElement(
+																	'option',
+																	{ value: '' },
+																	'\u8BF7\u9009\u62E9'
+															),
+															companys.map(function (company) {
+																	return _react2.default.createElement(
+																			'option',
+																			{ value: company.company_code },
+																			company.company_name
+																	);
+															})
+													),
+													_react2.default.createElement('label', { className: 'inviteCode' })
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u9009\u62E9\u9879\u76EE\uFF1A'
+															)
+													),
+													_react2.default.createElement('select', { name: '', id: 'service_id', className: 'select-div' }),
+													_react2.default.createElement('p', null)
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u9884\u7EA6\u65E5\u671F\uFF1A'
+															)
+													),
+													_react2.default.createElement('input', { type: 'text', className: 'text-input layicon', id: 'visit_time', readonly: 'readonly' }),
+													_react2.default.createElement('p', null),
+													_react2.default.createElement('div', { className: 'calendarbox', id: 'inline-calendar' })
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u533B\u751F\uFF1A'
+															)
+													),
+													_react2.default.createElement(
+															'select',
+															{ onChange: chooseDoctor, name: '', id: 'doctor_id', className: 'select-div' },
+															_react2.default.createElement(
+																	'option',
+																	{ value: '' },
+																	'\u8BF7\u9009\u62E9'
+															),
+															doctors.map(function (doctor) {
+																	return _react2.default.createElement(
+																			'option',
+																			{ value: doctor.id, clinic_name: doctor.clinic_name, clinic_id: doctor.clinic_id },
+																			doctor.name
+																	);
+															})
+													),
+													_react2.default.createElement('p', null)
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															'\u8BCA\u6240\uFF1A'
+													),
+													_react2.default.createElement('input', { value: clinic_name, type: 'text', className: 'text-input readonly', id: 'clink', readonly: 'readonly' })
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box chuzhenTimebox' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u9009\u62E9\u51FA\u8BCA\u65F6\u95F4\uFF1A'
+															)
+													),
+													_react2.default.createElement('ul', { id: 'timeArry' }),
+													_react2.default.createElement('p', { id: 'timeWrong' }),
+													_react2.default.createElement('div', { className: 'clear' })
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															'\u5907\u6CE8\uFF1A'
+													),
+													_react2.default.createElement('textarea', { onChange: function onChange(ev) {
+																	change(ev, 'remark');
+															}, className: 'textarea', style: { maxWidth: '245px' }, id: 'remark' }),
+													_react2.default.createElement('p', null)
+											)
+									)
+							)
+					)
+			);
+	};
+
+/***/ },
+/* 397 */
+/*!****************************************************!*\
+  !*** ./backend/modules/fillter/tabcomplete.min.js ***!
+  \****************************************************/
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	/*!
+	 * tabcomplete
+	 * http://github.com/erming/tabcomplete
+	 * v1.5.0
+	 */
+	!function (a) {
+	  function b(b, c, d) {
+	    return a.grep(c, function (a) {
+	      return d ? !a.indexOf(b) : !a.toLowerCase().indexOf(b.toLowerCase());
+	    });
+	  }function c(b) {
+	    var c = this,
+	        d = c.prev(".hint");c.css({ backgroundColor: "transparent", position: "relative" }), d.length || (c.options.wrapInput && c.wrap(a("<div>").css({ position: "relative", height: c.css("height"), display: c.css("display") })), d = c.clone().attr("tabindex", -1).removeAttr("id name placeholder").addClass("hint").insertBefore(c), d.css({ position: "absolute" }));var e = "";if ("undefined" != typeof b) {
+	      var f = c.val();e = f + b.substr(f.split(/ |\n/).pop().length);
+	    }d.val(e);
+	  }function d(a) {
+	    var b = this,
+	        c = b.val();a && (b.val(c + a.substr(c.split(/ |\n/).pop().length)), b[0].selectionStart = c.length);
+	  }var e = { backspace: 8, tab: 9, up: 38, down: 40 };a.tabcomplete = {}, a.tabcomplete.defaultOptions = { after: "", arrowKeys: !1, hint: "placeholder", match: b, caseSensitive: !1, minLength: 1, wrapInput: !0 }, a.fn.tab = a.fn.tabcomplete = function (b, f) {
+	    if (this.length > 1) return this.each(function () {
+	      a(this).tabcomplete(b, f);
+	    });var g = this.prop("tagName");if ("INPUT" == g || "TEXTAREA" == g) {
+	      this.options = f = a.extend(a.tabcomplete.defaultOptions, f), this.unbind(".tabcomplete"), this.prev(".hint").remove();var h = this,
+	          i = !1,
+	          j = -1,
+	          k = [],
+	          l = "",
+	          m = a.noop;switch (f.hint) {case "placeholder":
+	          m = c;break;case "select":
+	          m = d;}return this.on("input.tabcomplete", function () {
+	        var c = h.val(),
+	            d = c.split(/ |\n/).pop();j = -1, l = "", k = [], h[0].selectionStart == c.length && d.length && (k = f.match(d, b, f.caseSensitive), f.after && (k = a.map(k, function (a) {
+	          return a + f.after;
+	        }))), h.trigger("match", k.length), f.hint && (("select" != f.hint || !i) && d.length >= f.minLength ? m.call(h, k[0]) : m.call(h, "")), i && (i = !1);
+	      }), this.on("keydown.tabcomplete", function (a) {
+	        var b = a.which;if (b == e.tab || f.arrowKeys && (b == e.up || b == e.down)) {
+	          if (a.preventDefault(), b != e.up) j++;else {
+	            if (-1 == j) return;0 == j ? j = k.length - 1 : j--;
+	          }var c = k[j % k.length];if (!c) return;var d = h.val();if (l = l || d.split(/ |\n/).pop(), l.length < f.minLength) return;var g = "select" == f.hint ? d : d.substr(0, h[0].selectionStart - l.length) + c;h.val(g), "select" == f.hint && (h[0].selectionStart = g.length), l = c, h.trigger("tabcomplete", l), f.hint && m.call(h, "");
+	        } else a.which == e.backspace && (i = !0, j = -1, l = "");
+	      }), f.hint && m.call(this, ""), this;
+	    }
+	  };
+	}(jQuery);
+
+/***/ },
+/* 398 */
+/*!***************************************************!*\
+  !*** ./backend/modules/fillter/livefilter.min.js ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var _typeof2 = __webpack_require__(/*! babel-runtime/helpers/typeof */ 251);
+	
+	var _typeof3 = _interopRequireDefault(_typeof2);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*! ========================================================================
+	 * Live Filter: livefilter.js v2.0.0
+	 * ========================================================================
+	 * Copyright 2015, Salvatore Di Salvo (disalvo-infographiste[dot].be)
+	 * ======================================================================== */
+	(function (d) {
+	  var b = function b(f, e) {
+	    this.$element = d(f);this.options = d.extend({}, this.defaults(), e);this.structure = d.extend({}, this.parts());this.keywords = null;this.init();
+	  };b.VERSION = "2.0.0";b.DEFAULTS = { clearbtn: false, autocomplete: false, hint: "placeholder", arrowKeys: false, matches: false, caseSensitive: false, minLength: 1, wrapInput: true };b.prototype.parts = function () {
+	    return { $input: d(".live-search", this.$element), $filter: d(".list-to-filter", this.$element), $clear: d(".filter-clear", this.$element), $no_results: d(".no-search-results", this.$element), $items: d(".filter-item", this.$element), $matches: d(".matches", this.$element) };
+	  };b.prototype.defaults = function () {
+	    return { clearbtn: this.$element.attr("data-clear") || b.DEFAULTS.clearbtn, autocomplete: this.$element.attr("data-autocomplete") || b.DEFAULTS.autocomplete, hint: this.$element.attr("data-hint") || b.DEFAULTS.hint, arrowKeys: this.$element.attr("data-keys") || b.DEFAULTS.arrowKeys, matches: this.$element.attr("data-matches") || b.DEFAULTS.arrowKeys, caseSensitive: b.DEFAULTS.caseSensitive, minLength: b.DEFAULTS.minLength, wrapInput: b.DEFAULTS.wrapInput };
+	  };b.prototype.getKeywords = function () {
+	    var e = [];this.structure.$items.each(function (f) {
+	      if (!d(this).hasClass("disabled")) {
+	        e = e.concat(d(this).attr("data-filter").split("|"));
+	      }
+	    });return e;
+	  };b.prototype.init = function () {
+	    var e = this;if (e.options.autocomplete) {
+	      e.initAC();
+	    }if (e.options.clearbtn) {
+	      e.structure.$clear.click(function (f) {
+	        f.preventDefault();e.clear();
+	      });
+	    }e.structure.$input.on("keyup", function () {
+	      var f = d(this).val().toLowerCase();if (e.options.clearbtn) {
+	        e.structure.$clear.toggleClass("hide", !f).prev("span").toggle(!f);
+	      }e.structure.$no_results.hide();e.searchAndFilter(f);
+	    });e.structure.$input.val("").trigger("input").trigger("keyup");if (e.structure.$clear && e.options.clearbtn) {
+	      e.structure.$clear.addClass("hide").prev("span").show();
+	    }if (e.structure.$no_results) {
+	      e.structure.$no_results.hide();
+	    }
+	  };b.prototype.initAC = function () {
+	    var e = this;e.keywords = e.getKeywords();if (e.keywords != undefined && e.keywords != null) {
+	      e.structure.$input.tabcomplete(e.keywords, { hint: e.options.hint, arrowKeys: e.options.arrowKeys, caseSensitive: e.options.caseSensitive, minLength: e.options.minLength, wrapInput: e.options.wrapInput });if (e.options.matches) {
+	        e.structure.$input.on("match", function (g, f) {
+	          e.structure.$matches.css("opacity", f == 0 ? 0 : 1).find("span").html(f);
+	        }).on("blur", function () {
+	          e.structure.$matches.css("opacity", 0);
+	        });
+	      }
+	    } else {
+	      console.log("no keywords defined!");
+	    }
+	  };b.prototype.searchAndFilter = function (g) {
+	    var f = this,
+	        e = 0;if (!g) {
+	      this.structure.$items.each(function () {
+	        if (!d(this).hasClass("disabled")) {
+	          d(this).show();
+	        }
+	      });
+	    } else {
+	      this.structure.$items.each(function () {
+	        if (!d(this).hasClass("disabled")) {
+	          var i = d(this).attr("data-filter").split("|");var h = f.inFilter(g, i);if (h) {
+	            e++;
+	          }d(this).toggle(!!h);
+	        }
+	      });
+	    }if (e == 0 && g.length != 0) {
+	      this.structure.$no_results.find("span").text(g);this.structure.$no_results.show();
+	    } else {
+	      this.structure.$no_results.hide();
+	    }
+	  };b.prototype.clear = function () {
+	    this.structure.$input.val("").trigger("input").trigger("keyup");this.structure.$clear.addClass("hide");
+	  };b.prototype.inFilter = function (h, g) {
+	    for (var f = 0; f < g.length; f++) {
+	      var e = g[f].toLowerCase();if (e.match(h)) {
+	        return true;
+	      }
+	    }return false;
+	  };function c(e) {
+	    return this.each(function () {
+	      var h = d(this);var g = h.data("liveFilter");var f = (typeof e === "undefined" ? "undefined" : (0, _typeof3.default)(e)) == "object" && e;if (!g) {
+	        h.data("liveFilter", g = new b(this, f));
+	      }if (typeof e == "string" && g[e]) {
+	        g[e]();
+	      }
+	    });
+	  }var a = d.fn.liveFilter;d.fn.liveFilter = c;d.fn.liveFilter.Constructor = b;d.fn.toggle.noConflict = function () {
+	    d.fn.liveFilter = a;return this;
+	  };d(function () {
+	    d(".livefilter").liveFilter();
+	  });
+	})(jQuery);
+
+/***/ },
+/* 399 */
+/*!*********************************************************!*\
+  !*** ./backend/modules/fillter/src/bootstrap-select.js ***!
+  \*********************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _typeof2 = __webpack_require__(/*! babel-runtime/helpers/typeof */ 251);
+	
+	var _typeof3 = _interopRequireDefault(_typeof2);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*! ========================================================================
+	 * Bootstrap Select: bootstrap-select.js v2.0.0
+	 * ========================================================================
+	 * Copyright 2015, Salvatore Di Salvo (disalvo-infographiste[dot]be)
+	 * ======================================================================== */
+	
+	+function ($) {
+	    'use strict';
+	
+	    // DROPDOWN SELECT PUBLIC CLASS DEFINITION
+	    // ====================================
+	
+	    var DropdownSelect = function DropdownSelect(element, options) {
+	        this.$element = $(element);
+	        this.options = $.extend({}, this.defaults(), options);
+	        this.structure = $.extend({}, this.parts());
+	        this.init();
+	    };
+	
+	    DropdownSelect.VERSION = '2.4.0';
+	
+	    DropdownSelect.DEFAULTS = {
+	        select: this,
+	        autoclose: true,
+	        cancelbtn: false,
+	        clearbtn: false,
+	        livefilter: false,
+	        filter: null,
+	        fmethod: 'recursive',
+	        open: 'open',
+	        filled: 'filled',
+	        display: '.dropdown-toggle',
+	        list: '.dropdown-menu',
+	        placeholder: '.placeholder',
+	        items: '.items',
+	        current: '.current',
+	        clear: '.clear',
+	        selected: '.selected',
+	        cancel: '.cancel'
+	    };
+	
+	    DropdownSelect.prototype.parts = function () {
+	        return {
+	            $select: this.$element,
+	            $section: this.$element.attr('id'),
+	            $display: $(this.options.display, this.$element),
+	            $list: $(this.options.list, this.$element),
+	            $placeholder: $(this.options.placeholder, this.$element),
+	            $items: $(this.options.items, this.$element),
+	            $current: $(this.options.current, this.$element),
+	            $clear: $(this.options.clear, this.$element),
+	            $selected: this.get(),
+	            $cancel: $(this.options.cancel, this.$element)
+	        };
+	    };
+	
+	    DropdownSelect.prototype.defaults = function () {
+	        return {
+	            select: DropdownSelect.DEFAULTS.select,
+	            autoclose: this.$element.attr('data-autoclose') || DropdownSelect.DEFAULTS.autoclose,
+	            cancelbtn: this.$element.attr('data-cancel') || DropdownSelect.DEFAULTS.cancelbtn,
+	            clearbtn: this.$element.attr('data-clear') || DropdownSelect.DEFAULTS.clearbtn,
+	            livefilter: this.$element.attr('data-live') || DropdownSelect.DEFAULTS.livefilter,
+	            filter: this.$element.attr('data-filter') || DropdownSelect.DEFAULTS.filter,
+	            fmethod: this.$element.attr('data-fmethod') || DropdownSelect.DEFAULTS.fmethod,
+	            open: this.$element.attr('data-open') || DropdownSelect.DEFAULTS.open,
+	            filled: this.$element.attr('data-filled') || DropdownSelect.DEFAULTS.filled,
+	            display: DropdownSelect.DEFAULTS.display,
+	            list: DropdownSelect.DEFAULTS.list,
+	            placeholder: DropdownSelect.DEFAULTS.placeholder,
+	            items: DropdownSelect.DEFAULTS.items,
+	            current: DropdownSelect.DEFAULTS.current,
+	            clear: DropdownSelect.DEFAULTS.clear,
+	            selected: DropdownSelect.DEFAULTS.selected,
+	            cancel: DropdownSelect.DEFAULTS.cancel
+	        };
+	    };
+	
+	    DropdownSelect.prototype.init = function () {
+	        var $select = this;
+	
+	        this.structure.$display.on('click', function (e) {
+	            e.preventDefault();
+	            $select.toggle();
+	        });
+	
+	        this.structure.$items.on('click', function () {
+	            $select.select($(this));
+	        });
+	
+	        if (this.options.cancelbtn) {
+	            this.structure.$cancel.on('click', function (e) {
+	                e.preventDefault();
+	                $select.toggle('close');
+	            });
+	        }
+	
+	        if (this.options.clearbtn) {
+	            this.structure.$clear.on('click', function (e) {
+	                $select.clear(e);
+	            });
+	        }
+	
+	        if (this.options.livefilter) {
+	            $('.live-filtering', this.structure.$select).liveFilter();
+	        }
+	
+	        $(document).mouseup(function (e) {
+	            if ($select.$element.has(e.target).length === 0 && $select.$element.hasClass($select.options.open)) {
+	                $select.toggle('close');
+	                e.preventDefault();
+	            }
+	        });
+	    };
+	
+	    DropdownSelect.prototype.toggle = function (mode) {
+	        if (mode) {
+	            if (mode == 'open') this.$element.addClass(this.options.open);else if (mode == 'close') {
+	                this.$element.removeClass(this.options.open);
+	
+	                if (this.options.livefilter) {
+	                    $('.live-filtering', this.structure.$select).liveFilter('clear');
+	                }
+	            }
+	        } else {
+	            if (!this.$element.hasClass(this.options.open)) this.$element.addClass(this.options.open);else {
+	                this.$element.removeClass(this.options.open);
+	
+	                if (this.options.livefilter) {
+	                    $('.live-filtering', this.structure.$select).liveFilter('clear');
+	                }
+	            }
+	        }
+	    };
+	
+	    DropdownSelect.prototype.get = function () {
+	        return $(this.options.selected, this.$element);
+	    };
+	
+	    DropdownSelect.prototype.select = function (item) {
+	        if (this.structure.$current.length == 1) this.structure.$current.toggleClass('active');
+	
+	        this.structure.$selected = this.get();
+	        this.structure.$selected.removeClass('selected');
+	        item.addClass('selected');
+	
+	        this.updateDisplay('select', item);
+	
+	        if (this.options.filter != null) {
+	            var $toFilter = this.options.filter.split(' ');
+	
+	            if ($.isArray($toFilter) && $toFilter.length > 0) {
+	                for (var i = 0; i < $toFilter.length; i++) {
+	                    var $this = $('#' + $toFilter[i]);
+	                    $this.selectFilter({ method: this.options.fmethod });
+	                    $this.selectFilter('filter', this.structure.$section, $toFilter[i], item.data('value'));
+	                    //this.filter(this.structure.$section,$toFilter[i],item.data('value'));
+	                }
+	            }
+	        }
+	
+	        if (this.options.autoclose === true) {
+	            this.toggle('close');
+	        }
+	    };
+	
+	    DropdownSelect.prototype.clear = function (e) {
+	        if (e != undefined) e.preventDefault();
+	
+	        this.structure.$selected = this.get();
+	        this.structure.$selected.removeClass('selected');
+	
+	        this.updateDisplay('clear');
+	
+	        if (this.options.filter != null) {
+	            var $toFilter = this.options.filter.split(' ');
+	
+	            if ($.isArray($toFilter) && $toFilter.length > 0) {
+	                for (var i = 0; i < $toFilter.length; i++) {
+	                    var $this = document.getElementById($toFilter[i]);
+	                    $this.selectFilter({ method: this.options.fmethod });
+	                    $this.selectFilter('filter', this.structure.$section, $toFilter[i]);
+	                    //this.filter(this.structure.$section,$toFilter[i]);
+	                }
+	            }
+	        }
+	
+	        if (this.options.autoclose === true) {
+	            this.toggle('close');
+	        }
+	    };
+	
+	    DropdownSelect.prototype.refresh = function () {
+	        if (this.structure.$selected.data('value') != undefined) {
+	            this.updateDisplay('select');
+	        }
+	    };
+	
+	    DropdownSelect.prototype.updateDisplay = function (mode, selected) {
+	        if (mode == 'select') {
+	            this.structure.$clear.show();
+	            $('input[name="' + this.structure.$section + '"]').val(selected.data('value'));
+	            this.structure.$display.html('<span class="text">' + selected.html() + '</span><span class="caret"></span>').addClass(this.options.filled);
+	        }
+	
+	        if (mode == 'clear') {
+	            this.structure.$clear.hide();
+	            $('input[name="' + this.structure.$section + '"]').val('');
+	            this.structure.$display.html('<span class="placeholder">' + this.structure.$placeholder.html() + '</span><span class="caret"></span>').removeClass(this.options.filled);
+	        }
+	    };
+	
+	    /*DropdownSelect.prototype.filter = function( section, select, val ) {
+	        if( val ) {
+	            var $selected = $('#'+select+' .items.selected');
+	             if($selected.length) {
+	                $selected.each(function(){
+	                    if( $(this).data(section) != val ) {
+	                        $('#'+select).bootstrapSelect('clear');
+	                    }
+	                });
+	            }
+	             this.filterItem( section, select, val, this.options.fmethod );
+	        }
+	        else
+	        {
+	            this.filterItem( section, select, null, this.options.fmethod );
+	        }
+	         $('#'+select+' .live-filtering').liveFilter('initAC');
+	    }
+	     DropdownSelect.prototype.filterItem = function( section, select, val, method ) {
+	        $('#'+select+' .items').each(function(){
+	            var ref = $(this).data('ref'),
+	                valid = $(this).data('valid');
+	             if( ref != undefined && valid != undefined ) {
+	                ref = ref.split(',');
+	                valid = valid.split(',');
+	                 if ( ref.length == valid.length ) {
+	                    if (val != null) {
+	                        if (ref.indexOf(section) > -1) {
+	                            valid[ref.indexOf(section)] = val;
+	                        }else {
+	                            ref = ref.concat([section]);
+	                            valid = valid.concat([val]);
+	                        }
+	                    } else {
+	                        ref.splice(ref.indexOf(section),1);
+	                        valid.splice(ref.indexOf(section),1);
+	                    }
+	                }
+	            } else if (val != null) {
+	                ref = [section];
+	                valid = [val];
+	            }
+	             if( method == 'recursive' ) {
+	                var skip = true;
+	                for( var c = 0; c < ref.length; c++ ) {
+	                    if ( valid[c] != $(this).data(ref[c])) {
+	                        skip = false;
+	                    }
+	                }
+	            } else if ( method == 'additionnal' ) {
+	                var skip = false;
+	                for( var c = 0; c < ref.length; c++ ) {
+	                    if ( valid[c] == $(this).data(ref[c])) {
+	                        skip = true;
+	                    }
+	                }
+	            }
+	             $(this).data('ref',ref.toString()).data('valid',valid.toString());
+	            if ( !skip ) {
+	                $(this).addClass('disabled').hide();
+	            } else {
+	                $(this).removeClass('disabled').show();
+	            }
+	        });
+	    }*/
+	
+	    // DROPDOWN SELECT PLUGIN DEFINITION
+	    // ==============================
+	
+	    function Plugin(option) {
+	        return this.each(function () {
+	            var $this = $(this);
+	            var data = $this.data('bs.dropdownselect');
+	            var options = (typeof option === 'undefined' ? 'undefined' : (0, _typeof3.default)(option)) == 'object' && option;
+	
+	            if (!data) $this.data('bs.dropdownselect', data = new DropdownSelect(this, options));
+	            if (typeof option == 'string' && data[option]) data[option]();
+	        });
+	    }
+	
+	    var old = $.fn.bootstrapSelect;
+	
+	    $.fn.bootstrapSelect = Plugin;
+	    $.fn.bootstrapSelect.Constructor = DropdownSelect;
+	
+	    // DROPDOWN SELECT NO CONFLICT
+	    // ========================
+	
+	    $.fn.toggle.noConflict = function () {
+	        $.fn.bootstrapSelect = old;
+	        return this;
+	    };
+	
+	    // DROPDOWN SELECT DATA-API
+	    // =====================
+	
+	    $(function () {
+	        $('.selectpicker').bootstrapSelect();
+	    });
+	}(jQuery);
 
 /***/ }
 /******/ ]);

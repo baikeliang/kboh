@@ -11,11 +11,15 @@ import {
 } from 'react-redux';
 
 import TeethGraph, { asyncEvent as teethgraphAsync } from  './teethgraph.js';
+import BasicInfo,  { asyncEvent as basicinfoAsync }  from './basicinfo.js';
+import History,  { asyncEvent as historyAsync }  from './history.js';
+import TeethStatus , { asyncEvent as teethstatusAsync } from './teethstatus.js'
 
 const BASIC = 'BASIC';
 const ILLHISTORY = 'ILLHISTORY';
 const TEETHSTATUS = 'TEETHSTATUS';
 const TEETHGRAPH = 'TEETHGRAPH';
+
 
 var NavPage = ({
   toBasic,
@@ -24,7 +28,6 @@ var NavPage = ({
   toTeethGraph,
   tab
 }) => {
-
     return (<div className="user_topmenu user_topmenu_edit">
                 <ul id='routeUl'>
                     <li><a className={(tab==BASIC)?"active":''} onClick={ toBasic }>基础信息</a></li>
@@ -50,21 +53,30 @@ export default class Nav extends Component {
 
   toBasic(){
   	 this.setState({tab:BASIC});
-
+     this.context.showUserData({ asyncProcess:basicinfoAsync,comCreater:function(){
+      return  <BasicInfo/>
+     }});
   }
 
   toillHistory(){
   	 this.setState({tab:ILLHISTORY});
-
+     this.context.showUserData({ asyncProcess:historyAsync,comCreater:function(){
+      return  <History/>
+     }});
   }
   toTeethGraph(){
+     var WebUploader = window.webuploader;
+     console.log(WebUploader)
   	 this.setState({tab:TEETHGRAPH});
      this.context.showUserData({ asyncProcess:teethgraphAsync,comCreater:function(){
-     	return  <TeethGraph/>
+     return  <TeethGraph/>
      }});
   }
   toTeethStatus(){
   	 this.setState({tab:TEETHSTATUS});
+     this.context.showUserData({ asyncProcess:teethstatusAsync,comCreater:function(){
+      return  <TeethStatus/>
+     }});
 
   }
   render(){

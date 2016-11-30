@@ -1,5 +1,6 @@
 import Immutable from 'immutable'
 import Promise from 'bluebird'
+import getApiIp from 'backend/util/apiinterface.js'
 
 const LOAD = 'bohe/cteeth_status/LOAD';
 const LOAD_SUCCESS = 'bohe/cteeth_status/LOAD_SUCCESS';
@@ -188,13 +189,18 @@ export default function reducer(state = initialState, action = {}) {
         case LOAD_SUCCESS:
             var _data = {};
             var teethlist = action.result;
+
             _data[action.index] = teethlist;
 
-            var teethui = (teethlist.length > 0) ? teethlist[teethlist.length - 1] : {}
+            var tooth_ui = (teethlist.length > 0) ? teethlist[teethlist.length - 1] : {}
 
-            var latest_data = { idx: teethlist.length - 1, useridx: action.index, size: teethlist.length, ...teethui }
-                //return state.merge({ loading: false, loaded: true, teeth: action.result })
-            return state.mergeDeep({ loading: false, loaded: true, teeth_ui: latest_data, allUserTeeth: _data })
+            var timelist =  teethlist.map((teeth) => {
+                return  teeth.time;
+            })
+
+            var teeth_ui = { idx: teethlist.length - 1, useridx: action.index, timelist, size: teethlist.length, ...tooth_ui }
+
+            return state.mergeDeep({ loading: false, loaded: true, teeth_ui, allUserTeeth: _data })
         case LOAD_FAIL:
             return state.merge({ loading: false, loaded: false, error: action.error })
         case SWITCH_TEETH:
@@ -302,7 +308,7 @@ export function load({ user,patient,index,req,refresh}) {
 
     return {
         types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
-        promise: (client) => client.GET('http://192.168.10.10/patient/cteeth/rest?', { params }, {
+        promise: (client) => client.GET('http://'+getApiIp()+'/patient/cteeth/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");

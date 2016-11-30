@@ -11,21 +11,21 @@ import {
 } from 'react-redux';
 
 import Nav from './nav.js'
-import { Header } from './view/header.js'
+import { Header } from './view/baseinfo/header.js'
 
 
 export default  class Container extends Component{
-   constructor(props) {
+    constructor(props) {
         // code
       super(props);
       this.state = {toShowData:function(){
           return  <div/>
       }};
-   }
-   static contextTypes = {
+    }
+    static contextTypes = {
         store: PropTypes.object.isRequired,
-   };
-   static childContextTypes = {
+    };
+    static childContextTypes = {
          showUserData: React.PropTypes.func.isRequired
     };
 
@@ -56,15 +56,15 @@ export default  class Container extends Component{
 
     }
     render(){
-    return ( <div style={{height:"100%"}}>
-             {Header({})}
-             <div className="add-box-container">
-             <div className="user_main_top">
+      return (<div style={{height:"100%"}}>
+               { Header({}) }
+               <div className="add-box-container">
+               <div className="user_main_top">
                <Nav/>
-               {this.state.toShowData()}
-             </div>
-             </div>
-             </div>)
+                 {this.state.toShowData()}
+               </div>
+               </div>
+              </div>)
    }
 
 }
