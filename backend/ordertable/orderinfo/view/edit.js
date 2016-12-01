@@ -9,8 +9,10 @@ export const EditOrder = ({
   patient_name,
   doctors,
   companys,
+  projects,
   chooseDoctor,
   clinic_name
+  service_id,
 }) => {
        return (<div>
 			          <div className="rtop rtop4">
@@ -93,6 +95,13 @@ export const EditOrder = ({
 			                    <div className="input-box h30">
 			                        <span><em className="emx">选择项目：</em></span>
 			                        <select name="" id="service_id" className="select-div">
+			                          {  projects.map((project) =>{
+			                          	  if(service_id == project.id)
+			                          	  	 return <option selected='selected' value={ project.id }>{ project.service_name }</option>
+			                          	  else
+                                             return <option value={ project.id }>{ project.service_name }</option>
+			                            })
+			                          }
 			                        </select>
 			                        <p></p>
 			                    </div>
@@ -106,9 +115,9 @@ export const EditOrder = ({
 			                        <span><em className="emx">医生：</em></span>
 			                        <select onChange={ chooseDoctor }name="" id="doctor_id" className="select-div">
 			                          <option value="">请选择</option>
-			                          { doctors.map((doctor)=>{
-			                          	 return <option value={ doctor.id } clinic_name={doctor.clinic_name} clinic_id={doctor.clinic_id}>{doctor.name}</option>
-			                          }) }
+			                            { doctors.map((doctor)=>{
+			                          	   return <option value={ doctor.id } clinic_name={doctor.clinic_name} clinic_id={doctor.clinic_id}>{doctor.name}</option>
+			                             }) }
 			                        </select>
 			                        <p></p>
 			                    </div>
@@ -119,6 +128,7 @@ export const EditOrder = ({
 			                    <div className="input-box chuzhenTimebox">
 			                      <span><em className="emx">选择出诊时间：</em></span>
 			                      <ul id="timeArry">
+
 			                      </ul>
 			                      <p id="timeWrong"></p>
 			                      <div className="clear"></div>
