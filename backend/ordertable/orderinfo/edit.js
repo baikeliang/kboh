@@ -171,7 +171,7 @@ export default  class Edit extends Component{
         let orderdata = this.props.detailEdit.get('data')?this.props.detailEdit.get('data').toJS():{};
         let doctors   = this.props.doctorRepo.get('doctors')?this.props.doctorRepo.get('doctors').toJS():[];
         let companys  = this.props.companyRepo.get('companys')?this.props.companyRepo.get('companys').toJS():[];
-        let projects  = this.props.companyRepo.get('projects')?this.props.projectRepo.get('projects').toJS():[];
+        let projects  = this.props.projectRepo.get('projects')?this.props.projectRepo.get('projects').toJS():[];
         console.log('AAAAAAAAAAAAAA');
         console.log(orderdata);
         return EditOrder({
