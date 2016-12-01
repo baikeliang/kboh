@@ -317,7 +317,6 @@ export default function reducer(state = initialState, action = {}) {
               return state.setIn(['users',idx,'oraledit','oral',pair.key],state.getIn(['users',idx,'oraledit','oral',pair.key]).remove(index));
             else
               return state
->>>>>>> baseinfo
         default:
             return state
     }
