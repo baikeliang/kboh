@@ -1,142 +1,142 @@
 export const table = [
 	{
-		name:'09:00',
-		check:'0'
+		time:'09:00',
+		
 	},
 	{
-		name:'09:15',
-		check:'0'
+		time:'09:15',
+		
 	},
 	{
-		name:'09:30',
-		check:'0'
+		time:'09:30',
+		
 	},
 	{
-		name:'09:45',
-		check:'0'
+		time:'09:45',
+		
 	},
 	{
-		name:'10:00',
-		check:'0'
+		time:'10:00',
+		
 	},
 	{
-		name:'10:15',
-		check:'0'
+		time:'10:15',
+		
 	},
 	{
-		name:'10:30',
-		check:'0'
+		time:'10:30',
+		
 	},
 	{
-		name:'10:45',
-		check:'0'
+		time:'10:45',
+		
 	},
 	{
-		name:'11:00',
-		check:'0'
+		time:'11:00',
+		
 	},
 	{
-		name:'11:15',
-		check:'0'
+		time:'11:15',
+		
 	},
 	{
-		name:'11:30',
-		check:'0'
+		time:'11:30',
+		
 	},
 	{
-		name:'11:45',
-		check:'0'
+		time:'11:45',
+		
 	},
 	{
-		name:'12:00',
-		check:'0'
+		time:'12:00',
+		
 	},
 	{
-		name:'12:15',
-		check:'0'
+		time:'12:15',
+		
 	},
 	{
-		name:'12:30',
-		check:'0'
+		time:'12:30',
+		
 	},
 	{
-		name:'12:45',
-		check:'0'
+		time:'12:45',
+		
 	},
 	{
-		name:'13:00',
-		check:'0'
+		time:'13:00',
+		
 	},
 	{
-		name:'13:15',
-		check:'0'
+		time:'13:15',
+		
 	},
 	{
-		name:'13:30',
-		check:'0'
+		time:'13:30',
+		
 	},
 	{
-		name:'13:45',
-		check:'0'
+		time:'13:45',
+		
 	},
 	{
-		name:'14:00',
-		check:'0'
+		time:'14:00',
+		
 	},
 	{
-		name:'14:15',
-		check:'0'
+		time:'14:15',
+		
 	},
 	{
-		name:'14:30',
-		check:'0'
+		time:'14:30',
+		
 	},
 	{
-		name:'14:45',
-		check:'0'
+		time:'14:45',
+		
 	},
 	{
-		name:'15:00',
-		check:'0'
+		time:'15:00',
+		
 	},
 	{
-		name:'15:15',
-		check:'0'
+		time:'15:15',
+		
 	},
 	{
-		name:'15:30',
-		check:'0'
+		time:'15:30',
+		
 	},
 	{
-		name:'15:45',
-		check:'0'
+		time:'15:45',
+		
 	},
 	{
-		name:'16:00',
-		check:'0'
+		time:'16:00',
+		
 	},
 	{
-		name:'16:15',
-		check:'0'
+		time:'16:15',
+		
 	},
 	{
-		name:'16:30',
-		check:'0'
+		time:'16:30',
+		
 	},
 	{
-		name:'16:45',
-		check:'0'
+		time:'16:45',
+		
 	},
 	{
-		name:'17:00',
-		check:'0'
+		time:'17:00',
+		
 	},
 	{
-		name:'17:15',
-		check:'0'
+		time:'17:15',
+		
 	},
 	{
-		name:'17:30',
-		check:'0'
+		time:'17:30',
+		
 	}
 ]

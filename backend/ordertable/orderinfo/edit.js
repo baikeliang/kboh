@@ -156,6 +156,11 @@ export default  class Edit extends Component{
     static contextTypes = {
         showRight: PropTypes.func.isRequired
     };
+    click(e,key,time){
+        console.log(time);
+        time = time.split(' ')[0];
+        this.props.orderEdit([{key,val:time+' '+e.target.innerHTML}]);
+    }
     change(ev,key){
         this.props.orderEdit([{key,val:ev.target.value}]);
     }
@@ -215,6 +220,7 @@ export default  class Edit extends Component{
             dateModal:(this.dateModal),
             showDateModal:(::this.showDateModal),
             change:(::this.change),
+            click:(::this.click),
             ordertable,
             doctors,
             companys,

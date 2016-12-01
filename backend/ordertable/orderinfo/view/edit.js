@@ -19,15 +19,9 @@ export const EditOrder = ({
   dateModal,
   showDateModal,
   ordertable,
-  arr
+  timeRange,
+  click
 }) => {	
-		arr.map((itemdata)=>{
-			ordertable.map((itemtable)=>{
-				if(itemtable.name==itemdata.time){
-					itemtable.check=1;
-				}
-			})
-		})
        return (<div>
 			          <div className="rtop rtop4">
 			            <div className="but-box bj-none">
@@ -147,23 +141,44 @@ export const EditOrder = ({
 			                      <ul id="timeArry">
 			                      	<h2 className="timeh2">上午</h2>
 			                      	{
-			                      		ordertable.map((time)=>{
-			                      			if(parseInt(time.name)<=12){
-			                      				return (
-			                      					<li className={time.check==0?'gray':''}><span>{time.name}</span></li>
-			                      				)
+			                      		ordertable?ordertable.map((tableitem)=>{
+			                      			var color = 'gray';
+			                      			console.log(parseInt(tableitem.time));
+			                      			if(parseInt(tableitem.time)<=12){
+			                      				timeRange?timeRange.map((dataitem)=>{
+			                      					if(dataitem.visit_time==tableitem.time){
+			                      						color = '';
+			                      						console.log(visit_time);
+			                      						if(visit_time.indexOf(tableitem.time)>=0){
+			                      							color = 'cur';
+			                      						}
+			                      					}
+
+			                      				}):''
+			                      				return <li className={ color }><span onClick={ (e)=>{click(e,'visit_time',visit_time) }}>{tableitem.time}</span></li>
+
 			                      			}
-			                      		})
+			                      		}):''
 			                      	}
 			                    	<h2 className="timeh2">下午</h2>
 			                    	{
-			                      		ordertable.map((time)=>{
-			                      			if(parseInt(time.name)>=13){
-			                      				return (
-			                      					<li className={time.check==0?'gray':''}><span>{time.name}</span></li>
-			                      				)
+			                      		ordertable?ordertable.map((tableitem)=>{
+			                      			var color = 'gray';
+			                      			if(parseInt(tableitem.time)>=13){
+			                      				timeRange?timeRange.map((dataitem)=>{
+			                      					if(dataitem.visit_time==tableitem.time){
+			                      						color = '';
+
+			                      						if(visit_time.indexOf(tableitem.time)>=0){
+			                      							color = 'cur';
+			                      						}
+			                      					}
+
+			                      				}):''
+			                      				return <li className={ color }><span onClick={ (e)=>{click(e,'visit_time',visit_time) }}>{tableitem.time}</span></li>
+
 			                      			}
-			                      		})
+			                      		}):''
 			                      	}
 			                      </ul>
 			                      <p id="timeWrong"></p>
