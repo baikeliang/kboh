@@ -91,7 +91,7 @@ export const EditOrder = ({
 			                        <select name="" id="company_name" className="select-div">
 			                          <option value="">请选择</option>
 			                          {companys?companys.map((company)=>{
-                                           return <option value={ company.company_code }>{company.company_name}</option>
+                                           return <option value={ company.company_code }>{company.name}</option>
 			                          }):''}
 			                        </select>
 			                        <label className="inviteCode"></label>
@@ -101,9 +101,9 @@ export const EditOrder = ({
 			                        <select name="" id="service_id" className="select-div">
 			                          {projects?projects.map((project) =>{
 			                          	  if(service_id == project.id)
-			                          	  	 return <option selected='selected' value={ project.id }>{ project.service_name }</option>
+			                          	  	 return <option selected='selected' value={ project.id }>{ project.name }</option>
 			                          	  else
-                                             return <option value={ project.id }>{ project.service_name }</option>
+                                             return <option value={ project.id }>{ project.name }</option>
 			                            }):''
 			                          }
 			                        </select>
