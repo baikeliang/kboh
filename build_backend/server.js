@@ -22003,6 +22003,7 @@ module.exports =
 	exports.nextGroupOrders = nextGroupOrders;
 	exports.LoadedorLoading = LoadedorLoading;
 	exports.LoadedorLoading_order = LoadedorLoading_order;
+	exports.orderEdit = orderEdit;
 	exports.load = load;
 	exports.load_detail = load_detail;
 	
@@ -22027,6 +22028,8 @@ module.exports =
 	var LOAD_DETAIL = 'bohe/order_patient/LOAD_DETAIL';
 	var LOAD_DETAIL_SUCCESS = 'bohe/order_patient/LOAD_DETAIL_SUCCESS';
 	var LOAD_DETAIL_FAIL = 'bohe/order_patient/LOAD_DETAIL_FAIL';
+	
+	var ORDERINFO_EDIT = 'bohe/order_patient/ORDERINFO_EDIT';
 	
 	var SET_ORDER_TOSHOW = 'bohe/order_patient/SHOW';
 	var NEXT_GROUP_ORDERS = 'bohe/order_patient/NEXTGROUPORDERS';
@@ -22086,6 +22089,14 @@ module.exports =
 	                    return order;
 	                });
 	            });
+	        case ORDERINFO_EDIT:
+	            var pairs = action.result;
+	            var data = {};
+	            pairs.forEach(function (pair) {
+	                data[pair.key] = pair.val;
+	            });
+	            var detailedit = { data: data };
+	            return state.mergeDeep({ detailedit: detailedit });
 	        case SET_ORDER_TOSHOW:
 	            return state.merge({ frontorder: action.result });
 	        default:
@@ -22133,6 +22144,14 @@ module.exports =
 	        loaded = order.get('loaded');
 	    }
 	    return loaded || loading;
+	}
+	
+	function orderEdit(pairs) {
+	
+	    return {
+	        type: ORDERINFO_EDIT,
+	        result: pairs
+	    };
 	}
 	
 	/* 当 直接采用 浏览器发起域名访问时 不会携带本地Token 所以在鉴权阶段 会转入login 登录后得到新的签发token
@@ -28876,7 +28895,7 @@ module.exports =
 	    }, {
 	        key: 'hangleSelectDate',
 	        value: function hangleSelectDate(date) {
-	
+	            this.state.dateModal.display = 'none';
 	            var dated = new Date();
 	            var nowYear = dated.getFullYear();
 	            var age = nowYear - date.format('Y');
@@ -28974,7 +28993,6 @@ module.exports =
 	                        showDateModal: this.showDateModal.bind(this),
 	                        dateModal: this.state.dateModal,
 	                        birthdate: this.props.user.getIn(['baseinfoedit', 'birthdate'])
-	
 	                    }))
 	                );
 	            }
@@ -30531,7 +30549,7 @@ module.exports =
 	});
 	exports.default = getApiIp;
 	function getApiIp() {
-		return '172.16.37.45';
+		return '172.16.37.77';
 	}
 
 /***/ },
@@ -32851,9 +32869,16 @@ module.exports =
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
 	exports.default = reducer;
 	exports.LoadedorLoading = LoadedorLoading;
 	exports.load = load;
+	exports.load_details = load_details;
+	exports.load_detail = load_detail;
 	
 	var _immutable = __webpack_require__(/*! immutable */ 46);
 	
@@ -32873,6 +32898,14 @@ module.exports =
 	var LOAD_SUCCESS = 'bohe/user_doctor/LOAD_SUCCESS';
 	var LOAD_FAIL = 'bohe/user_doctor/LOAD_FAIL';
 	
+	var LOAD_DETAILS = 'bohe/user_doctor/LOAD_DETAILS';
+	var LOAD_DETAILS_SUCCESS = 'bohe/user_doctor/LOAD_DETAILS_SUCCESS';
+	var LOAD_DETAILS_FAIL = 'bohe/user_doctor/LOAD_DETAILS_FAIL';
+	
+	var LOAD_DETAIL = 'bohe/user_doctor/LOAD_DETAIL';
+	var LOAD_DETAIL_SUCCESS = 'bohe/user_doctor/LOAD_DETAIL_SUCCESS';
+	var LOAD_DETAIL_FAIL = 'bohe/user_doctor/LOAD_DETAIL_FAIL';
+	
 	var initialState = _immutable2.default.Map({
 	    loaded: false,
 	    loading: false
@@ -32889,6 +32922,54 @@ module.exports =
 	            return state.merge({ loading: false, loaded: true, doctors: action.result });
 	        case LOAD_FAIL:
 	            return state.merge({ loading: false, loaded: false, error: action.error });
+	        case LOAD_DETAILS:
+	            return state.merge({ loading: true });
+	        case LOAD_DETAILS_SUCCESS:
+	            return state.updateIn(['doctors'], function (list) {
+	                return list.map(function (doctor) {
+	                    var _doctors_ = action.result;
+	                    _doctors_.map(function (_doctor_) {
+	                        if (doctor.get('id') == _doctor_.id) doctor = doctor.merge(_doctor_);
+	                    });
+	                    return doctor;
+	                });
+	            });
+	        case LOAD_DETAILS_FAIL:
+	            return state.merge({ loading: false, loaded: false, error: action.error });
+	        case LOAD_DETAIL:
+	            return state.updateIn(['doctors'], function (list) {
+	                return list.map(function (doctor) {
+	                    if (doctor.get('id') == action.id) {
+	                        return doctor.merge({ loading: true });
+	                    }
+	                    return doctor;
+	                });
+	            });
+	        case LOAD_DETAIL_SUCCESS:
+	            if (!action.extract) return state.updateIn(['doctors'], function (list) {
+	                return list.map(function (doctor) {
+	                    if (doctors.get('id') == action.result.id) {
+	                        return doctors.merge((0, _extends3.default)({ loading: false, loaded: true }, action.result));
+	                    }
+	                    return doctors;
+	                });
+	            });else return state.updateIn(['doctors'], function (list) {
+	                return list.map(function (doctor) {
+	                    if (doctor.get('id') == action.result.id) {
+	                        return doctor.merge((0, _extends3.default)({ loading: false, loaded: true }, action.result));
+	                    }
+	                    return doctor;
+	                });
+	            }).merge({ detailedit: { idx: action.idx, data: action.result } });
+	        case LOAD_DETAIL_FAIL:
+	            return state.updateIn(['doctors'], function (list) {
+	                return list.map(function (doctor) {
+	                    if (doctor.get('id') == action.error.id) {
+	                        return doctor.merge({ loading: false, loaded: false, error: action.error.info });
+	                    }
+	                    return doctor;
+	                });
+	            });
 	        default:
 	            return state;
 	    }
@@ -32960,6 +33041,95 @@ module.exports =
 	                }
 	            });
 	        }
+	    };
+	}
+	
+	function load_details(_ref2) {
+	    var user = _ref2.user,
+	        time = _ref2.time,
+	        serviceid = _ref2.serviceid,
+	        req = _ref2.req,
+	        extract = _ref2.extract;
+	
+	    var params = {};
+	    params.time = time;
+	    params.serviceid = serviceid;
+	    return {
+	        types: [LOAD_DETAIL, LOAD_DETAIL_SUCCESS, LOAD_DETAIL_FAIL],
+	        promise: function promise(client) {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/patient/orderInfo/rest?', { params: params }, {
+	                format: function format(response) {
+	                    if (response.status >= 400) {
+	                        throw new Error("Bad response from server");
+	                    }
+	                    return response.json();
+	                },
+	                done: function done(res) {
+	
+	                    console.log(res);
+	
+	                    if (res.valid == 1) {
+	
+	                        return _bluebird2.default.resolve(res.doctors);
+	                    } else {
+	                        //var err = { info: 'auth' }
+	                        return _bluebird2.default.reject({ id: id, info: 'notvalid' });
+	                    }
+	                },
+	                error: function error(err) {
+	                    console.log(err);
+	                    console.log('GGGGGGGGGGGGGG1');
+	                    return _bluebird2.default.reject({ id: id, info: 'wire' });
+	                }
+	            });
+	        },
+	        id: id,
+	        idx: idx,
+	        extract: extract
+	    };
+	}
+	
+	function load_detail(_ref3) {
+	    var id = _ref3.id,
+	        idx = _ref3.idx,
+	        extract = _ref3.extract;
+	
+	    var params = {};
+	    params.id = id;
+	
+	    return {
+	        types: [LOAD_DETAIL, LOAD_DETAIL_SUCCESS, LOAD_DETAIL_FAIL],
+	        promise: function promise(client) {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/patient/orderInfo/rest?', { params: params }, {
+	                format: function format(response) {
+	                    if (response.status >= 400) {
+	                        throw new Error("Bad response from server");
+	                    }
+	                    console.log('>>>>>>>>>>>>>>>>');
+	                    return response.json();
+	                },
+	                done: function done(res) {
+	
+	                    console.log(res);
+	
+	                    if (res.valid == 1) {
+	
+	                        return _bluebird2.default.resolve(res.doctor);
+	                    } else {
+	                        //var err = { info: 'auth' }
+	                        return _bluebird2.default.reject({ id: id, info: 'notvalid' });
+	                    }
+	                },
+	                error: function error(err) {
+	                    console.log(err);
+	                    console.log('GGGGGGGGGGGGGG1');
+	                    return _bluebird2.default.reject({ id: id, info: 'wire' });
+	                }
+	            });
+	        },
+	        id: id,
+	        idx: idx,
+	        extract: extract
 	    };
 	}
 
@@ -34685,24 +34855,53 @@ module.exports =
 	        doctorRepo: state.get('user_doctor'),
 	        companyRepo: state.get('user_company')
 	    };
-	}, { pushState: _reactRouterRedux.push }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
+	}, { pushState: _reactRouterRedux.push, orderEdit: _order_patient.orderEdit }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
 	    (0, _inherits3.default)(Edit, _Component);
 	
 	    function Edit(props) {
 	        (0, _classCallCheck3.default)(this, Edit);
 	
+	        var _this = (0, _possibleConstructorReturn3.default)(this, (Edit.__proto__ || (0, _getPrototypeOf2.default)(Edit)).call(this, props));
 	        // code
-	        return (0, _possibleConstructorReturn3.default)(this, (Edit.__proto__ || (0, _getPrototypeOf2.default)(Edit)).call(this, props));
+	
+	
+	        _this.dateModal = { display: 'none' };
+	        _this.state = { refresh: 0 };
+	        return _this;
 	    }
 	
 	    (0, _createClass3.default)(Edit, [{
 	        key: 'change',
 	        value: function change() {}
 	    }, {
+	        key: 'showDateModal',
+	        value: function showDateModal() {
+	            console.log(this.dateModal);
+	            this.dateModal.display == 'block' ? this.dateModal.display = 'none' : this.dateModal = (0, _extends3.default)({}, this.dateModal, { display: 'block', position: 'absolute', left: 150 + 'px', top: 35 + 'px' });
+	            console.log(this.dateModal);
+	            this.setState((0, _extends3.default)({}, this.state, { refresh: 0 }));
+	        }
+	    }, {
+	        key: 'hangleSelectDate',
+	        value: function hangleSelectDate(date) {
+	            console.log(this.dateModal.display);
+	            console.log(date.format('DD/MM/YY').toString());
+	            this.dateModal.display = 'none';
+	            this.setState((0, _extends3.default)({}, this.state, { refresh: 0 }));
+	            this.props.orderEdit([{ key: 'visit_time', val: date.format('DD/MM/YY').toString() }]);
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
 	            var orderdata = this.props.detailEdit.get('data').toJS();
-	            return (0, _edit.EditOrder)((0, _extends3.default)({}, orderdata, { change: this.change.bind(this) }));
+	            console.log('AAAAAAAAAAAAAA');
+	            console.log(orderdata);
+	            return (0, _edit.EditOrder)((0, _extends3.default)({}, orderdata, {
+	                hangleSelectDate: this.hangleSelectDate.bind(this),
+	                dateModal: this.dateModal,
+	                showDateModal: this.showDateModal.bind(this),
+	                change: this.change.bind(this)
+	            }));
 	        }
 	    }]);
 	    return Edit;
@@ -34735,6 +34934,8 @@ module.exports =
 	
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 	
+	var _reactDateRange = __webpack_require__(/*! react-date-range */ 367);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var EditOrder = exports.EditOrder = function EditOrder(_ref) {
@@ -34743,8 +34944,14 @@ module.exports =
 			    patient_name = _ref.patient_name,
 			    doctors = _ref.doctors,
 			    companys = _ref.companys,
+			    projects = _ref.projects,
 			    chooseDoctor = _ref.chooseDoctor,
-			    clinic_name = _ref.clinic_name;
+			    clinic_name = _ref.clinic_name,
+			    service_id = _ref.service_id,
+			    hangleSelectDate = _ref.hangleSelectDate,
+			    visit_time = _ref.visit_time,
+			    dateModal = _ref.dateModal,
+			    showDateModal = _ref.showDateModal;
 	
 			return _react2.default.createElement(
 					'div',
@@ -34955,13 +35162,13 @@ module.exports =
 																	{ value: '' },
 																	'\u8BF7\u9009\u62E9'
 															),
-															companys.map(function (company) {
+															companys ? companys.map(function (company) {
 																	return _react2.default.createElement(
 																			'option',
 																			{ value: company.company_code },
 																			company.company_name
 																	);
-															})
+															}) : ''
 													),
 													_react2.default.createElement('label', { className: 'inviteCode' })
 											),
@@ -34977,12 +35184,26 @@ module.exports =
 																	'\u9009\u62E9\u9879\u76EE\uFF1A'
 															)
 													),
-													_react2.default.createElement('select', { name: '', id: 'service_id', className: 'select-div' }),
+													_react2.default.createElement(
+															'select',
+															{ name: '', id: 'service_id', className: 'select-div' },
+															projects ? projects.map(function (project) {
+																	if (service_id == project.id) return _react2.default.createElement(
+																			'option',
+																			{ selected: 'selected', value: project.id },
+																			project.service_name
+																	);else return _react2.default.createElement(
+																			'option',
+																			{ value: project.id },
+																			project.service_name
+																	);
+															}) : ''
+													),
 													_react2.default.createElement('p', null)
 											),
 											_react2.default.createElement(
 													'div',
-													{ className: 'input-box h30' },
+													{ className: 'input-box h30', style: { position: 'relative' } },
 													_react2.default.createElement(
 															'span',
 															null,
@@ -34992,9 +35213,14 @@ module.exports =
 																	'\u9884\u7EA6\u65E5\u671F\uFF1A'
 															)
 													),
-													_react2.default.createElement('input', { type: 'text', className: 'text-input layicon', id: 'visit_time', readonly: 'readonly' }),
+													_react2.default.createElement('input', { type: 'text', className: 'text-input layicon', id: 'visit_time', onClick: showDateModal, value: visit_time ? visit_time : '', readonly: 'readonly' }),
 													_react2.default.createElement('p', null),
-													_react2.default.createElement('div', { className: 'calendarbox', id: 'inline-calendar' })
+													_react2.default.createElement('div', { className: 'calendarbox', id: 'inline-calendar' }),
+													_react2.default.createElement(
+															'div',
+															{ style: dateModal },
+															_react2.default.createElement(_reactDateRange.Calendar, { onChange: hangleSelectDate })
+													)
 											),
 											_react2.default.createElement(
 													'div',
@@ -35016,13 +35242,13 @@ module.exports =
 																	{ value: '' },
 																	'\u8BF7\u9009\u62E9'
 															),
-															doctors.map(function (doctor) {
+															doctors ? doctors.map(function (doctor) {
 																	return _react2.default.createElement(
 																			'option',
 																			{ value: doctor.id, clinic_name: doctor.clinic_name, clinic_id: doctor.clinic_id },
 																			doctor.name
 																	);
-															})
+															}) : ''
 													),
 													_react2.default.createElement('p', null)
 											),

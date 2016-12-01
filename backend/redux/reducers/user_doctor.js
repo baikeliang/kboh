@@ -147,7 +147,7 @@ export function load({
 }
 
 export function load_details({
-    user
+    user,
     time,
     serviceid,
     req,

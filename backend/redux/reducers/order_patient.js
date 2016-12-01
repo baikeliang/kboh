@@ -72,7 +72,7 @@ export default function reducer(state = initialState, action = {}) {
                  data[pair.key] = pair.val;
              })
              var detailedit ={ data }
-             return state.mergeDeep(detailedit);
+             return state.mergeDeep({detailedit});
         case SET_ORDER_TOSHOW:
             return state.merge({ frontorder: action.result } )
         default:
