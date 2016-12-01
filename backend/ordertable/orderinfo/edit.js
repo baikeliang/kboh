@@ -167,7 +167,14 @@ export default  class Edit extends Component{
     chooseDoctor(ev){
         let id =  ev.target.value;
         this.props.orderEdit([{key:'doctor_id',val:ev.target.value}]);
-        this.props.load_onduty_detail({id});
+
+        this.props.doctorRepo.get('dutydoctors').map((doctor)=>{
+               if(doctor.get('id') == id){
+                  this.props.orderEdit([{key:'clinic_name',val:doctor.get('clinic_name')}])
+               }
+
+        })
+        this.props.load_onduty_detail({ id });
     }
     chooseProject(ev){
         let visit_time;
