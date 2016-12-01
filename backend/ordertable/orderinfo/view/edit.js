@@ -4,15 +4,17 @@ import { Calendar } from 'react-date-range';
 
 export const EditOrder = ({
   change,
+  changeProject,
   relations,
   patient_name,
   doctors,
   companys,
   projects,
   chooseDoctor,
+  chooseProject,
   clinic_name,
   service_id,
-  hangleSelectDate,
+  handleSelectDate,
   visit_time,
   dateModal,
   showDateModal,
@@ -106,7 +108,7 @@ export const EditOrder = ({
 			                    </div>
 			                    <div className="input-box h30">
 			                        <span><em className="emx">选择项目：</em></span>
-			                        <select name="" id="service_id" className="select-div" onChange={ (e)=>{ change(e,'project_name') } }>
+			                        <select onChange={ chooseProject } name="" id="service_id" className="select-div">
 			                          {projects?projects.map((project) =>{
 			                          	  if(service_id == project.id)
 			                          	  	 return <option selected='selected' value={ project.id }>{ project.name }</option>
@@ -123,12 +125,12 @@ export const EditOrder = ({
 			                        <p></p>
 			                        <div className="calendarbox" id="inline-calendar"></div>
 			                        <div style={ dateModal }>
-                                      <Calendar onChange={hangleSelectDate}/>
+                                      <Calendar onChange={handleSelectDate}/>
                                 	</div>
 			                    </div>
 			                    <div className="input-box h30">
 			                        <span><em className="emx">医生：</em></span>
-			                        <select onChange={ (e)=>{ change(e,'doctor_id') } } name="" id="doctor_id" className="select-div" >
+			                        <select onChange={ chooseDoctor } name="" id="doctor_id" className="select-div">
 			                          <option value="">请选择</option>
 			                            { doctors?doctors.map((doctor)=>{
 			                          	   return <option value={ doctor.id } clinic_name={doctor.clinic_name} clinic_id={doctor.clinic_id}>{doctor.name}</option>

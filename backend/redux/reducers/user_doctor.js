@@ -10,9 +10,19 @@ const LOAD_DETAILS = 'bohe/user_doctor/LOAD_DETAILS';
 const LOAD_DETAILS_SUCCESS = 'bohe/user_doctor/LOAD_DETAILS_SUCCESS';
 const LOAD_DETAILS_FAIL = 'bohe/user_doctor/LOAD_DETAILS_FAIL';
 
+const LOAD_ONDUTY_DOCTORS = 'bohe/user_doctor/LOAD_ONDUTY_DOCTORS';
+const LOAD_ONDUTY_DOCTORS_SUCCESS = 'bohe/user_doctor/LOAD_ONDUTY_DOCTORS_SUCCESS';
+const LOAD_ONDUTY_DOCTORS_FAIL = 'bohe/user_doctor/LOAD_ONDUTY_DOCTORS_FAIL';
+
 const LOAD_DETAIL = 'bohe/user_doctor/LOAD_DETAIL';
 const LOAD_DETAIL_SUCCESS = 'bohe/user_doctor/LOAD_DETAIL_SUCCESS';
 const LOAD_DETAIL_FAIL = 'bohe/user_doctor/LOAD_DETAIL_FAIL';
+
+const LOAD_ONDUTY_DETAIL = 'bohe/user_doctor/LOAD_ONDUTY_DETAIL';
+const LOAD_ONDUTY_DETAIL_SUCCESS = 'bohe/user_doctor/LOAD_ONDUTY_DETAIL_SUCCESS';
+const LOAD_ONDUTY_DETAIL_FAIL = 'bohe/user_doctor/LOAD_ONDUTY_DETAIL_FAIL';
+
+
 
 
 
@@ -29,6 +39,35 @@ export default function reducer(state = initialState, action = {}) {
             return state.merge({ loading: false, loaded: true, doctors: action.result })
         case LOAD_FAIL:
             return state.merge({ loading: false, loaded: false, error: action.error })
+
+        case LOAD_ONDUTY_DOCTORS:
+            return state.merge({ loading: true })
+        case LOAD_ONDUTY_DOCTORS_SUCCESS:
+            return state.merge({ loading: false, loaded: true, dutydoctors: action.result })
+        case LOAD_ONDUTY_DOCTORS_FAIL:
+            return state.merge({ loading: false, loaded: false, error: action.error })
+
+        case LOAD_ONDUTY_DETAIL:
+            return state.updateIn(['dutydoctors'], list => list.map(doctor => {
+                    if(doctor.get('id') == action.id){
+                      return doctor.merge({loading: true})
+                    }
+                    return doctor
+            }))
+        case LOAD_ONDUTY_DETAIL_SUCCESS:
+              return state.updateIn(['dutydoctors'], list => list.map(doctor => {
+                    if(doctor.get('id') == action.result.id){
+                        return doctor.merge({loading:false, loaded:true, ...action.result})
+                    }
+                        return doctor
+              }))
+        case LOAD_ONDUTY_DETAIL_FAIL:
+            return state.updateIn(['dutydoctors'], list => list.map(doctor => {
+                    if(doctor.get('id') == action.error.id){
+                    return doctor.merge({loading:false,loaded:false, error: action.error.info})
+                    }
+                    return doctor
+            }))
         case LOAD_DETAILS:
             return state.merge({ loading: true });
         case LOAD_DETAILS_SUCCESS:
@@ -52,10 +91,10 @@ export default function reducer(state = initialState, action = {}) {
         case LOAD_DETAIL_SUCCESS:
             if( !action.extract )
               return state.updateIn(['doctors'], list => list.map(doctor => {
-                    if(doctors.get('id') == action.result.id){
-                        return doctors.merge({loading:false, loaded:true, ...action.result})
+                    if(doctor.get('id') == action.result.id){
+                        return doctor.merge({loading:false, loaded:true, ...action.result})
                     }
-                        return doctors
+                        return doctor
               }))
            else
               return state.updateIn(['doctors'], list => list.map(doctor => {
@@ -146,48 +185,45 @@ export function load({
 
 }
 
-export function load_details({
+export function load_OndutyDoctors({
     user,
-    time,
-    serviceid,
+    visit_time,
+    service_id,
     req,
     extract
 }) {
-    var params = {}
-    params.time = time;
-    params.serviceid = serviceid;
-    return {
-        types: [ LOAD_DETAIL, LOAD_DETAIL_SUCCESS, LOAD_DETAIL_FAIL ],
-        promise: (client) => client.GET('http://'+getApiIp()+'/patient/orderInfo/rest?', { params }, {
-            format: function(response) {
-                if (response.status >= 400) {
-                    throw new Error("Bad response from server");
-                }
-                return response.json();
-            },
-            done: function(res) {
+    var params = {};
+    visit_time?(params.visit_time = visit_time):undefined;
+    service_id?(params.service_id = service_id):undefined;
+    if(visit_time&&service_id)
+            return {
+                types: [ LOAD_ONDUTY_DOCTORS, LOAD_ONDUTY_DOCTORS_SUCCESS, LOAD_ONDUTY_DOCTORS_FAIL ],
+                promise: (client) => client.GET('http://'+getApiIp()+'/user_doctor/details/rest?', { params }, {
+                    format: function(response) {
+                        if (response.status >= 400) {
+                            throw new Error("Bad response from server");
+                        }
+                        return response.json();
+                    },
+                    done: function(res) {
 
-                console.log(res);
+                        console.log(res);
 
-                if (res.valid == 1) {
+                        if (res.valid == 1) {
+                            return Promise.resolve(res.doctors)
 
-                    return Promise.resolve(res.doctors)
-
-                } else {
-                    //var err = { info: 'auth' }
-                    return Promise.reject({id, info:'notvalid'})
-                }
-            },
-            error: function(err) {
-                console.log(err)
-                console.log('GGGGGGGGGGGGGG1')
-                return Promise.reject({id, info: 'wire' })
-            }
-        }),
-        id,
-        idx,
-        extract
-    };
+                        } else {
+                            //var err = { info: 'auth' }
+                            return Promise.reject({id, info:'notvalid'})
+                        }
+                    },
+                    error: function(err) {
+                        console.log(err)
+                        return Promise.reject({id, info: 'wire' })
+                    }
+                }),
+                extract
+            };
 
 }
 
@@ -201,7 +237,7 @@ export function load_detail({
 
     return {
         types: [ LOAD_DETAIL, LOAD_DETAIL_SUCCESS, LOAD_DETAIL_FAIL ],
-        promise: (client) => client.GET('http://'+getApiIp()+'/patient/orderInfo/rest?', { params }, {
+        promise: (client) => client.GET('http://'+getApiIp()+'/user_doctor/detail/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -234,6 +270,47 @@ export function load_detail({
     };
 
 }
+
+export function load_onduty_detail({
+    id
+}) {
+    var params = {}
+    params.id = id
+
+    return {
+        types: [ LOAD_ONDUTY_DETAIL, LOAD_ONDUTY_DETAIL_SUCCESS, LOAD_ONDUTY_DETAIL_FAIL ],
+        promise: (client) => client.GET('http://'+getApiIp()+'/user_doctor/detail/rest?', { params }, {
+            format: function(response) {
+                if (response.status >= 400) {
+                    throw new Error("Bad response from server");
+                }
+                console.log('>>>>>>>>>>>>>>>>')
+                return response.json();
+            },
+            done: function(res) {
+
+                console.log(res);
+
+                if (res.valid == 1) {
+
+                    return Promise.resolve(res.doctor)
+
+                } else {
+                    //var err = { info: 'auth' }
+                    return Promise.reject({id, info:'notvalid'})
+                }
+            },
+            error: function(err) {
+                console.log(err)
+                console.log('GGGGGGGGGGGGGG1')
+                return Promise.reject({id, info: 'wire' })
+            }
+        }),
+        id
+    };
+
+}
+
 
 
 
