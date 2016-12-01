@@ -67,11 +67,12 @@ export default function reducer(state = initialState, action = {}) {
             }))
         case ORDERINFO_EDIT:
              var pairs = action.result;
-             var detailedit = {};
+             var data = {};
              pairs.forEach((pair) => {
-                 detailedit[pair.key] = pair.val;
+                 data[pair.key] = pair.val;
              })
-             return state.merge(detailedit);
+             var detailedit ={ data }
+             return state.mergeDeep(detailedit);
         case SET_ORDER_TOSHOW:
             return state.merge({ frontorder: action.result } )
         default:
