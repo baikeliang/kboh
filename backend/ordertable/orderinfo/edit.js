@@ -115,7 +115,7 @@ export const asyncEvent = [{
                     return Promise.resolve();
             })
         } else {
-                if (!successorLoading_doctor(getState())) {
+                if (!successorLoading_project(getState())) {
                     let state = getState();
                     let user = state.getIn(['auth', 'user']).toJS();
                     return dispatch(loadProjects({ user }));
