@@ -8,7 +8,7 @@ import {
 import { Calendar } from 'react-date-range';
 
 function photoBox(){
-   return (<div className="new-create-opcity" style={{display:"none"}}>
+   return (<div className="new-create-opcity" style={{display:"none",position:'absolute'}}>
              <div className="new-uppic-bj">
                 <div className="new-uppic-box">
                     <h4 className="toph4 nomargin">上传头像<span className="close_dialog"></span></h4>

@@ -386,7 +386,6 @@ export function oralFlush(){
 
     return {
         type: ORAL_FLUSH
->>>>>>> baseinfo
     }
 
 }

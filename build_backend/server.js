@@ -21136,6 +21136,18 @@ module.exports =
 	
 	var _cteeth_status2 = _interopRequireDefault(_cteeth_status);
 	
+	var _user_doctor = __webpack_require__(/*! ./redux/reducers/user_doctor */ 384);
+	
+	var _user_doctor2 = _interopRequireDefault(_user_doctor);
+	
+	var _user_clinic = __webpack_require__(/*! ./redux/reducers/user_clinic */ 385);
+	
+	var _user_clinic2 = _interopRequireDefault(_user_clinic);
+	
+	var _user_company = __webpack_require__(/*! ./redux/reducers/user_company */ 386);
+	
+	var _user_company2 = _interopRequireDefault(_user_company);
+	
 	var _clientMiddleware = __webpack_require__(/*! ./redux/middleware/clientMiddleware */ 250);
 	
 	var _clientMiddleware2 = _interopRequireDefault(_clientMiddleware);
@@ -21177,6 +21189,9 @@ module.exports =
 	        bill_patient: _bill_patient2.default,
 	        wxjdk: _wxjdk2.default,
 	        user_patient: _user_patient2.default,
+	        user_doctor: _user_doctor2.default,
+	        user_clinic: _user_clinic2.default,
+	        user_company: _user_company2.default,
 	        mteeth_status: _mteeth_status2.default,
 	        cteeth_status: _cteeth_status2.default
 	    });
@@ -21985,7 +22000,9 @@ module.exports =
 	
 	exports.default = reducer;
 	exports.frontOrder = frontOrder;
+	exports.nextGroupOrders = nextGroupOrders;
 	exports.LoadedorLoading = LoadedorLoading;
+	exports.LoadedorLoading_order = LoadedorLoading_order;
 	exports.load = load;
 	exports.load_detail = load_detail;
 	
@@ -21996,6 +22013,10 @@ module.exports =
 	var _bluebird = __webpack_require__(/*! bluebird */ 242);
 	
 	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _apiinterface = __webpack_require__(/*! ../../util/apiinterface.js */ 374);
+	
+	var _apiinterface2 = _interopRequireDefault(_apiinterface);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -22008,10 +22029,13 @@ module.exports =
 	var LOAD_DETAIL_FAIL = 'bohe/order_patient/LOAD_DETAIL_FAIL';
 	
 	var SET_ORDER_TOSHOW = 'bohe/order_patient/SHOW';
+	var NEXT_GROUP_ORDERS = 'bohe/order_patient/NEXTGROUPORDERS';
 	
 	var initialState = _immutable2.default.Map({
 	    loaded: false,
-	    loading: false
+	    loading: false,
+	    showbegin: 0,
+	    detailedit: {}
 	});
 	
 	function reducer() {
@@ -22022,23 +22046,7 @@ module.exports =
 	        case LOAD:
 	            return state.merge({ loading: true });
 	        case LOAD_SUCCESS:
-	            var allres;
-	            if (_immutable2.default.List.isList(state.get('orders'))) {
-	                if (!action.refresh) {
-	
-	                    allres = state.get('orders').pop().toJS().concat(action.result);
-	                } else if (action.refresh.resolve) {
-	
-	                    action.refresh.resolve();
-	                }
-	            }
-	            if (allres) {
-	                allres.push({ flag: true });
-	                return state.merge({ loading: false, loaded: true, orders: allres });
-	            } else {
-	                action.result.push({ flag: true });
-	                return state.merge({ loading: false, loaded: true, orders: action.result });
-	            }
+	            if (action.showOrdersBegin) return state.merge({ showbegin: action.showOrdersBegin, loading: false, loaded: true, users: action.result });else return state.merge({ loading: false, loaded: true, orders: action.result });
 	        case LOAD_FAIL:
 	            if (action.refresh && action.refresh.reject) {
 	                action.refresh.reject();
@@ -22054,15 +22062,21 @@ module.exports =
 	                });
 	            });
 	        case LOAD_DETAIL_SUCCESS:
-	            return state.updateIn(['orders'], function (list) {
+	            if (!action.extract) return state.updateIn(['orders'], function (list) {
 	                return list.map(function (order) {
 	                    if (order.get('id') == action.result.id) {
 	                        return order.merge((0, _extends3.default)({ loading: false, loaded: true }, action.result));
 	                    }
 	                    return order;
 	                });
-	            });
-	
+	            });else return state.updateIn(['orders'], function (list) {
+	                return list.map(function (order) {
+	                    if (order.get('id') == action.result.id) {
+	                        return order.merge((0, _extends3.default)({ loading: false, loaded: true }, action.result));
+	                    }
+	                    return order;
+	                });
+	            }).merge({ detailedit: { idx: action.idx, data: action.result } });
 	        case LOAD_DETAIL_FAIL:
 	            return state.updateIn(['orders'], function (list) {
 	                return list.map(function (order) {
@@ -22089,6 +22103,13 @@ module.exports =
 	    };
 	}
 	
+	function nextGroupOrders(begin) {
+	    return {
+	        type: NEXT_GROUP_ORDERS,
+	        result: begin
+	    };
+	}
+	
 	function LoadedorLoading(state) {
 	    var loaded = false;
 	    var loading = false;
@@ -22097,6 +22118,19 @@ module.exports =
 	    }
 	    if (state.hasIn(['order_patient', 'loading'])) {
 	        loading = state.getIn(['order_patient', 'loading']);
+	    }
+	    return loaded || loading;
+	}
+	
+	function LoadedorLoading_order(state, idx, id) {
+	    var loaded = false;
+	    var loading = false;
+	
+	    var order = state.getIn(['order_patient', 'orders', idx]);
+	
+	    if (order) {
+	        loading = order.get('loading');
+	        loaded = order.get('loaded');
 	    }
 	    return loaded || loading;
 	}
@@ -22110,7 +22144,8 @@ module.exports =
 	        num = _ref2.num,
 	        begin = _ref2.begin,
 	        req = _ref2.req,
-	        refresh = _ref2.refresh;
+	        refresh = _ref2.refresh,
+	        showOrdersBegin = _ref2.showOrdersBegin;
 	
 	    var params = {};
 	
@@ -22138,7 +22173,7 @@ module.exports =
 	    return {
 	        types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
 	        promise: function promise(client) {
-	            return client.GET('http://192.168.10.10/patient/orders/rest?', { params: params }, {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/patient/orders/rest?', { params: params }, {
 	                format: function format(response) {
 	                    if (response.status >= 400) {
 	                        throw new Error("Bad response from server");
@@ -22167,7 +22202,9 @@ module.exports =
 	}
 	
 	function load_detail(_ref3) {
-	    var id = _ref3.id;
+	    var id = _ref3.id,
+	        idx = _ref3.idx,
+	        extract = _ref3.extract;
 	
 	    var params = {};
 	    params.id = id;
@@ -22177,7 +22214,7 @@ module.exports =
 	    return {
 	        types: [LOAD_DETAIL, LOAD_DETAIL_SUCCESS, LOAD_DETAIL_FAIL],
 	        promise: function promise(client) {
-	            return client.GET('http://192.168.10.10/patient/orderInfo/rest?', { params: params }, {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/patient/orderInfo/rest?', { params: params }, {
 	                format: function format(response) {
 	                    if (response.status >= 400) {
 	                        throw new Error("Bad response from server");
@@ -22204,7 +22241,9 @@ module.exports =
 	                }
 	            });
 	        },
-	        id: id
+	        id: id,
+	        idx: idx,
+	        extract: extract
 	    };
 	}
 
@@ -22810,6 +22849,7 @@ module.exports =
 	exports.oralEditADD = oralEditADD;
 	exports.oralFlush = oralFlush;
 	exports.frontUserForInfo = frontUserForInfo;
+	exports.nextGroupUsers = nextGroupUsers;
 	exports.LoadedorLoading = LoadedorLoading;
 	exports.LoadedorLoadingUser = LoadedorLoadingUser;
 	exports.LoadedorLoadingUser_History = LoadedorLoadingUser_History;
@@ -22867,9 +22907,12 @@ module.exports =
 	
 	var SET_USER_TOSHOWINFO = 'bohe/user_patient/SHOWINFO';
 	
+	var NEXT_GROUP_USERS = 'bohe/user_patient/NEXTGROUPUSERS';
+	
 	var initialState = _immutable2.default.Map({
 	    loaded: false,
-	    loading: false
+	    loading: false,
+	    showbegin: 0
 	});
 	
 	function reducer() {
@@ -22880,24 +22923,7 @@ module.exports =
 	        case LOAD:
 	            return state.merge({ loading: true });
 	        case LOAD_SUCCESS:
-	            var allres;
-	            console.log('111DDDDDDDDDD!!!!!');
-	            if (_immutable2.default.List.isList(state.get('users'))) {
-	                if (!action.refresh) {
-	
-	                    allres = state.get('users').pop().toJS().concat(action.result);
-	                } else if (action.refresh.resolve) {
-	                    action.refresh.resolve();
-	                }
-	            }
-	            if (allres) {
-	                allres.push({ flag: true });
-	                return state.merge({ loading: false, loaded: true, users: allres });
-	            } else {
-	                console.log('DDDDDDDDDD!!!!!');
-	                action.result.push({ flag: true });
-	                return state.merge({ loading: false, loaded: true, users: action.result });
-	            }
+	            if (action.showUsersBegin) return state.merge({ showbegin: action.showUsersBegin, loading: false, loaded: true, users: action.result });else return state.merge({ loading: false, loaded: true, users: action.result });
 	        case LOAD_FAIL:
 	            if (action.refresh && action.refresh.reject) {
 	                action.refresh.reject();
@@ -22995,6 +23021,10 @@ module.exports =
 	                    return user;
 	                });
 	            });
+	        case SET_USER_TOSHOWINFO:
+	            return state.merge({ frontuserinfo: action.result });
+	        case NEXT_GROUP_USERS:
+	            return state.merge({ showbegin: action.result });
 	        case HISTORY_FLUSH:
 	            var idx = state.getIn(['frontuserinfo', 'idx']);
 	
@@ -23264,6 +23294,13 @@ module.exports =
 	    };
 	}
 	
+	function nextGroupUsers(begin) {
+	    return {
+	        type: NEXT_GROUP_USERS,
+	        result: begin
+	    };
+	}
+	
 	function LoadedorLoading(state) {
 	    var loaded = false;
 	    var loading = false;
@@ -23337,7 +23374,8 @@ module.exports =
 	        num = _ref2.num,
 	        begin = _ref2.begin,
 	        req = _ref2.req,
-	        refresh = _ref2.refresh;
+	        refresh = _ref2.refresh,
+	        showUsersBegin = _ref2.showUsersBegin;
 	
 	    var params = {};
 	
@@ -23389,7 +23427,8 @@ module.exports =
 	                }
 	            });
 	        },
-	        refresh: refresh
+	        refresh: refresh,
+	        showUsersBegin: showUsersBegin
 	    };
 	}
 	
@@ -23539,6 +23578,7 @@ module.exports =
 	var _extends3 = _interopRequireDefault(_extends2);
 	
 	exports.default = reducer;
+	exports.flushgraphydata = flushgraphydata;
 	exports.switchtooth = switchtooth;
 	exports.switchteeth = switchteeth;
 	exports.switchache = switchache;
@@ -23553,6 +23593,10 @@ module.exports =
 	
 	var _bluebird2 = _interopRequireDefault(_bluebird);
 	
+	var _apiinterface = __webpack_require__(/*! ../../util/apiinterface.js */ 374);
+	
+	var _apiinterface2 = _interopRequireDefault(_apiinterface);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var LOAD = 'bohe/mteeth_status/LOAD';
@@ -23562,6 +23606,8 @@ module.exports =
 	var SWITCH_TEETH = 'bohe/mteeth_status/SWITCHTEETH';
 	var SWITCH_ACHE = 'bohe/mteeth_status/SWITCHACHE';
 	var SWITCH_TOOTH = 'bohe/mteeth_status/SWITCHTOOTH';
+	
+	var FLUSH_GRAPHY_DATA = 'bohe/mteeth_status/FLUSHGRAPHYDATA';
 	
 	var teeth_ui = {
 	  size: 0,
@@ -23737,15 +23783,26 @@ module.exports =
 	    case LOAD_SUCCESS:
 	      var _data = {};
 	      var teethlist = action.result;
-	      _data[action.index] = teethlist;
 	
-	      var teethui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
+	      _data[action.index.toString()] = teethlist;
 	
-	      var latest_data = (0, _extends3.default)({ idx: teethlist.length - 1, useridx: action.index, size: teethlist.length }, teethui);
-	      //return state.merge({ loading: false, loaded: true, teeth: action.result })
-	      return state.mergeDeep({ loading: false, loaded: true, teeth_ui: latest_data, allUserTeeth: _data });
+	      var tooth_ui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
+	
+	      var timelist = teethlist.map(function (teeth) {
+	        return teeth.time;
+	      });
+	      console.log(timelist);
+	      var teeth_ui = (0, _extends3.default)({ idx: teethlist.length - 1, useridx: action.index.toString(), timelist: timelist, size: teethlist.length }, tooth_ui);
+	
+	      return state.mergeDeep({ loading: false, loaded: true, teeth_ui: teeth_ui, allUserTeeth: _data });
 	    case LOAD_FAIL:
 	      return state.merge({ loading: false, loaded: false, error: action.error });
+	    case FLUSH_GRAPHY_DATA:
+	      var useridx = state.getIn(['teeth_ui', 'useridx']);
+	      var idx = state.getIn(['teeth_ui', 'idx']);
+	      var metateeth = state.getIn(['allUserTeeth', useridx, idx]);
+	      var newteeth = state.getIn(['teeth_ui', 'teeth']).toJS();
+	      return state.setIn(['allUserTeeth', useridx, idx, 'teeth'], metateeth.merge(newteeth));
 	    case SWITCH_TEETH:
 	      var pos = action.result;
 	      var teeth;
@@ -23807,6 +23864,11 @@ module.exports =
 	  }
 	}
 	
+	function flushgraphydata() {
+	  return {
+	    type: FLUSH_GRAPHY_DATA
+	  };
+	}
 	function switchtooth(_ref) {
 	  var toothname = _ref.toothname;
 	
@@ -23879,7 +23941,7 @@ module.exports =
 	  return {
 	    types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
 	    promise: function promise(client) {
-	      return client.GET('http://172.16.34.59/patient/mteeth/rest?', { params: params }, {
+	      return client.GET('http://' + (0, _apiinterface2.default)() + '/patient/mteeth/rest?', { params: params }, {
 	        format: function format(response) {
 	          if (response.status >= 400) {
 	            throw new Error("Bad response from server");
@@ -23939,6 +24001,10 @@ module.exports =
 	var _bluebird = __webpack_require__(/*! bluebird */ 242);
 	
 	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _apiinterface = __webpack_require__(/*! ../../util/apiinterface.js */ 374);
+	
+	var _apiinterface2 = _interopRequireDefault(_apiinterface);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -24060,13 +24126,18 @@ module.exports =
 	        case LOAD_SUCCESS:
 	            var _data = {};
 	            var teethlist = action.result;
+	
 	            _data[action.index] = teethlist;
 	
-	            var teethui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
+	            var tooth_ui = teethlist.length > 0 ? teethlist[teethlist.length - 1] : {};
 	
-	            var latest_data = (0, _extends3.default)({ idx: teethlist.length - 1, useridx: action.index, size: teethlist.length }, teethui);
-	            //return state.merge({ loading: false, loaded: true, teeth: action.result })
-	            return state.mergeDeep({ loading: false, loaded: true, teeth_ui: latest_data, allUserTeeth: _data });
+	            var timelist = teethlist.map(function (teeth) {
+	                return teeth.time;
+	            });
+	
+	            var teeth_ui = (0, _extends3.default)({ idx: teethlist.length - 1, useridx: action.index, timelist: timelist, size: teethlist.length }, tooth_ui);
+	
+	            return state.mergeDeep({ loading: false, loaded: true, teeth_ui: teeth_ui, allUserTeeth: _data });
 	        case LOAD_FAIL:
 	            return state.merge({ loading: false, loaded: false, error: action.error });
 	        case SWITCH_TEETH:
@@ -24200,7 +24271,7 @@ module.exports =
 	    return {
 	        types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
 	        promise: function promise(client) {
-	            return client.GET('http://172.16.34.59/patient/cteeth/rest?', { params: params }, {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/patient/cteeth/rest?', { params: params }, {
 	                format: function format(response) {
 	                    if (response.status >= 400) {
 	                        throw new Error("Bad response from server");
@@ -25278,6 +25349,10 @@ module.exports =
 	
 	var _userlist2 = _interopRequireDefault(_userlist);
 	
+	var _orderlist = __webpack_require__(/*! ./ordertable/orderlist.js */ 390);
+	
+	var _orderlist2 = _interopRequireDefault(_orderlist);
+	
 	var _left_table = __webpack_require__(/*! ./common/js/partial/left_table.js */ 329);
 	
 	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
@@ -25392,12 +25467,16 @@ module.exports =
 	    }, {
 	        key: 'onClick',
 	        value: function onClick(ev, itemid) {
-	
+	            console.log("change___________");
+	            console.log(itemid);
+	            var asyncProcess = function () {
+	                if (itemid == '0') return _orderlist.asyncEvent;else if (itemid == '1') return _userlist.asyncEvent;else return [];
+	            }();
 	            this.showRight({
-	                asyncProcess: _userlist.asyncEvent,
+	                asyncProcess: asyncProcess,
 	                itemid: itemid,
 	                comCreater: function comCreater() {
-	                    return _react2.default.createElement(_userlist2.default, null);
+	                    if (itemid == '0') return _react2.default.createElement(_orderlist2.default, null);else if (itemid == '1') return _react2.default.createElement(_userlist2.default, null);else return _react2.default.createElement('div', null);
 	                }
 	            });
 	        }
@@ -25997,7 +26076,6 @@ module.exports =
 	            getState = _ref$store.getState,
 	            params = _ref.params;
 	
-	        console.log("EEEEEEEEEEEEEEEEEEEE111111");
 	        if (!(0, _auth.isLoaded)(getState())) {
 	            return dispatch((0, _auth.load)(params)).then(function () {
 	                if (!(0, _user_patient.LoadedorLoading)(getState())) {
@@ -26007,9 +26085,7 @@ module.exports =
 	                } else return _bluebird2.default.resolve();
 	            });
 	        } else {
-	            console.log("EEEEEEEEEEEEEEEEEEEE");
 	            if (!(0, _user_patient.LoadedorLoading)(getState())) {
-	                console.log("EEEEEEEEEEEEEEEEEEEE2");
 	                var state = getState();
 	                var user = state.getIn(['auth', 'user']).toJS();
 	                return dispatch((0, _user_patient.load)({ user: user, num: 10, begin: 0, refresh: { flag: true } }));
@@ -26023,7 +26099,7 @@ module.exports =
 	        auth: state.get('auth'),
 	        userRepo: state.get('user_patient')
 	    };
-	}, { pushState: _reactRouterRedux.push, load: _user_patient.load, toDetail: _user_patient.frontUserForInfo }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
+	}, { pushState: _reactRouterRedux.push, load: _user_patient.load, toDetail: _user_patient.frontUserForInfo, nextGroupUsers: _user_patient.nextGroupUsers }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
 	    (0, _inherits3.default)(UserListCom, _Component);
 	
 	    function UserListCom() {
@@ -26082,6 +26158,13 @@ module.exports =
 	            });
 	        }
 	    }, {
+	        key: 'handlePageClick',
+	        value: function handlePageClick(data) {
+	            var selected = data.selected;
+	
+	            this.props.load({ num: 10, begin: selected * 10, showbegin: selected * 10 });
+	        }
+	    }, {
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {}
 	    }, {
@@ -26089,19 +26172,24 @@ module.exports =
 	        value: function render() {
 	            console.log(this.props.userRepo.toJS());
 	            if (this.props.auth.has('user')) {
-	
+	                console.log("PPPPPPPPPPPPPPPPPPPPPPPPPP");
 	                var size = this.props.userRepo.get('users').size;
+	                var showbegin = this.props.userRepo.get('showbegin');
+	                console.log("PPPPPPPPPPPPPPPPPPPPPPPPPP1");
 	                var nodata = size == 0 ? true : false;
-	                console.log(size);
-	                console.log("sssssssrrr");
 	                var options = {
 	                    touchAction: 'pan-y'
 	                };
 	                var height = window.innerHeight || document.documentElement.clientHeight;
-	                var data = nodata ? [] : this.props.userRepo.get('users').toJS();
+	                var data = [];
+	                console.log("LLLLLRRRRRRRR");
+	                for (var i = 0; i < 10 && showbegin + i < size; i++) {
+	                    data.push(this.props.userRepo.getIn(['users', showbegin + i]).toJS());
+	                }
+	
 	                console.log("ffffggg");
 	                console.log(data);
-	                return (0, _userlistpage.UserList)({ toUserInfo: this.toUserInfo.bind(this), toSearch: this.toSearch.bind(this), toAddUser: this.toAddUser.bind(this), toDeleteUser: this.toDeleteUser.bind(this), toEditUser: this.toEditUser.bind(this), data: data, nodata: nodata, options: options, length: size, handlePan: this.handlePan.bind(this), handleRefresh: this.handleRefresh.bind(this) });
+	                return (0, _userlistpage.UserList)({ handlePageClick: this.handlePageClick.bind(this), toUserInfo: this.toUserInfo.bind(this), toSearch: this.toSearch.bind(this), toAddUser: this.toAddUser.bind(this), toDeleteUser: this.toDeleteUser.bind(this), toEditUser: this.toEditUser.bind(this), data: data, nodata: nodata, options: options, length: size, handlePan: this.handlePan.bind(this), handleRefresh: this.handleRefresh.bind(this) });
 	            } else {
 	                return _react2.default.createElement('div', null);
 	            }
@@ -26419,6 +26507,10 @@ module.exports =
 	
 	var _userdata = __webpack_require__(/*! ./userdata.js */ 308);
 	
+	var _reactPaginate = __webpack_require__(/*! react-paginate */ 387);
+	
+	var _reactPaginate2 = _interopRequireDefault(_reactPaginate);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var UserList = exports.UserList = function UserList(_ref) {
@@ -26428,7 +26520,9 @@ module.exports =
 	      toAddUser = _ref.toAddUser,
 	      toDeleteUser = _ref.toDeleteUser,
 	      toEditUser = _ref.toEditUser,
-	      toUserInfo = _ref.toUserInfo;
+	      toUserInfo = _ref.toUserInfo,
+	      handlePageClick = _ref.handlePageClick,
+	      pageNum = _ref.pageNum;
 	
 	  var rowidx = 0;
 	  return _react2.default.createElement(
@@ -26580,7 +26674,22 @@ module.exports =
 	            return ret;
 	          })
 	        )
-	      )
+	      ),
+	      _react2.default.createElement(_reactPaginate2.default, { previousLabel: "previous",
+	        nextLabel: "next",
+	        breakLabel: _react2.default.createElement(
+	          'a',
+	          null,
+	          '...'
+	        ),
+	        breakClassName: "break-me",
+	        pageNum: 110,
+	        marginPagesDisplayed: 2,
+	        pageRangeDisplayed: 5,
+	        clickCallback: handlePageClick,
+	        containerClassName: "pagination",
+	        subContainerClassName: "pages pagination",
+	        activeClassName: "active" })
 	    )
 	  );
 	};
@@ -27405,7 +27514,6 @@ module.exports =
 	        toTeethGraph = _ref.toTeethGraph,
 	        tab = _ref.tab;
 	
-	
 	    return _react2.default.createElement(
 	        'div',
 	        { className: 'user_topmenu user_topmenu_edit' },
@@ -27487,6 +27595,8 @@ module.exports =
 	    }, {
 	        key: 'toTeethGraph',
 	        value: function toTeethGraph() {
+	            var WebUploader = window.webuploader;
+	            console.log(WebUploader);
 	            this.setState({ tab: TEETHGRAPH });
 	            this.context.showUserData({ asyncProcess: _teethgraph.asyncEvent, comCreater: function comCreater() {
 	                    return _react2.default.createElement(_teethgraph2.default, null);
@@ -27526,6 +27636,10 @@ module.exports =
 	    value: true
 	});
 	exports.default = exports.asyncEvent = undefined;
+	
+	var _defineProperty2 = __webpack_require__(/*! babel-runtime/helpers/defineProperty */ 388);
+	
+	var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 	
 	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
 	
@@ -27627,10 +27741,10 @@ module.exports =
 	var TeethGraph = (_dec = (0, _reduxConnect.asyncConnect)(asyncEvent), _dec2 = (0, _reactRedux.connect)(function (state) {
 	    return {
 	        auth: state.get('auth'),
-	        mteeth_status: state.get('mteeth_status'),
-	        cteeth_status: state.get('cteeth_status')
+	        mteeth_ui: state.getIn(['mteeth_status', 'teeth_ui']),
+	        cteeth_ui: state.getIn(['cteeth_status', 'teeth_ui'])
 	    };
-	}, { pushState: _reactRouterRedux.push, switchteethm: _mteeth_status.switchteeth, switchteethc: _cteeth_status.switchteeth, switchachem: _mteeth_status.switchache, switchachec: _cteeth_status.switchache, switchtoothm: _mteeth_status.switchtooth, switchtoothc: _cteeth_status.switchtooth }), _dec(_class = _dec2(_class = function (_Component) {
+	}, { pushState: _reactRouterRedux.push, switchteethm: _mteeth_status.switchteeth, switchteethc: _cteeth_status.switchteeth, switchachem: _mteeth_status.switchache, switchachec: _cteeth_status.switchache, switchtoothm: _mteeth_status.switchtooth, switchtoothc: _cteeth_status.switchtooth, flushgraphydata: _mteeth_status.flushgraphydata }), _dec(_class = _dec2(_class = function (_Component) {
 	    (0, _inherits3.default)(TeethGraph, _Component);
 	
 	    function TeethGraph(props) {
@@ -27653,9 +27767,15 @@ module.exports =
 	    }, {
 	        key: 'toAdd',
 	        value: function toAdd() {
-	            var teeth_status = this.props.teethtype == 'M' ? this.props.mteeth_status : this.props.cteeth_status;
-	            var addtime = teeth_status.getIn(['teeth_ui', 'time']);
+	            var teeth_ui = this.props.teethtype == 'M' ? this.props.mteeth_ui : this.props.cteeth_ui;
+	            var addtime = teeth_ui.get('time');
 	            this.setState((0, _extends3.default)({}, this.state, { check: false, edit: false, add: true, addtime: addtime }));
+	        }
+	    }, {
+	        key: 'save',
+	        value: function save() {
+	            this.props.flushgraphydata();
+	            this.toCheck();
 	        }
 	    }, {
 	        key: 'toEdit',
@@ -27681,7 +27801,7 @@ module.exports =
 	        key: 'componentWillMount',
 	        value: function componentWillMount() {
 	
-	            var teethtype = this.props.mteeth_status.get('allUserTeeth').size >= 0 ? 'M' : 'C';
+	            var teethtype = this.props.mteeth_ui.get('size') >= 0 ? 'M' : 'C';
 	            this.setState((0, _extends3.default)({}, this.state, { teethtype: teethtype }));
 	        }
 	    }, {
@@ -27690,8 +27810,8 @@ module.exports =
 	    }, {
 	        key: 'componentWillReceiveProps',
 	        value: function componentWillReceiveProps(nextProps) {
-	            var teethtype = nextProps.mteeth_status.get('allUserTeeth').size >= 0 ? 'M' : 'C';
-	            var curToothName = nextProps.mteeth_status.get('allUserTeeth').size >= 0 ? nextProps.mteeth_status.getIn(['teeth_ui', 'toothname']) : nextProps.cteeth_status.getIn(['teeth_ui', 'toothname']);
+	            var teethtype = nextProps.mteeth_ui.get('size') >= 0 ? 'M' : 'C';
+	            var curToothName = nextProps.mteeth_ui.get('size') >= 0 ? nextProps.mteeth_ui.get('toothname') : nextProps.cteeth_ui.get('toothname');
 	            if (curToothName) this.setState((0, _extends3.default)({}, this.state, { teethtype: teethtype, curToothName: curToothName }));else this.setState((0, _extends3.default)({}, this.state, { teethtype: teethtype }));
 	        }
 	    }, {
@@ -27715,6 +27835,23 @@ module.exports =
 	            this.props.switchachec({ acheidx: acheidx, curToothName: curToothName, status: status });
 	        }
 	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            var _window$$$diyUpload;
+	
+	            window.$("#pick").diyUpload((_window$$$diyUpload = {
+	                url: '',
+	                success: function success(data) {},
+	                error: function error(err) {
+	                    console.log(err);
+	                },
+	                buttonText: '上传图片'
+	            }, (0, _defineProperty3.default)(_window$$$diyUpload, 'buttonText', '上传图片'), (0, _defineProperty3.default)(_window$$$diyUpload, 'chunked', false), (0, _defineProperty3.default)(_window$$$diyUpload, 'auto', true), (0, _defineProperty3.default)(_window$$$diyUpload, 'chunkSize', 1048576 * 15), (0, _defineProperty3.default)(_window$$$diyUpload, 'fileNumLimit', 1), (0, _defineProperty3.default)(_window$$$diyUpload, 'fileSizeLimit', 1048576 * 100), (0, _defineProperty3.default)(_window$$$diyUpload, 'fileSingleSizeLimit', 1048576 * 15), (0, _defineProperty3.default)(_window$$$diyUpload, 'accept', {
+	                mimeTypes: 'image/*',
+	                extensions: 'gif,jpg,jpeg,png'
+	            }), _window$$$diyUpload));
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
 	
@@ -27727,24 +27864,25 @@ module.exports =
 	                        check: this.state.check,
 	                        add: this.state.add,
 	                        addTime: this.state.addtime,
-	                        teeth_status: this.state.teethtype == 'M' ? this.props.mteeth_status.toJS() : this.props.cteeth_status.toJS(),
+	                        teeth_ui: this.state.teethtype == 'M' ? this.props.mteeth_ui.toJS() : this.props.cteeth_ui.toJS(),
 	                        toAdd: this.toAdd.bind(this),
 	                        toEdit: this.toEdit.bind(this),
 	                        toCheck: this.toCheck.bind(this),
+	                        saveTeethGraph: this.save.bind(this),
 	                        changeCheckTime: this.changeCheckTime.bind(this),
 	                        changeEditTime: this.changeEditTime.bind(this)
 	                    }),
 	                    ' ',
 	                    this.state.check ? (0, _teethshow.TeethShow)({
 	                        teethtype: this.state.teethtype,
-	                        mteeth_status: this.props.mteeth_status ? this.props.mteeth_status.toJS() : [],
-	                        cteeth_status: this.props.cteeth_status ? this.props.cteeth_status.toJS() : [],
+	                        mteeth_ui: this.props.mteeth_ui ? this.props.mteeth_ui.toJS() : {},
+	                        cteeth_ui: this.props.cteeth_ui ? this.props.cteeth_ui.toJS() : {},
 	                        toMteeth: this.toMteeth.bind(this),
 	                        toCteeth: this.toCteeth.bind(this)
 	                    }) : (0, _teethedit.TeethEdit)({
 	                        teethtype: this.state.teethtype,
-	                        mteeth_status: this.props.mteeth_status ? this.props.mteeth_status.toJS() : [],
-	                        cteeth_status: this.props.cteeth_status ? this.props.cteeth_status.toJS() : [],
+	                        mteeth_ui: this.props.mteeth_ui ? this.props.mteeth_ui.toJS() : {},
+	                        cteeth_ui: this.props.cteeth_ui ? this.props.cteeth_ui.toJS() : {},
 	                        toMteeth: this.toMteeth.bind(this),
 	                        toCteeth: this.toCteeth.bind(this),
 	                        clickOnTooth: this.clickOnTooth.bind(this),
@@ -28216,13 +28354,13 @@ module.exports =
 	            'div',
 	            { className: 'login-input-box user-input' },
 	            _react2.default.createElement('span', { className: 'icon-user' }),
-	            _react2.default.createElement('input', { onChange: onPassword, type: 'text', id: 'username', autocomplete: 'off', name: 'username' })
+	            _react2.default.createElement('input', { onChange: onUsername, type: 'text', id: 'username', autocomplete: 'off', name: 'username' })
 	          ),
 	          _react2.default.createElement(
 	            'div',
 	            { className: 'login-input-box pwd-input' },
 	            _react2.default.createElement('span', { className: 'icon-lock' }),
-	            _react2.default.createElement('input', { onChange: onUsername, type: 'password', id: 'pwd', autocomplete: 'off', name: 'password' })
+	            _react2.default.createElement('input', { onChange: onPassword, type: 'password', id: 'pwd', autocomplete: 'off', name: 'password' })
 	          ),
 	          _react2.default.createElement(
 	            'div',
@@ -28423,7 +28561,10 @@ module.exports =
 	                console.log("pppppppp");
 	                req.body = (0, _stringify2.default)(data);
 	                console.log(req.body);
-	                req.headers = {};
+	                req.headers = {
+	                    'Accept': 'application/json',
+	                    'Content-Type': 'application/json'
+	                };
 	            }
 	            return fetch(path + u, req).then(format).then(done, error);
 	        };
@@ -28742,6 +28883,74 @@ module.exports =
 	            this.props.basicInfoEdit([{ key: 'birthdate', val: date.format('DD/MM/YY').toString() }, { key: 'age', val: age }]);
 	        }
 	    }, {
+	        key: 'upLoadPhoto',
+	        value: function upLoadPhoto() {
+	            /*图片头像上传*/
+	            var comself = this;
+	            console.log(this.state);
+	            console.log("upLoadPhoto!!!!!!!!!!!!!");
+	            var options = {
+	                thumbBox: '.thumbBox',
+	                spinner: '.spinner',
+	                imgSrc: __webpack_require__(/*! ../../common/images/user.png */ 389)
+	            };
+	            console.log(window.$._data(window.$("#btnCrop").get(0), "events"));
+	            var cropper = window.$('.imageBox').cropbox(options);
+	            if (!window.$._data(window.$("#base_photo_choose").get(0), "events") || !window.$._data(window.$("#base_photo_choose").get(0), "events").change) {
+	                console.log("33344444444443333333333333");
+	                window.$('#base_photo_rechoose,#base_photo_choose').on('change', function () {
+	                    window.$('.new-create-opcity').show();
+	                    var reader = new FileReader();
+	                    reader.onload = function (e) {
+	                        options.imgSrc = e.target.result;
+	                        cropper = window.$('.imageBox').cropbox(options);
+	                    };
+	                    console.log(this.files);
+	                    var file = this.files[0];
+	                    console.log(this.files);
+	                    if (file) {
+	                        console.log("YYYYYYYY");
+	                        console.log(file);
+	                        reader.readAsDataURL(file);
+	                    }
+	                    //this.files = [];
+	                });
+	            }
+	            if (!window.$._data(window.$("#btnCrop").get(0), "events") || !window.$._data(window.$("#btnCrop").get(0), "events").click) window.$('#btnCrop').on('click', function () {
+	                var img = cropper.getDataURL();
+	                comself.props.basicInfoEdit([{ key: 'photo', val: img }]);
+	                window.$('.new-create-opcity').hide();
+	                console.log("eeeee");
+	                // AjaxObj.imgBase64Up(function(result) {
+	                //     if (result.Data.code == 1) {
+	                //         $('.new-create-opcity').hide()
+	                //         $('#base_photo_show img').attr('src', result.Data.photo_path)
+	                //         $('#file,#file2').val('');
+	                //     } else {
+	                //         $('#base_photo_show').siblings('p').html(result.Data.msg).show()
+	                //         $('#file,#file2').val('');
+	                //     }
+	                // }, img)
+	            });
+	            if (!window.$._data(window.$("#btnZoomIn").get(0), "events") || !window.$._data(window.$("#btnZoomIn").get(0), "events").click) window.$('#btnZoomIn').on('click', function () {
+	                cropper.zoomIn();
+	            });
+	            if (!window.$._data(window.$("#btnZoomOut").get(0), "events") || !window.$._data(window.$("#btnZoomOut").get(0), "events").click) window.$('#btnZoomOut').on('click', function () {
+	                cropper.zoomOut();
+	            });
+	            if (!window.$._data(window.$(".close_dialog").get(0), "events") || !window.$._data(window.$(".close_dialog").get(0), "events").click) window.$('.close_dialog').click(function () {
+	                window.$('.new-create-opcity').hide();
+	            });
+	            /*------图片头像上传结束----*/
+	        }
+	    }, {
+	        key: 'componentDidUpdate',
+	        value: function componentDidUpdate() {
+	            if (this.state.edit) {
+	                this.upLoadPhoto();
+	            }
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
 	
@@ -28941,19 +29150,19 @@ module.exports =
 	};
 	
 	var TeethAche = function TeethAche(_ref2) {
-	    var teeth_status = _ref2.teeth_status;
+	    var teeth_ui = _ref2.teeth_ui;
 	
 	    var teethui = [];
-	    teeth_status.teeth_ui.teeth.forEach(function (tooth) {
-	        if (tooth.ache.length) teethui.push(ToothAche({ tooth: tooth, ache_list: teeth_status.teeth_ui.ache_list }));
+	    teeth_ui.teeth.forEach(function (tooth) {
+	        if (tooth.ache.length) teethui.push(ToothAche({ tooth: tooth, ache_list: teeth_ui.ache_list }));
 	    });
 	    return teethui;
 	};
 	
 	var TeethShow = exports.TeethShow = function TeethShow(_ref3) {
 	    var teethtype = _ref3.teethtype,
-	        mteeth_status = _ref3.mteeth_status,
-	        cteeth_status = _ref3.cteeth_status,
+	        mteeth_ui = _ref3.mteeth_ui,
+	        cteeth_ui = _ref3.cteeth_ui,
 	        toMteeth = _ref3.toMteeth,
 	        toCteeth = _ref3.toCteeth;
 	
@@ -28990,7 +29199,7 @@ module.exports =
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'H_teeth_position_pic' },
-	                            mteeth_status.teeth_ui.teeth.map(function (tooth) {
+	                            mteeth_ui.teeth.map(function (tooth) {
 	                                return _react2.default.createElement(
 	                                    'div',
 	                                    { className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name, style: tooth.ache.length > 0 ? { backgroundColor: '#cc6060' } : { backgroundColor: '#fafcff' } },
@@ -29001,7 +29210,7 @@ module.exports =
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'H_teeth_position_list' },
-	                            TeethAche({ teeth_status: mteeth_status })
+	                            TeethAche({ teeth_ui: mteeth_ui })
 	                        )
 	                    ) : _react2.default.createElement(
 	                        'div',
@@ -29009,7 +29218,7 @@ module.exports =
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'H_teeth_position_pic H_teeth_position_pic_son' },
-	                            cteeth_status.teeth_ui.teeth.map(function (tooth) {
+	                            cteeth_ui.teeth.map(function (tooth) {
 	                                return _react2.default.createElement(
 	                                    'div',
 	                                    { className: 'H_teeth_position_pic_same ' + 'H_teeth_position_pic_' + tooth.name },
@@ -29020,7 +29229,7 @@ module.exports =
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'H_teeth_position_list' },
-	                            TeethAche({ teeth_status: cteeth_status })
+	                            TeethAche({ teeth_ui: cteeth_ui })
 	                        )
 	                    )
 	                )
@@ -29057,8 +29266,8 @@ module.exports =
 	
 	var TeethEdit = exports.TeethEdit = function TeethEdit(_ref) {
 	    var teethtype = _ref.teethtype,
-	        mteeth_status = _ref.mteeth_status,
-	        cteeth_status = _ref.cteeth_status,
+	        mteeth_ui = _ref.mteeth_ui,
+	        cteeth_ui = _ref.cteeth_ui,
 	        toMteeth = _ref.toMteeth,
 	        toCteeth = _ref.toCteeth,
 	        clickOnTooth = _ref.clickOnTooth,
@@ -29101,7 +29310,7 @@ module.exports =
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'H_teeth_position_pic' },
-	                            mteeth_status.teeth_ui.teeth.map(function (tooth) {
+	                            mteeth_ui.teeth.map(function (tooth) {
 	                                return _react2.default.createElement(
 	                                    'div',
 	                                    { onClick: function onClick(ev) {
@@ -29126,7 +29335,7 @@ module.exports =
 	                            _react2.default.createElement(
 	                                'div',
 	                                { className: 'H_teeth_position_list_item', style: curToothName ? {} : { pointerEvents: 'none' } },
-	                                mteeth_status.teeth_ui.ache_list.map(function (ache) {
+	                                mteeth_ui.ache_list.map(function (ache) {
 	                                    var _marchidx = macheidx++;
 	                                    return _react2.default.createElement(
 	                                        'div',
@@ -29154,7 +29363,7 @@ module.exports =
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'H_teeth_position_pic H_teeth_position_pic_son' },
-	                            cteeth_status.teeth_ui.teeth.map(function (tooth) {
+	                            cteeth_ui.teeth.map(function (tooth) {
 	                                return _react2.default.createElement(
 	                                    'div',
 	                                    { onClick: function onClick(ev) {
@@ -29179,7 +29388,7 @@ module.exports =
 	                            _react2.default.createElement(
 	                                'div',
 	                                { className: 'H_teeth_position_list_item', style: curToothName ? {} : { pointerEvents: 'none' } },
-	                                cteeth_status.teeth_ui.ache_list.map(function (ache) {
+	                                cteeth_ui.ache_list.map(function (ache) {
 	                                    cacheidx++;
 	                                    return _react2.default.createElement(
 	                                        'div',
@@ -29239,10 +29448,11 @@ module.exports =
 	        check = _ref.check,
 	        add = _ref.add,
 	        addTime = _ref.addTime,
-	        teeth_status = _ref.teeth_status,
+	        teeth_ui = _ref.teeth_ui,
 	        toAdd = _ref.toAdd,
 	        toEdit = _ref.toEdit,
 	        toCheck = _ref.toCheck,
+	        saveTeethGraph = _ref.saveTeethGraph,
 	        changeCheckTime = _ref.changeCheckTime,
 	        changeEditTime = _ref.changeEditTime;
 	
@@ -29265,12 +29475,12 @@ module.exports =
 	                    _react2.default.createElement(
 	                        'select',
 	                        { onChange: changeCheckTime },
-	                        teeth_status.allUserTeeth[teeth_status.teeth_ui.useridx].map(function (teeth) {
+	                        teeth_ui.timelist.map(function (time) {
 	                            index++;
 	                            return _react2.default.createElement(
 	                                'option',
 	                                { value: index },
-	                                teeth.time
+	                                time
 	                            );
 	                        })
 	                    )
@@ -29287,6 +29497,11 @@ module.exports =
 	                        'span',
 	                        { onClick: toEdit, className: 'default_inputbtn z_edit_btn' },
 	                        '\u7F16\u8F91'
+	                    ),
+	                    _react2.default.createElement(
+	                        'span',
+	                        { id: 'pick', className: 'default_inputbtn z_add_btn' },
+	                        'test'
 	                    )
 	                )
 	            )
@@ -29309,11 +29524,11 @@ module.exports =
 	                    _react2.default.createElement(
 	                        'select',
 	                        { onChange: changeEditTime },
-	                        teeth_status.allUserTeeth[teeth_status.teeth_ui.useridx].map(function (teeth) {
+	                        teeth_ui.timelist.map(function (time) {
 	                            return _react2.default.createElement(
 	                                'option',
 	                                { value: index },
-	                                teeth.time
+	                                time
 	                            );
 	                        })
 	                    )
@@ -29323,7 +29538,7 @@ module.exports =
 	                    null,
 	                    _react2.default.createElement(
 	                        'span',
-	                        { onClick: toCheck, className: 'default_inputbtn z_save_btn' },
+	                        { onClick: saveTeethGraph, className: 'default_inputbtn z_save_btn' },
 	                        '\u4FDD\u5B58'
 	                    )
 	                )
@@ -29364,6 +29579,7 @@ module.exports =
 	        );
 	    }
 	};
+	//import WebUploader from 'backend/modules/uploader/Components/WebUploader.jsx';
 
 /***/ },
 /* 372 */
@@ -29392,6 +29608,54 @@ module.exports =
 	var _reactDateRange = __webpack_require__(/*! react-date-range */ 367);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function photoBox() {
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'new-create-opcity', style: { display: "none", position: 'absolute' } },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'new-uppic-bj' },
+	            _react2.default.createElement(
+	                'div',
+	                { className: 'new-uppic-box' },
+	                _react2.default.createElement(
+	                    'h4',
+	                    { className: 'toph4 nomargin' },
+	                    '\u4E0A\u4F20\u5934\u50CF',
+	                    _react2.default.createElement('span', { className: 'close_dialog' })
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'imageBox' },
+	                    _react2.default.createElement('div', { className: 'thumbBox' }),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'spinner', style: { display: "none" } },
+	                        'Loading...'
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'action' },
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'filebut' },
+	                        _react2.default.createElement('input', { type: 'file', id: 'base_photo_rechoose', className: 'choose-file' }),
+	                        '\u91CD\u65B0\u9009\u62E9'
+	                    ),
+	                    _react2.default.createElement(
+	                        'div',
+	                        { className: 'zoom-box' },
+	                        _react2.default.createElement('span', { id: 'btnZoomOut', className: 'btnZoomOut' }),
+	                        _react2.default.createElement('span', { id: 'btnZoomIn', className: 'btnZoomIn' })
+	                    ),
+	                    _react2.default.createElement('input', { type: 'button', id: 'btnCrop', value: '\u786E\u8BA4\u4E0A\u4F20', className: 'btnCrop' })
+	                )
+	            )
+	        )
+	    );
+	}
 	
 	var BaseInfoEdit = exports.BaseInfoEdit = function BaseInfoEdit(_ref) {
 	    var photo = _ref.photo,
@@ -29439,13 +29703,13 @@ module.exports =
 	                        { className: 'z_headerPic' },
 	                        _react2.default.createElement(
 	                            'div',
-	                            { className: 'z_touxiang' },
+	                            { id: 'base_photo_show', className: 'z_touxiang' },
 	                            _react2.default.createElement('img', { src: photo ? photo : __webpack_require__(/*! ../../../../common/images/userPic.png */ 365), alt: '' })
 	                        ),
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'z_but-input' },
-	                            _react2.default.createElement('input', { type: 'file', className: 'but-input upfile-butt' }),
+	                            _react2.default.createElement('input', { id: 'base_photo_choose', type: 'file', className: 'but-input upfile-butt' }),
 	                            '\u4E0A\u4F20\u5934\u50CF'
 	                        )
 	                    )
@@ -29859,7 +30123,8 @@ module.exports =
 	                    )
 	                )
 	            )
-	        )
+	        ),
+	        photoBox()
 	    );
 	};
 
@@ -32573,6 +32838,2725 @@ module.exports =
 			)
 		);
 	};
+
+/***/ },
+/* 384 */
+/*!***********************************************!*\
+  !*** ./backend/redux/reducers/user_doctor.js ***!
+  \***********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = reducer;
+	exports.LoadedorLoading = LoadedorLoading;
+	exports.load = load;
+	
+	var _immutable = __webpack_require__(/*! immutable */ 46);
+	
+	var _immutable2 = _interopRequireDefault(_immutable);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _apiinterface = __webpack_require__(/*! ../../util/apiinterface.js */ 374);
+	
+	var _apiinterface2 = _interopRequireDefault(_apiinterface);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var LOAD = 'bohe/user_doctor/LOAD';
+	var LOAD_SUCCESS = 'bohe/user_doctor/LOAD_SUCCESS';
+	var LOAD_FAIL = 'bohe/user_doctor/LOAD_FAIL';
+	
+	var initialState = _immutable2.default.Map({
+	    loaded: false,
+	    loading: false
+	});
+	
+	function reducer() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+	    var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	
+	    switch (action.type) {
+	        case LOAD:
+	            return state.merge({ loading: true });
+	        case LOAD_SUCCESS:
+	            return state.merge({ loading: false, loaded: true, doctors: action.result });
+	        case LOAD_FAIL:
+	            return state.merge({ loading: false, loaded: false, error: action.error });
+	        default:
+	            return state;
+	    }
+	}
+	
+	function LoadedorLoading(state) {
+	    var loaded = false;
+	    var loading = false;
+	    if (state.hasIn(['user_doctor', 'loaded'])) {
+	        loaded = state.getIn(['user_doctor', 'loaded']);
+	    }
+	    if (state.hasIn(['user_doctor', 'loading'])) {
+	        loading = state.getIn(['user_doctor', 'loading']);
+	    }
+	    return loaded || loading;
+	}
+	
+	/* 当 直接采用 浏览器发起域名访问时 不会携带本地Token 所以在鉴权阶段 会转入login 登录后得到新的签发token
+	   当采用 微信公众号直接跳转时 鉴权阶段使用openid 通过鉴权，签发新的token到state的user中
+	   所以本地token最大的作用是在进入usercenter时 快捷判断是否登录过
+	*/
+	function load(_ref) {
+	    var user = _ref.user,
+	        req = _ref.req;
+	
+	    var params = {};
+	
+	    if (typeof window === 'undefined' || window.__SERVER__ == true) {
+	        ///server side
+	        if (user.token) ///  鉴权通过 已经持有 token
+	            {
+	                params.token = user.token;
+	            } else {
+	            // server side none key to login
+	
+	            return {
+	                type: LOAD_FAIL,
+	                promise: function promise() {
+	                    return _bluebird2.default.reject({ info: 'auth' });
+	                }
+	            };
+	        }
+	    } else {}
+	
+	    return {
+	        types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
+	        promise: function promise(client) {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/user_doctor/rest?', { params: params }, {
+	                format: function format(response) {
+	                    if (response.status >= 400) {
+	                        throw new Error("Bad response from server");
+	                    }
+	                    return response.json();
+	                },
+	                done: function done(res) {
+	
+	                    console.log(res);
+	
+	                    if (res.valid == 1) {
+	
+	                        return _bluebird2.default.resolve(res.doctors);
+	                    } else {
+	                        //var err = { info: 'auth' }
+	                        return _bluebird2.default.reject({ info: 'notvalid' });
+	                    }
+	                },
+	                error: function error(err) {
+	                    return _bluebird2.default.reject({ info: 'wire' });
+	                }
+	            });
+	        }
+	    };
+	}
+
+/***/ },
+/* 385 */
+/*!***********************************************!*\
+  !*** ./backend/redux/reducers/user_clinic.js ***!
+  \***********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = reducer;
+	exports.LoadedorLoading = LoadedorLoading;
+	exports.load = load;
+	
+	var _immutable = __webpack_require__(/*! immutable */ 46);
+	
+	var _immutable2 = _interopRequireDefault(_immutable);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _apiinterface = __webpack_require__(/*! ../../util/apiinterface.js */ 374);
+	
+	var _apiinterface2 = _interopRequireDefault(_apiinterface);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var LOAD = 'bohe/user_clinic/LOAD';
+	var LOAD_SUCCESS = 'bohe/user_clinic/LOAD_SUCCESS';
+	var LOAD_FAIL = 'bohe/user_clinic/LOAD_FAIL';
+	
+	var initialState = _immutable2.default.Map({
+	    loaded: false,
+	    loading: false
+	});
+	
+	function reducer() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+	    var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	
+	    switch (action.type) {
+	        case LOAD:
+	            return state.merge({ loading: true });
+	        case LOAD_SUCCESS:
+	            return state.merge({ loading: false, loaded: true, clinics: action.result });
+	        case LOAD_FAIL:
+	            return state.merge({ loading: false, loaded: false, error: action.error });
+	        default:
+	            return state;
+	    }
+	}
+	
+	function LoadedorLoading(state) {
+	    var loaded = false;
+	    var loading = false;
+	    if (state.hasIn(['user_clinic', 'loaded'])) {
+	        loaded = state.getIn(['user_clinic', 'loaded']);
+	    }
+	    if (state.hasIn(['user_clinic', 'loading'])) {
+	        loading = state.getIn(['user_clinic', 'loading']);
+	    }
+	    return loaded || loading;
+	}
+	
+	/* 当 直接采用 浏览器发起域名访问时 不会携带本地Token 所以在鉴权阶段 会转入login 登录后得到新的签发token
+	   当采用 微信公众号直接跳转时 鉴权阶段使用openid 通过鉴权，签发新的token到state的user中
+	   所以本地token最大的作用是在进入usercenter时 快捷判断是否登录过
+	*/
+	function load(_ref) {
+	    var user = _ref.user,
+	        req = _ref.req;
+	
+	    var params = {};
+	
+	    if (typeof window === 'undefined' || window.__SERVER__ == true) {
+	        ///server side
+	        if (user.token) ///  鉴权通过 已经持有 token
+	            {
+	                params.token = user.token;
+	            } else {
+	            // server side none key to login
+	
+	            return {
+	                type: LOAD_FAIL,
+	                promise: function promise() {
+	                    return _bluebird2.default.reject({ info: 'auth' });
+	                }
+	            };
+	        }
+	    } else {}
+	
+	    return {
+	        types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
+	        promise: function promise(client) {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/user_clinic/rest?', { params: params }, {
+	                format: function format(response) {
+	                    if (response.status >= 400) {
+	                        throw new Error("Bad response from server");
+	                    }
+	                    return response.json();
+	                },
+	                done: function done(res) {
+	
+	                    console.log(res);
+	
+	                    if (res.valid == 1) {
+	
+	                        return _bluebird2.default.resolve(res.clinics);
+	                    } else {
+	                        //var err = { info: 'auth' }
+	                        return _bluebird2.default.reject({ info: 'notvalid' });
+	                    }
+	                },
+	                error: function error(err) {
+	                    return _bluebird2.default.reject({ info: 'wire' });
+	                }
+	            });
+	        }
+	    };
+	}
+
+/***/ },
+/* 386 */
+/*!************************************************!*\
+  !*** ./backend/redux/reducers/user_company.js ***!
+  \************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = reducer;
+	exports.LoadedorLoading = LoadedorLoading;
+	exports.load = load;
+	
+	var _immutable = __webpack_require__(/*! immutable */ 46);
+	
+	var _immutable2 = _interopRequireDefault(_immutable);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _apiinterface = __webpack_require__(/*! ../../util/apiinterface.js */ 374);
+	
+	var _apiinterface2 = _interopRequireDefault(_apiinterface);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var LOAD = 'bohe/user_company/LOAD';
+	var LOAD_SUCCESS = 'bohe/user_company/LOAD_SUCCESS';
+	var LOAD_FAIL = 'bohe/user_company/LOAD_FAIL';
+	
+	var initialState = _immutable2.default.Map({
+	    loaded: false,
+	    loading: false
+	});
+	
+	function reducer() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+	    var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	
+	    switch (action.type) {
+	        case LOAD:
+	            return state.merge({ loading: true });
+	        case LOAD_SUCCESS:
+	            return state.merge({ loading: false, loaded: true, companys: action.result });
+	        case LOAD_FAIL:
+	            return state.merge({ loading: false, loaded: false, error: action.error });
+	        default:
+	            return state;
+	    }
+	}
+	
+	function LoadedorLoading(state) {
+	    var loaded = false;
+	    var loading = false;
+	    if (state.hasIn(['user_company', 'loaded'])) {
+	        loaded = state.getIn(['user_company', 'loaded']);
+	    }
+	    if (state.hasIn(['user_company', 'loading'])) {
+	        loading = state.getIn(['user_company', 'loading']);
+	    }
+	    return loaded || loading;
+	}
+	
+	/* 当 直接采用 浏览器发起域名访问时 不会携带本地Token 所以在鉴权阶段 会转入login 登录后得到新的签发token
+	   当采用 微信公众号直接跳转时 鉴权阶段使用openid 通过鉴权，签发新的token到state的user中
+	   所以本地token最大的作用是在进入usercenter时 快捷判断是否登录过
+	*/
+	function load(_ref) {
+	    var user = _ref.user,
+	        req = _ref.req;
+	
+	    var params = {};
+	
+	    if (typeof window === 'undefined' || window.__SERVER__ == true) {
+	        ///server side
+	        if (user.token) ///  鉴权通过 已经持有 token
+	            {
+	                params.token = user.token;
+	            } else {
+	            // server side none key to login
+	
+	            return {
+	                type: LOAD_FAIL,
+	                promise: function promise() {
+	                    return _bluebird2.default.reject({ info: 'auth' });
+	                }
+	            };
+	        }
+	    } else {}
+	
+	    return {
+	        types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
+	        promise: function promise(client) {
+	            return client.GET('http://' + (0, _apiinterface2.default)() + '/user_company/rest?', { params: params }, {
+	                format: function format(response) {
+	                    if (response.status >= 400) {
+	                        throw new Error("Bad response from server");
+	                    }
+	                    return response.json();
+	                },
+	                done: function done(res) {
+	
+	                    console.log(res);
+	
+	                    if (res.valid == 1) {
+	
+	                        return _bluebird2.default.resolve(res.companys);
+	                    } else {
+	                        //var err = { info: 'auth' }
+	                        return _bluebird2.default.reject({ info: 'notvalid' });
+	                    }
+	                },
+	                error: function error(err) {
+	                    return _bluebird2.default.reject({ info: 'wire' });
+	                }
+	            });
+	        }
+	    };
+	}
+
+/***/ },
+/* 387 */
+/*!*********************************!*\
+  !*** external "react-paginate" ***!
+  \*********************************/
+/***/ function(module, exports) {
+
+	module.exports = require("react-paginate");
+
+/***/ },
+/* 388 */
+/*!***************************************************!*\
+  !*** ./~/babel-runtime/helpers/defineProperty.js ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	exports.__esModule = true;
+	
+	var _defineProperty = __webpack_require__(/*! ../core-js/object/define-property */ 290);
+	
+	var _defineProperty2 = _interopRequireDefault(_defineProperty);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	exports.default = function (obj, key, value) {
+	  if (key in obj) {
+	    (0, _defineProperty2.default)(obj, key, {
+	      value: value,
+	      enumerable: true,
+	      configurable: true,
+	      writable: true
+	    });
+	  } else {
+	    obj[key] = value;
+	  }
+	
+	  return obj;
+	};
+
+/***/ },
+/* 389 */
+/*!****************************************!*\
+  !*** ./backend/common/images/user.png ***!
+  \****************************************/
+/***/ function(module, exports) {
+
+	module.exports = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAIAAAAFYYeqAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyhpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDIxIDc5LjE1NTc3MiwgMjAxNC8wMS8xMy0xOTo0NDowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTQgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QUY5QjhBQzgwRjgzMTFFNkEwRUJFNzZCNTZFRkYwNkEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QUY5QjhBQzkwRjgzMTFFNkEwRUJFNzZCNTZFRkYwNkEiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDoxMzM4MTNGRjBGNjMxMUU2QTBFQkU3NkI1NkVGRjA2QSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDoxMzM4MTQwMDBGNjMxMUU2QTBFQkU3NkI1NkVGRjA2QSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Po+NWz8AAAs9SURBVHja7J13Wxs7E8WNiSkGYwgmgdAJnTyUh3z/z5AKBBxCCy30YjDF3N/rfe/euWvj67KWxFrzB4+9gFerozlzRhrJdU9PTyFrui1su8DCYM3CYGGwZmGwMFizMFgYrFkYLAzWLAwWBmsWhpdor15KQ+/v79Pp9PX19fn5OT9vb2/v7u4eHx+fnp7q6urq6+sjkUhTU1M0Gm1ra4vFYo2NjQ0NDS/l6erMn+g+zdrh4SEAFP9fIJFIJF5nLRwOWxjKNBq2t7d3cHAAAJV8Tmdn59u3b3t6el69emVhKM0AYHNzs6Th/5/O0dfXNzAwYGEoyuD91dXVP3/+5DaMGMCIjmWNGAD78xbCyWQyBAlCRSqVurq6uri4IJBwMffDOzo6JiYm4vG4haGQ7e7uggGh2HOdTm9vb4db+EkoBo8CVAYkuNH+/j4RBVA9f0AwHx0dHRoasjDkt5WVFYgol0y6u7v7+/vp/TKiy/b2toOH51eEiunpaXOihREwMH6/fv1KNJYXkZuMWQCovLMAY2NjA8qSF3Gsubk5NK6F4X/28PDw5csXgoG8CP+MjY21tLT4dRfyjPX1dfDwuNrCwkJzc3Otw8Dd8QN0kbwIdw8PD1dD7AMD1CejN1nF/Px8GYwXqMkMArLEgK6fmZl5//59lRIuKI5Olyx3cnKyvLys3Rt0woAugrIlBrOzs6j7qt60q6trcXFRDn/GAXxVozAgJZeWluQV/ICQoODWBGePTySTSdyiFmGAjhBI7luI6N27d8ruTkiYnJyUIYqYIdtTEzAcZs19m0gkCMuK29Db20uocN9eXl56dFTAYUCoSC6GHMbHx7U8PC4o1erW1tbd3V2twHB0dCTn7AYHB9HvWh6+sbERL3SnRm5ubjzSObAwwMJyxoLBSIqgMTYSkORMHw5BOhl8GKBgqUlg5/r6er1iUc5+p1IpLZJJNQxy4ggAenp6tKdOqORoNCrlQ/BhIDDI54ed9Wew4XB3d7dsoXpeUgoDKRth0H375s2bAisHKo2WuK/T6fTFxUWQYTg7O3MHGjq1tbU1ZIZBSlK55q5PBAoG4rM7odvW1mbIXD8WiUTIq2U7gwyDZCQGoHaN5HGIvO0MIAz39/fua3Ncwc1gZDsVL8Oog8FZrJc8YBQMssQvk8nkliUEBAYwkMteRjGSI1ufGzFB8wb51hCp+lx7AktKDDf5qHnLuTSap98Vl71qg0HjGktek8OCpiouYQqr9Hr5bLpm9p+z29tb2VTFCkKp68kZJPXavLDJYjLaqTh0KYVBpkhXV1cyjdDOSLTHfetjmZqJMMRiMXeU8diSB/Taw8PD2dmZbGeQYXDqsV1lon4i8zm7vLyUsaqjoyPIMMC5cqDt7e0ZIlvlEnRL1oIMQ+jfM/vHx8eSkXUZfiALmWmh+gxfAwzyIXd2drTD8Pv3b8lIcqAEFoampiZZIQkbeLYdqNdIskqMqKClWkdDnZKslUOiJJNJjTCsr6/LDEZXpYgGGOLxuFyCxyE8e0yUGZFJlpS3tbVpYSQ9MJA6jIyMyImN5eVl9Un14+Pj0tKSp5xZ1/S7nlJi+FdSExisrq4qbsPPnz/l0j8RS5crhDQW1uMQMhju7++vrKwou/vm5uavX79kQqOrnFkzDJDShw8fJAnQNWtrawpu7eyAk1empqbkfFcNweCExJmZGY9u8WwB8t1wAs8txsbG1OwyKhQvtW/IRav8+PFDXuns7AQe3/fJ3t/fcyOSNXlxYGAAV9CeQhqxPR0n8NARWR5kja71a97/6OiIW3gmE/v6+jzuWNMwhLIbC3I3xsIVg4ODFc530vU7Ozu5G6r4ZLn9zcLwfzs4OIC1cxdHe3p63mSt1GV6PIDEEAByl/snJiaMOtTHrBNkrq+voe+8SXU8a+3t7ThHgYo/UDw/Pz85OeHn2dlZ7tOhCwgGfE7IJDPuPKVMJkMUJbeiQ/MeqeQcoxSJRBC7dVl7yhr/SBB+eHhIp9N5lzH4r8GsmVYwGDL2dDE6lFABTfmyLgRUqC8igfr1nGKzKNMahBNcXl4SVxnXjHdfYCAYPD4+7u7uOodS6s3UTPeGw8PD4+Pj09PTqm4vIB3BMwgwxHx7rNW/+AcxQ1iWtRGFh7ZL7m5W4T4FPlRkPWBra+vr16/RSyYwlU4YUqmUcwhbgUoZBiy6CDKJ/m0NDQ0FlCskBhKprN3c3KCXeOGcmpv37/k0nIO4zS00VjfrgYF+J6Xa3NzMu+eS7mCEQuIdWaPryy7s5em4F0SHhIXrEMR5fYU7kp04YNQEDI4eXV9fz+sBzgmTsHaV5toAA/VVIPyMjIz09/er34mkFAYisGexxbVEIsF4hKwVdAHRiJYQjdBOub/FEQFD5alC6mDgLmtra1tbW7mc0NXVxQCEoNWfpI0ogBs9c67udBZ5hjK3UAEDDLCyspJ7FgVdPzw8DPvrPcqcME6UQil4ugIMpqam1KyMVh0GZ3XTs6MP8T40NGTU5BoxA8LMjRljY2OMlWqLqOrCkEwmeTbPxb6+vtHRURNOy8hlTlq7sbHhYc7u7u6ZmZmq5nrVggFFtLS05KFduh43177i+J8BY3l52bNAFI/H5+bmqndwblVgQIp8//7dc9gzoRgMTDgCuJj2r66ueuprUVDz8/NVOufDfxjyHvZMJIBkzf9WEWnoOqKa7B+QwCeqUeTqMwyw6ufPnz0YjI+P6z3JrRJ98e3bNxkq8IaFhQXf52j9hIGP+vTpkzydi+E/PT3d29sberGGzsa5pdIDiY8fP/orMfxkCVxYYoC0wIVfNAah7MG5i4uLns2TeLy/J5D5BgMZEGT6j5fV1eEHGqtCfTSCAeNJDv/T01N/Sz39geHo6MjTrMnJSROOM/TLnAJDmcShxWVRvn4Ybm9vc8sRjf1OqbINwT07OyuvIGr9Oi3UBxjAQO5OIBiMjIyEgmik07LwG0nCs/uyyb5SGAgJUp46VUCh4BrKW25Vur6+9iVIVAQDmkFOGSGNIFDTzqvy3RhnMpfe3d2t/ATdimAAA+mShARdi4gqraGhASRkuF5bW6vwXKLyYTg+PibJlPpa7qMKtnkeFlaQYl0dDJlMRpbCO8W5pp3bVlVDhshMAvFayUksZcJwcHAgv4MBeVoLdCQNDCBh9+3d3V3uVzhWFwZcQe7fa25uDqpCLWxIc7n3Ynt7u+wTD8qBAWEgFwtxBQNrpNWY/IpXonTe6oJqwSB3ziAbFNeSmJZay60SwFBeNlcyDM5Xyst0Rp7nW2vmnHjgvk2n03lrn/yHAcDdJYqmpiaZUtamJRIJ6RAqYABtOZmFS5p24rkWh5C0TA5Rxtc/lAYDGMhZPAZCyFo2m3OncJCRZcxtlAyD+zoWi8mvnqhla2lpgRhk+Cx1k1IJMJChSHfr7Ow0Z7eMCZLJfY2aL3LLTDkwOPsDnNf4oGUkaeRx7twGriCnGHyGQRayIVLllwdaa25ulrPfpR4xWywMntNrYUPLSB6TMKCXSjoLvlgYnN33UhvYfs/lJXeOGfYuaX6pWBjI0V2pGg6HTTvswASjT9zwAHmUdHpgsTDIDwUGY7fbazTnFAn3bVW8wdVIufez5pqcU6gKDHJpKRqN1tRCW0l5nOyx4heoLQx+mix1TafTxde5lqCU8rqeNU94cAfoc+cJVaqUZIi2PZ7XCJkuDLiC/zBI/7Lx+TnzlMr5D4PJ3yNpFAwyaha/hcfC4DMpya733xtkaZQN0c9ZJGtuBC2+YKVYGKanp1FjoG3yiXUmeAMdxTAFAKfHivxHQ488rDWz0tPCYM3CYGGwZmGwMFizMFgYrFkYXoT9JcAARV761lPquUAAAAAASUVORK5CYII="
+
+/***/ },
+/* 390 */
+/*!*****************************************!*\
+  !*** ./backend/ordertable/orderlist.js ***!
+  \*****************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = exports.asyncEvent = undefined;
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 284);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 288);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 289);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 293);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 294);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _dec, _dec2, _class, _class2, _temp;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reactList = __webpack_require__(/*! react-list */ 303);
+	
+	var _reactList2 = _interopRequireDefault(_reactList);
+	
+	var _reactHammerjs = __webpack_require__(/*! react-hammerjs */ 304);
+	
+	var _reactHammerjs2 = _interopRequireDefault(_reactHammerjs);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _immutable = __webpack_require__(/*! immutable */ 46);
+	
+	var _immutable2 = _interopRequireDefault(_immutable);
+	
+	var _orderlistpage = __webpack_require__(/*! ./view/orderlistpage.js */ 391);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	var _auth = __webpack_require__(/*! ../redux/reducers/auth */ 241);
+	
+	var _order_patient = __webpack_require__(/*! ../redux/reducers/order_patient */ 243);
+	
+	var _user_doctor = __webpack_require__(/*! ../redux/reducers/user_doctor */ 384);
+	
+	var _user_clinic = __webpack_require__(/*! ../redux/reducers/user_clinic */ 385);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	var _check = __webpack_require__(/*! ./orderinfo/check.js */ 393);
+	
+	var _check2 = _interopRequireDefault(_check);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var asyncEvent = exports.asyncEvent = [{
+	    promise: function promise(_ref) {
+	        var _ref$store = _ref.store,
+	            dispatch = _ref$store.dispatch,
+	            getState = _ref$store.getState,
+	            params = _ref.params;
+	
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                if (!(0, _order_patient.LoadedorLoading)(getState())) {
+	                    var state = getState();
+	                    var user = state.getIn(['auth', 'user']).toJS();
+	                    return dispatch((0, _order_patient.load)({ user: user, num: 10, begin: 0, refresh: { flag: true } }));
+	                } else return _bluebird2.default.resolve();
+	            });
+	        } else {
+	            if (!(0, _order_patient.LoadedorLoading)(getState())) {
+	                var state = getState();
+	                var user = state.getIn(['auth', 'user']).toJS();
+	                return dispatch((0, _order_patient.load)({ user: user, num: 10, begin: 0, refresh: { flag: true } }));
+	            } else return _bluebird2.default.resolve();
+	        }
+	    }
+	}, {
+	    promise: function promise(_ref2) {
+	        var _ref2$store = _ref2.store,
+	            dispatch = _ref2$store.dispatch,
+	            getState = _ref2$store.getState,
+	            params = _ref2.params;
+	
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                if (!(0, _user_doctor.LoadedorLoading)(getState())) {
+	                    var state = getState();
+	                    var user = state.getIn(['auth', 'user']).toJS();
+	                    return dispatch((0, _user_doctor.load)({ user: user }));
+	                } else return _bluebird2.default.resolve();
+	            });
+	        } else {
+	            if (!(0, _user_doctor.LoadedorLoading)(getState())) {
+	                var state = getState();
+	                var user = state.getIn(['auth', 'user']).toJS();
+	                return dispatch((0, _user_doctor.load)({ user: user }));
+	            } else return _bluebird2.default.resolve();
+	        }
+	    }
+	}, {
+	    promise: function promise(_ref3) {
+	        var _ref3$store = _ref3.store,
+	            dispatch = _ref3$store.dispatch,
+	            getState = _ref3$store.getState,
+	            params = _ref3.params;
+	
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                if (!(0, _user_clinic.LoadedorLoading)(getState())) {
+	                    var state = getState();
+	                    var user = state.getIn(['auth', 'user']).toJS();
+	                    return dispatch((0, _user_clinic.load)({ user: user }));
+	                } else return _bluebird2.default.resolve();
+	            });
+	        } else {
+	            if (!(0, _user_clinic.LoadedorLoading)(getState())) {
+	                var state = getState();
+	                var user = state.getIn(['auth', 'user']).toJS();
+	                return dispatch((0, _user_clinic.load)({ user: user }));
+	            } else return _bluebird2.default.resolve();
+	        }
+	    }
+	}];
+	
+	var OrderListCom = (_dec = (0, _reduxConnect.asyncConnect)(asyncEvent), _dec2 = (0, _reactRedux.connect)(function (state) {
+	    return {
+	        auth: state.get('auth'),
+	        orderRepo: state.get('order_patient'),
+	        doctorRepo: state.get('user_doctor'),
+	        clinicRepo: state.get('user_clinic')
+	    };
+	}, { pushState: _reactRouterRedux.push, load: _order_patient.load, toDetail: _order_patient.frontOrder, nextGroupOrders: _order_patient.nextGroupOrders }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
+	    (0, _inherits3.default)(OrderListCom, _Component);
+	
+	    function OrderListCom() {
+	        (0, _classCallCheck3.default)(this, OrderListCom);
+	        return (0, _possibleConstructorReturn3.default)(this, (OrderListCom.__proto__ || (0, _getPrototypeOf2.default)(OrderListCom)).apply(this, arguments));
+	    }
+	
+	    (0, _createClass3.default)(OrderListCom, [{
+	        key: 'handlePan',
+	
+	        // methods
+	        value: function handlePan(ev) {}
+	    }, {
+	        key: 'handleRefresh',
+	        value: function handleRefresh(resolve, reject) {
+	
+	            this.props.load({ num: 10, begin: 0, refresh: { flag: true, resolve: resolve, reject: reject } });
+	        }
+	    }, {
+	        key: 'componentWillMount',
+	        value: function componentWillMount() {
+	            if (this.props.auth.has('user')) {
+	                return;
+	            } else {
+	                if (this.props.auth.getIn(['error', 'info']) == 'auth') {
+	                    this.props.pushState('/login');
+	                }
+	            }
+	            return;
+	        }
+	    }, {
+	        key: 'toAddOrder',
+	        value: function toAddOrder() {}
+	    }, {
+	        key: 'toDeleteOrder',
+	        value: function toDeleteOrder() {}
+	    }, {
+	        key: 'toEditOrder',
+	        value: function toEditOrder() {}
+	    }, {
+	        key: 'toSearch',
+	        value: function toSearch() {}
+	    }, {
+	        key: 'toOrderInfo',
+	        value: function toOrderInfo(ev, idx, id) {
+	
+	            this.props.toDetail({ idx: idx, id: id });
+	
+	            this.context.showRight({
+	                asyncProcess: _check.asyncEvent,
+	                comCreater: function comCreater() {
+	                    return _react2.default.createElement(_check2.default, null);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'handlePageClick',
+	        value: function handlePageClick(data) {
+	            var selected = data.selected;
+	
+	            this.props.load({ num: 10, begin: selected * 10, showbegin: selected * 10 });
+	        }
+	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            !/* require.ensure */(function (require) {
+	
+	                __webpack_require__(/*! ../modules/fillter/tabcomplete.min.js */ 397), __webpack_require__(/*! ../modules/fillter/livefilter.min.js */ 398);
+	                __webpack_require__(/*! ../modules/fillter/src/bootstrap-select.js */ 399);
+	            }(__webpack_require__));
+	        }
+	    }, {
+	        key: 'moreSlider',
+	        value: function moreSlider() {
+	            console.log("uuuuu!!!!!!!!!!!");
+	            window.$('.moreboxhide').slideToggle();
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            console.log(this.props.orderRepo.toJS());
+	            if (this.props.auth.has('user')) {
+	                console.log("PPPPPPPPPPPPPPPPPPPPPPPPPP");
+	                var size = this.props.orderRepo.get('orders').size;
+	                var showbegin = this.props.orderRepo.get('showbegin');
+	                console.log("PPPPPPPPPPPPPPPPPPPPPPPPPP1");
+	                console.log(size);
+	                var nodata = size == 0 ? true : false;
+	                var options = {
+	                    touchAction: 'pan-y'
+	                };
+	                var height = window.innerHeight || document.documentElement.clientHeight;
+	                var orders = [];
+	                var doctors = this.props.doctorRepo.get('doctors') ? this.props.doctorRepo.get('doctors').toJS() : [];
+	                var clinics = this.props.clinicRepo.get('clinics') ? this.props.clinicRepo.get('clinics').toJS() : [];;
+	
+	                for (var i = 0; i < 10 && showbegin + i < size; i++) {
+	                    orders.push(this.props.orderRepo.getIn(['orders', showbegin + i]).toJS());
+	                }
+	
+	                console.log("ffffggg");
+	                console.log(doctors);
+	                console.log(clinics);
+	
+	                return (0, _orderlistpage.OrderList)({ moreSlider: this.moreSlider.bind(this), handlePageClick: this.handlePageClick.bind(this), toOrderInfo: this.toOrderInfo.bind(this), toSearch: this.toSearch.bind(this), toAddOrder: this.toAddOrder.bind(this), toDeleteOrder: this.toDeleteOrder.bind(this), toEditOrder: this.toEditOrder.bind(this), doctors: doctors, clinics: clinics, orders: orders, nodata: nodata, options: options, length: size, handlePan: this.handlePan.bind(this), handleRefresh: this.handleRefresh.bind(this) });
+	            } else {
+	                return _react2.default.createElement('div', null);
+	            }
+	        }
+	    }]);
+	    return OrderListCom;
+	}(_react.Component), _class2.propTypes = {
+	    orderRepo: _react2.default.PropTypes.object.isRequired
+	}, _class2.contextTypes = {
+	    showRight: _react.PropTypes.func.isRequired
+	}, _temp)) || _class) || _class);
+	exports.default = OrderListCom;
+
+/***/ },
+/* 391 */
+/*!**************************************************!*\
+  !*** ./backend/ordertable/view/orderlistpage.js ***!
+  \**************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.OrderList = undefined;
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _reactList = __webpack_require__(/*! react-list */ 303);
+	
+	var _reactList2 = _interopRequireDefault(_reactList);
+	
+	var _reactHammerjs = __webpack_require__(/*! react-hammerjs */ 304);
+	
+	var _reactHammerjs2 = _interopRequireDefault(_reactHammerjs);
+	
+	var _orderdata = __webpack_require__(/*! ./orderdata.js */ 392);
+	
+	var _reactPaginate = __webpack_require__(/*! react-paginate */ 387);
+	
+	var _reactPaginate2 = _interopRequireDefault(_reactPaginate);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var OrderList = exports.OrderList = function OrderList(_ref) {
+	  var orders = _ref.orders,
+	      doctors = _ref.doctors,
+	      clinics = _ref.clinics,
+	      nodata = _ref.nodata,
+	      length = _ref.length,
+	      toAddOrder = _ref.toAddOrder,
+	      toDeleteOrder = _ref.toDeleteOrder,
+	      toEditOrder = _ref.toEditOrder,
+	      toOrderInfo = _ref.toOrderInfo,
+	      handlePageClick = _ref.handlePageClick,
+	      pageNum = _ref.pageNum,
+	      moreSlider = _ref.moreSlider;
+	
+	  var rowidx = 0;
+	  return _react2.default.createElement(
+	    'div',
+	    null,
+	    _react2.default.createElement(
+	      'div',
+	      { className: 'rtop rtop2' },
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'but-box' },
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          _react2.default.createElement(
+	            'a',
+	            { onClick: toAddOrder, className: 'add-but' },
+	            '\u65B0\u5EFA'
+	          ),
+	          _react2.default.createElement(
+	            'a',
+	            { onClick: toEditOrder, className: 'edit-but' },
+	            '\u4FEE\u6539'
+	          ),
+	          _react2.default.createElement(
+	            'a',
+	            { onClick: toDeleteOrder, className: 'delete-but' },
+	            '\u5220\u9664'
+	          )
+	        )
+	      ),
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'top-input-box' },
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          '\u9884\u7EA6\u5355\u53F7\uFF1A',
+	          _react2.default.createElement('input', { type: 'text', id: 'reserve_number' })
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          '\u5C31\u8BCA\u4EBA\uFF1A ',
+	          _react2.default.createElement('input', { type: 'text', id: 'patient_name' })
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          '\u9884\u7EA6\u65F6\u95F4\uFF1A',
+	          _react2.default.createElement('input', { type: 'text', id: 'timeStart', readonly: true, className: 'riliicon' }),
+	          _react2.default.createElement(
+	            'span',
+	            null,
+	            ' \u81F3 '
+	          ),
+	          _react2.default.createElement('input', { type: 'text', id: 'timeEnd', readonly: true, className: 'riliicon' })
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          '\u6240\u5C5E\u516C\u53F8\uFF1A',
+	          _react2.default.createElement('input', { type: 'text', id: 'company_name' })
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'moresel' },
+	          _react2.default.createElement(
+	            'span',
+	            { onClick: moreSlider, className: 'moreButspan' },
+	            _react2.default.createElement(
+	              'b',
+	              null,
+	              '\u66F4\u591A'
+	            ),
+	            _react2.default.createElement('i', null)
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'moreboxhide' },
+	            _react2.default.createElement(
+	              'p',
+	              null,
+	              '\u9879\u76EE\uFF1A',
+	              _react2.default.createElement('input', { type: 'text', id: 'project_name' })
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'orderDoctor' },
+	              _react2.default.createElement(
+	                'span',
+	                { className: 'doctorspan' },
+	                '\u533B\u751F\uFF1A'
+	              ),
+	              _react2.default.createElement(
+	                'div',
+	                { className: 'col-sm-9', id: 'DocInputbox' },
+	                _react2.default.createElement(
+	                  'div',
+	                  { id: 'bts-ex-5', className: 'selectpicker', 'data-clear': 'true', 'data-live': 'true' },
+	                  _react2.default.createElement(
+	                    'button',
+	                    { 'data-id': 'prov', type: 'button', className: 'btn btn-lg btn-block btn-default dropdown-toggle' },
+	                    _react2.default.createElement(
+	                      'span',
+	                      { className: 'placeholder', id: 'DovVal', 'data-val': '' },
+	                      '\u8BF7\u9009\u62E9'
+	                    ),
+	                    _react2.default.createElement('span', { className: 'caret' })
+	                  ),
+	                  _react2.default.createElement(
+	                    'div',
+	                    { className: 'dropdown-menu' },
+	                    _react2.default.createElement(
+	                      'div',
+	                      { className: 'live-filtering', 'data-clear': 'true', 'data-autocomplete': 'true', 'data-keys': 'true' },
+	                      _react2.default.createElement('label', { className: 'sr-only', 'for': 'input-bts-ex-5' }),
+	                      _react2.default.createElement(
+	                        'div',
+	                        { className: 'search-box' },
+	                        _react2.default.createElement(
+	                          'div',
+	                          { className: 'input-group' },
+	                          _react2.default.createElement('input', { type: 'text', placeholder: '\u8BF7\u8F93\u5165\u641C\u7D22\u5185\u5BB9', id: 'input-bts-ex-5', className: 'form-control live-search form-control3', 'aria-describedby': 'search-icon5', tabindex: '1' })
+	                        )
+	                      ),
+	                      _react2.default.createElement(
+	                        'div',
+	                        { className: 'list-to-filter' },
+	                        _react2.default.createElement(
+	                          'ul',
+	                          { className: 'list-unstyled', id: 'doctor_id' },
+	                          doctors.map(function (doctor) {
+	                            return _react2.default.createElement(
+	                              'li',
+	                              { className: 'filter-item items', 'data-filter': doctor.name, 'data-value': doctor.id },
+	                              doctor.name
+	                            );
+	                          })
+	                        ),
+	                        _react2.default.createElement(
+	                          'div',
+	                          { className: 'no-search-results' },
+	                          _react2.default.createElement(
+	                            'div',
+	                            { className: 'alert alert-warning', role: 'alert' },
+	                            _react2.default.createElement('i', { className: 'fa fa-warning margin-right-sm' }),
+	                            '\u6CA1\u6709\u627E\u5230 ',
+	                            _react2.default.createElement(
+	                              'strong',
+	                              null,
+	                              '\'',
+	                              _react2.default.createElement('span', null),
+	                              '\''
+	                            ),
+	                            '\u76F8\u5173\u6570\u636E'
+	                          )
+	                        )
+	                      )
+	                    )
+	                  ),
+	                  _react2.default.createElement('input', { type: 'hidden', name: 'bts-ex-5', value: '' })
+	                )
+	              ),
+	              _react2.default.createElement('p', null)
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'orderDoctor' },
+	              _react2.default.createElement(
+	                'span',
+	                { className: 'doctorspan' },
+	                '\u8BCA\u6240\uFF1A'
+	              ),
+	              _react2.default.createElement(
+	                'div',
+	                { className: 'col-sm-9', id: 'DocInputbox' },
+	                _react2.default.createElement(
+	                  'div',
+	                  { id: 'bts-ex-5', className: 'selectpicker', 'data-clear': 'true', 'data-live': 'true' },
+	                  _react2.default.createElement(
+	                    'button',
+	                    { 'data-id': 'prov', type: 'button', className: 'btn btn-lg btn-block btn-default dropdown-toggle' },
+	                    _react2.default.createElement(
+	                      'span',
+	                      { className: 'placeholder', id: 'DovVal', 'data-val': '' },
+	                      '\u8BF7\u9009\u62E9'
+	                    ),
+	                    _react2.default.createElement('span', { className: 'caret' })
+	                  ),
+	                  _react2.default.createElement(
+	                    'div',
+	                    { className: 'dropdown-menu' },
+	                    _react2.default.createElement(
+	                      'div',
+	                      { className: 'live-filtering', 'data-clear': 'true', 'data-autocomplete': 'true', 'data-keys': 'true' },
+	                      _react2.default.createElement('label', { className: 'sr-only', 'for': 'input-bts-ex-5' }),
+	                      _react2.default.createElement(
+	                        'div',
+	                        { className: 'search-box' },
+	                        _react2.default.createElement(
+	                          'div',
+	                          { className: 'input-group' },
+	                          _react2.default.createElement('input', { type: 'text', placeholder: '\u8BF7\u8F93\u5165\u641C\u7D22\u5185\u5BB9', id: 'input-bts-ex-5', className: 'form-control live-search form-control3', 'aria-describedby': 'search-icon5', tabindex: '1' })
+	                        )
+	                      ),
+	                      _react2.default.createElement(
+	                        'div',
+	                        { className: 'list-to-filter' },
+	                        _react2.default.createElement(
+	                          'ul',
+	                          { className: 'list-unstyled', id: 'doctor_id' },
+	                          clinics.map(function (clinic) {
+	                            return _react2.default.createElement(
+	                              'li',
+	                              { className: 'filter-item items', 'data-filter': clinic.name, 'data-value': clinic.id },
+	                              clinic.name
+	                            );
+	                          })
+	                        ),
+	                        _react2.default.createElement(
+	                          'div',
+	                          { className: 'no-search-results' },
+	                          _react2.default.createElement(
+	                            'div',
+	                            { className: 'alert alert-warning', role: 'alert' },
+	                            _react2.default.createElement('i', { className: 'fa fa-warning margin-right-sm' }),
+	                            '\u6CA1\u6709\u627E\u5230 ',
+	                            _react2.default.createElement(
+	                              'strong',
+	                              null,
+	                              '\'',
+	                              _react2.default.createElement('span', null),
+	                              '\''
+	                            ),
+	                            '\u76F8\u5173\u6570\u636E'
+	                          )
+	                        )
+	                      )
+	                    )
+	                  ),
+	                  _react2.default.createElement('input', { type: 'hidden', name: 'bts-ex-5', value: '' })
+	                )
+	              ),
+	              _react2.default.createElement('p', null)
+	            )
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          _react2.default.createElement(
+	            'a',
+	            { href: 'javascript:void(0)', className: 'search-but', id: 'search' },
+	            '\u641C\u7D22'
+	          ),
+	          _react2.default.createElement(
+	            'a',
+	            { href: 'javascript:void(0)', className: 'reset-but', id: 'reset' },
+	            '\u91CD\u7F6E'
+	          )
+	        )
+	      )
+	    ),
+	    _react2.default.createElement(
+	      'div',
+	      { className: 'table-box' },
+	      _react2.default.createElement(
+	        'table',
+	        { className: 'table table-bordered table-hover table-height table-height4 mtop100 Mbtom50' },
+	        _react2.default.createElement(
+	          'thead',
+	          null,
+	          _react2.default.createElement(
+	            'tr',
+	            null,
+	            _react2.default.createElement(
+	              'th',
+	              { width: '60px' },
+	              '\u9009\u62E9'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '80px' },
+	              '\u9884\u7EA6\u5355\u53F7'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '100px' },
+	              '\u5C31\u8BCA\u4EBA'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '120px' },
+	              '\u9884\u7EA6\u65F6\u95F4'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '80px' },
+	              '\u63D0\u4EA4\u65E5\u671F'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              '\u6240\u5C5E\u516C\u53F8'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '80px' },
+	              '\u533B\u751F'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '100px' },
+	              '\u8BCA\u6240'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '80px' },
+	              '\u9879\u76EE'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '80px' },
+	              '\u9884\u7EA6\u72B6\u6001'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '100px' },
+	              '\u8054\u7CFB\u65B9\u5F0F'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              { width: '80px' },
+	              '\u662F\u5426\u672C\u4EBA'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              '\u5907\u6CE8'
+	            )
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'tbody',
+	          { id: 'accountTbody' },
+	          orders.map(function (row) {
+	            var ret = (0, _orderdata.OrderData)((0, _extends3.default)({}, row, { rowidx: rowidx, toOrderInfo: toOrderInfo }));
+	            rowidx++;
+	            return ret;
+	          })
+	        )
+	      ),
+	      _react2.default.createElement(_reactPaginate2.default, { previousLabel: "previous",
+	        nextLabel: "next",
+	        breakLabel: _react2.default.createElement(
+	          'a',
+	          null,
+	          '...'
+	        ),
+	        breakClassName: "break-me",
+	        pageNum: 110,
+	        marginPagesDisplayed: 2,
+	        pageRangeDisplayed: 5,
+	        clickCallback: handlePageClick,
+	        containerClassName: "pagination",
+	        subContainerClassName: "pages pagination",
+	        activeClassName: "active" })
+	    )
+	  );
+	};
+
+/***/ },
+/* 392 */
+/*!**********************************************!*\
+  !*** ./backend/ordertable/view/orderdata.js ***!
+  \**********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.OrderData = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var OrderData = exports.OrderData = function OrderData(_ref) {
+	    var id = _ref.id,
+	        reserve_number = _ref.reserve_number,
+	        patient_name = _ref.patient_name,
+	        visit_time = _ref.visit_time,
+	        create_time = _ref.create_time,
+	        doctor_name = _ref.doctor_name,
+	        clinic_name = _ref.clinic_name,
+	        project_name = _ref.project_name,
+	        status = _ref.status,
+	        contact_tel = _ref.contact_tel,
+	        company_name = _ref.company_name,
+	        remark = _ref.remark,
+	        is_self = _ref.is_self,
+	        rowidx = _ref.rowidx,
+	        toOrderInfo = _ref.toOrderInfo;
+	
+	    return _react2.default.createElement(
+	        'tr',
+	        null,
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                { className: 'radio-span' },
+	                _react2.default.createElement('input', { type: 'radio', className: 'radio', name: 'radio', id: 'radioInputa_' + rowidx, value: id }),
+	                _react2.default.createElement('label', { htmlFor: 'radioInputa_' + rowidx })
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                { style: { paddingRight: '5px' } },
+	                reserve_number
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                { onClick: function onClick(ev) {
+	                        toOrderInfo(ev, rowidx, id);
+	                    }, className: 'spanName', id: 'goSee', 'data-id': id },
+	                patient_name
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            { className: 'W110' },
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                visit_time
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            { className: 'W110' },
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                create_time
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            { className: 'W150' },
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                company_name
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                { className: 'doctor_name' },
+	                doctor_name
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            { className: 'W110' },
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                clinic_name
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                project_name
+	            )
+	        ),
+	        function () {
+	            if (status == 1) {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        null,
+	                        '\u9884\u7EA6\u4E2D'
+	                    )
+	                );
+	            } else if (status == 2) {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        null,
+	                        '\u5DF2\u5B8C\u6210'
+	                    )
+	                );
+	            } else if (status == 3) {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        null,
+	                        '\u5DF2\u8FC7\u671F'
+	                    )
+	                );
+	            } else if (status == 4) {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        null,
+	                        '\u5DF2\u53D6\u6D88'
+	                    )
+	                );
+	            } else {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement('span', null)
+	                );
+	            }
+	        }(),
+	        _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                contact_tel
+	            )
+	        ),
+	        function () {
+	            if (is_self == 1) {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        null,
+	                        '\u662F'
+	                    )
+	                );
+	            } else if (is_self == 2) {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement(
+	                        'span',
+	                        null,
+	                        '\u5426'
+	                    )
+	                );
+	            } else {
+	                return _react2.default.createElement(
+	                    'td',
+	                    null,
+	                    _react2.default.createElement('span', null)
+	                );
+	            }
+	        }(),
+	        _react2.default.createElement(
+	            'td',
+	            { className: 'W100' },
+	            _react2.default.createElement(
+	                'span',
+	                null,
+	                remark
+	            )
+	        )
+	    );
+	};
+
+/***/ },
+/* 393 */
+/*!***********************************************!*\
+  !*** ./backend/ordertable/orderinfo/check.js ***!
+  \***********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = exports.asyncEvent = undefined;
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 284);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 288);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 289);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 293);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 294);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _dec, _dec2, _class, _class2, _temp;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _check = __webpack_require__(/*! ./view/check.js */ 394);
+	
+	var _edit = __webpack_require__(/*! ./edit.js */ 395);
+	
+	var _edit2 = _interopRequireDefault(_edit);
+	
+	var _order_patient = __webpack_require__(/*! ../../redux/reducers/order_patient.js */ 243);
+	
+	var _auth = __webpack_require__(/*! ../../redux/reducers/auth */ 241);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var asyncEvent = exports.asyncEvent = [{
+	    promise: function promise(_ref) {
+	        var _ref$store = _ref.store,
+	            dispatch = _ref$store.dispatch,
+	            getState = _ref$store.getState,
+	            params = _ref.params;
+	
+	        var state = getState();
+	        var id = state.getIn(['order_patient', 'frontorder', 'id']);
+	        var idx = state.getIn(['order_patient', 'frontorder', 'idx']);
+	        if (!(0, _auth.isLoaded)(state)) return dispatch((0, _auth.load)(params)).then(function () {
+	            if (!(0, _order_patient.LoadedorLoading_order)(state, idx, id)) return dispatch((0, _order_patient.load_detail)({ id: id, idx: idx, extract: true }));else return _bluebird2.default.resolve();
+	        });else if (!(0, _order_patient.LoadedorLoading_order)(state, idx, id)) return dispatch((0, _order_patient.load_detail)({ id: id, idx: idx, extract: true }));else return _bluebird2.default.resolve();
+	    }
+	}];
+	
+	var Check = (_dec = (0, _reduxConnect.asyncConnect)(asyncEvent), _dec2 = (0, _reactRedux.connect)(function (state) {
+	    return {
+	        auth: state.get('auth'),
+	        detailEdit: state.getIn(['order_patient', 'detailedit'])
+	    };
+	}, { pushState: _reactRouterRedux.push }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
+	    (0, _inherits3.default)(Check, _Component);
+	
+	    function Check(props) {
+	        (0, _classCallCheck3.default)(this, Check);
+	
+	        // code
+	        return (0, _possibleConstructorReturn3.default)(this, (Check.__proto__ || (0, _getPrototypeOf2.default)(Check)).call(this, props));
+	    }
+	
+	    (0, _createClass3.default)(Check, [{
+	        key: 'toEdit',
+	        value: function toEdit() {
+	
+	            this.context.showRight({
+	                asyncProcess: _edit.asyncEvent,
+	                comCreater: function comCreater() {
+	                    return _react2.default.createElement(_edit2.default, null);
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var orderdata = this.props.detailEdit.get('data').toJS();
+	            return (0, _check.CheckOrder)((0, _extends3.default)({}, orderdata, { toEdit: this.toEdit.bind(this) }));
+	        }
+	    }]);
+	    return Check;
+	}(_react.Component), _class2.contextTypes = {
+	    store: _react.PropTypes.object.isRequired
+	}, _class2.contextTypes = {
+	    showRight: _react.PropTypes.func.isRequired
+	}, _temp)) || _class) || _class);
+	exports.default = Check;
+
+/***/ },
+/* 394 */
+/*!****************************************************!*\
+  !*** ./backend/ordertable/orderinfo/view/check.js ***!
+  \****************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.CheckOrder = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var CheckOrder = exports.CheckOrder = function CheckOrder(_ref) {
+		var patient_name = _ref.patient_name,
+		    appointment_name = _ref.appointment_name,
+		    contact_tel = _ref.contact_tel,
+		    is_self = _ref.is_self,
+		    company_name = _ref.company_name,
+		    project_name = _ref.project_name,
+		    visit_time = _ref.visit_time,
+		    doctor_name = _ref.doctor_name,
+		    doctor_phone = _ref.doctor_phone,
+		    clinic_name = _ref.clinic_name,
+		    remark = _ref.remark,
+		    toEdit = _ref.toEdit;
+	
+		return _react2.default.createElement(
+			'div',
+			null,
+			_react2.default.createElement(
+				'div',
+				{ className: 'rtop rtop4' },
+				_react2.default.createElement(
+					'div',
+					{ className: 'but-box bj-none' },
+					_react2.default.createElement(
+						'p',
+						null,
+						_react2.default.createElement(
+							'a',
+							{ href: 'javascript:void(0)', className: 'back-but', id: 'back' },
+							'\u8FD4\u56DE'
+						),
+						_react2.default.createElement(
+							'a',
+							{ onClick: toEdit, className: 'edit-but', id: 'edit-but' },
+							'\u7F16\u8F91'
+						)
+					)
+				)
+			),
+			_react2.default.createElement(
+				'div',
+				{ className: 'add-box-container', style: { minHeight: '500px' } },
+				_react2.default.createElement(
+					'div',
+					{ className: 'add-h3 add-main-box1 mtop45' },
+					_react2.default.createElement(
+						'h3',
+						{ className: 'box5-h3' },
+						'\u57FA\u672C\u4FE1\u606F',
+						_react2.default.createElement('span', null)
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'main-input' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u5C31\u8BCA\u4EBA\u59D3\u540D\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								patient_name
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u9884\u7EA6\u4EBA\u59D3\u540D\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								appointment_name
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u8054\u7CFB\u65B9\u5F0F\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								contact_tel
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u662F\u5426\u672C\u4EBA\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								is_self
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u6240\u5C5E\u516C\u53F8\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								company_name
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u670D\u52A1\u9879\u76EE\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								project_name
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u9884\u7EA6\u65E5\u671F\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								visit_time
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u533B\u751F\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								_react2.default.createElement(
+									'label',
+									null,
+									doctor_name + '(' + doctor_phone + ')'
+								),
+								_react2.default.createElement(
+									'a',
+									{ href: 'javascript:;', className: 'checktimea' },
+									'\u67E5\u770B\u533B\u751F\u7684\u51FA\u8BCA\u65F6\u95F4'
+								)
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u8BCA\u6240\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								clinic_name
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'input-box h30 gray-span' },
+							_react2.default.createElement(
+								'span',
+								null,
+								'\u5907\u6CE8\uFF1A'
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'see-main' },
+								remark
+							)
+						)
+					)
+				)
+			)
+		);
+	};
+
+/***/ },
+/* 395 */
+/*!**********************************************!*\
+  !*** ./backend/ordertable/orderinfo/edit.js ***!
+  \**********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = exports.asyncEvent = undefined;
+	
+	var _extends2 = __webpack_require__(/*! babel-runtime/helpers/extends */ 2);
+	
+	var _extends3 = _interopRequireDefault(_extends2);
+	
+	var _getPrototypeOf = __webpack_require__(/*! babel-runtime/core-js/object/get-prototype-of */ 284);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(/*! babel-runtime/helpers/classCallCheck */ 288);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(/*! babel-runtime/helpers/createClass */ 289);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(/*! babel-runtime/helpers/possibleConstructorReturn */ 293);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(/*! babel-runtime/helpers/inherits */ 294);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _dec, _dec2, _class, _class2, _temp;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _bluebird = __webpack_require__(/*! bluebird */ 242);
+	
+	var _bluebird2 = _interopRequireDefault(_bluebird);
+	
+	var _reactRouterRedux = __webpack_require__(/*! react-router-redux */ 209);
+	
+	var _auth = __webpack_require__(/*! ../../redux/reducers/auth */ 241);
+	
+	var _edit = __webpack_require__(/*! ./view/edit.js */ 396);
+	
+	var _order_patient = __webpack_require__(/*! ../../redux/reducers/order_patient.js */ 243);
+	
+	var _user_company = __webpack_require__(/*! ../../redux/reducers/user_company */ 386);
+	
+	var _user_doctor = __webpack_require__(/*! ../../redux/reducers/user_doctor */ 384);
+	
+	var _reactRedux = __webpack_require__(/*! react-redux */ 207);
+	
+	var _reduxConnect = __webpack_require__(/*! redux-connect */ 210);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var asyncEvent = exports.asyncEvent = [{
+	    promise: function promise(_ref) {
+	        var _ref$store = _ref.store,
+	            dispatch = _ref$store.dispatch,
+	            getState = _ref$store.getState,
+	            params = _ref.params;
+	
+	        var state = getState();
+	        var id = state.getIn(['order_patient', 'frontorder', 'id']);
+	        var idx = state.getIn(['order_patient', 'frontorder', 'idx']);
+	        if (!(0, _auth.isLoaded)(state)) return dispatch((0, _auth.load)(params)).then(function () {
+	            if (!(0, _order_patient.LoadedorLoading_order)(state, idx, id)) return dispatch((0, _order_patient.load_detail)({ id: id, idx: idx, extract: true }));else return _bluebird2.default.resolve();
+	        });else if (!(0, _order_patient.LoadedorLoading_order)(state, idx, id)) return dispatch((0, _order_patient.load_detail)({ id: id, idx: idx, extract: true }));else return _bluebird2.default.resolve();
+	    }
+	}, {
+	    promise: function promise(_ref2) {
+	        var _ref2$store = _ref2.store,
+	            dispatch = _ref2$store.dispatch,
+	            getState = _ref2$store.getState,
+	            params = _ref2.params;
+	
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                if (!(0, _user_company.LoadedorLoading)(getState())) {
+	                    var state = getState();
+	                    var user = state.getIn(['auth', 'user']).toJS();
+	                    return dispatch((0, _user_company.load)({ user: user }));
+	                } else return _bluebird2.default.resolve();
+	            });
+	        } else {
+	            if (!(0, _user_company.LoadedorLoading)(getState())) {
+	                var state = getState();
+	                var user = state.getIn(['auth', 'user']).toJS();
+	                return dispatch((0, _user_company.load)({ user: user }));
+	            } else return _bluebird2.default.resolve();
+	        }
+	    }
+	}, {
+	    promise: function promise(_ref3) {
+	        var _ref3$store = _ref3.store,
+	            dispatch = _ref3$store.dispatch,
+	            getState = _ref3$store.getState,
+	            params = _ref3.params;
+	
+	        if (!(0, _auth.isLoaded)(getState())) {
+	            return dispatch((0, _auth.load)(params)).then(function () {
+	                if (!(0, _user_doctor.LoadedorLoading)(getState())) {
+	                    var state = getState();
+	                    var user = state.getIn(['auth', 'user']).toJS();
+	                    return dispatch((0, _user_doctor.load)({ user: user }));
+	                } else return _bluebird2.default.resolve();
+	            });
+	        } else {
+	            if (!(0, _user_doctor.LoadedorLoading)(getState())) {
+	                var state = getState();
+	                var user = state.getIn(['auth', 'user']).toJS();
+	                return dispatch((0, _user_doctor.load)({ user: user }));
+	            } else return _bluebird2.default.resolve();
+	        }
+	    }
+	}];
+	
+	var Edit = (_dec = (0, _reduxConnect.asyncConnect)(asyncEvent), _dec2 = (0, _reactRedux.connect)(function (state) {
+	    return {
+	        auth: state.get('auth'),
+	        detailEdit: state.getIn(['order_patient', 'detailedit']),
+	        doctorRepo: state.get('user_doctor'),
+	        companyRepo: state.get('user_company')
+	    };
+	}, { pushState: _reactRouterRedux.push }), _dec(_class = _dec2(_class = (_temp = _class2 = function (_Component) {
+	    (0, _inherits3.default)(Edit, _Component);
+	
+	    function Edit(props) {
+	        (0, _classCallCheck3.default)(this, Edit);
+	
+	        // code
+	        return (0, _possibleConstructorReturn3.default)(this, (Edit.__proto__ || (0, _getPrototypeOf2.default)(Edit)).call(this, props));
+	    }
+	
+	    (0, _createClass3.default)(Edit, [{
+	        key: 'change',
+	        value: function change() {}
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var orderdata = this.props.detailEdit.get('data').toJS();
+	            return (0, _edit.EditOrder)((0, _extends3.default)({}, orderdata, { change: this.change.bind(this) }));
+	        }
+	    }]);
+	    return Edit;
+	}(_react.Component), _class2.contextTypes = {
+	    store: _react.PropTypes.object.isRequired
+	}, _class2.contextTypes = {
+	    showRight: _react.PropTypes.func.isRequired
+	}, _temp)) || _class) || _class);
+	exports.default = Edit;
+
+/***/ },
+/* 396 */
+/*!***************************************************!*\
+  !*** ./backend/ordertable/orderinfo/view/edit.js ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+			value: true
+	});
+	exports.EditOrder = undefined;
+	
+	var _react = __webpack_require__(/*! react */ 47);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 302);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var EditOrder = exports.EditOrder = function EditOrder(_ref) {
+			var change = _ref.change,
+			    relations = _ref.relations,
+			    patient_name = _ref.patient_name,
+			    doctors = _ref.doctors,
+			    companys = _ref.companys,
+			    chooseDoctor = _ref.chooseDoctor,
+			    clinic_name = _ref.clinic_name;
+	
+			return _react2.default.createElement(
+					'div',
+					null,
+					_react2.default.createElement(
+							'div',
+							{ className: 'rtop rtop4' },
+							_react2.default.createElement(
+									'div',
+									{ className: 'but-box bj-none' },
+									_react2.default.createElement(
+											'p',
+											null,
+											_react2.default.createElement(
+													'a',
+													{ href: 'javascript:void(0)', className: 'back-but', id: 'back' },
+													'\u8FD4\u56DE'
+											),
+											_react2.default.createElement(
+													'a',
+													{ href: 'javascript:void(0)', className: 'save-but', id: 'save-but' },
+													'\u4FDD\u5B58'
+											)
+									)
+							)
+					),
+					_react2.default.createElement(
+							'div',
+							{ className: 'add-box-container', style: { minHeight: '700px' } },
+							_react2.default.createElement(
+									'div',
+									{ className: 'add-h3 add-main-box1 mtop45' },
+									_react2.default.createElement(
+											'h3',
+											{ className: 'box5-h3' },
+											'\u57FA\u672C\u4FE1\u606F',
+											_react2.default.createElement('span', null)
+									),
+									_react2.default.createElement(
+											'div',
+											{ className: 'main-input' },
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u5C31\u8BCA\u4EBA\u59D3\u540D\uFF1A'
+															)
+													),
+													_react2.default.createElement('input', { type: 'text', onChange: function onChange(ev) {
+																	change(ev, 'patient_name');
+															}, value: patient_name, className: 'text-input' }),
+													_react2.default.createElement('p', null)
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u9884\u7EA6\u4EBA\u59D3\u540D\uFF1A'
+															)
+													),
+													_react2.default.createElement(
+															'div',
+															{ className: 'col-sm-8', id: 'PatInputbox' },
+															_react2.default.createElement(
+																	'div',
+																	{ id: 'bts-ex-5', className: 'selectpicker', 'data-clear': 'true', 'data-live': 'true' },
+																	_react2.default.createElement(
+																			'button',
+																			{ 'data-id': 'prov', type: 'button', className: 'btn btn-lg btn-block btn-default dropdown-toggle' },
+																			_react2.default.createElement(
+																					'span',
+																					{ className: 'placeholder', id: 'PatVal', 'data-val': '' },
+																					'\u8BF7\u9009\u62E9'
+																			),
+																			_react2.default.createElement('span', { className: 'caret' })
+																	),
+																	_react2.default.createElement(
+																			'div',
+																			{ className: 'dropdown-menu' },
+																			_react2.default.createElement(
+																					'div',
+																					{ className: 'live-filtering', 'data-clear': 'true', 'data-autocomplete': 'true', 'data-keys': 'true' },
+																					_react2.default.createElement('label', { className: 'sr-only', htmlFor: 'input-bts-ex-5' }),
+																					_react2.default.createElement(
+																							'div',
+																							{ className: 'search-box' },
+																							_react2.default.createElement(
+																									'div',
+																									{ className: 'input-group' },
+																									_react2.default.createElement('input', { type: 'text', placeholder: '\u8BF7\u8F93\u5165\u641C\u7D22\u5185\u5BB9', id: 'input-bts-ex-5', className: 'form-control live-search', 'aria-describedby': 'search-icon5', tabindex: '1' })
+																							)
+																					),
+																					_react2.default.createElement(
+																							'div',
+																							{ className: 'list-to-filter' },
+																							_react2.default.createElement('ul', { className: 'list-unstyled', id: 'patient_id' }),
+																							_react2.default.createElement(
+																									'div',
+																									{ className: 'no-search-results' },
+																									_react2.default.createElement(
+																											'div',
+																											{ className: 'alert alert-warning', role: 'alert' },
+																											_react2.default.createElement('i', { className: 'fa fa-warning margin-right-sm' }),
+																											'\u6CA1\u6709\u627E\u5230 ',
+																											_react2.default.createElement(
+																													'strong',
+																													null,
+																													'\'',
+																													_react2.default.createElement('span', null),
+																													'\''
+																											),
+																											'\u76F8\u5173\u6570\u636E'
+																									)
+																							)
+																					)
+																			)
+																	),
+																	_react2.default.createElement('input', { type: 'hidden', name: 'bts-ex-5', value: '' })
+															)
+													),
+													_react2.default.createElement('p', null)
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															'\u8054\u7CFB\u65B9\u5F0F\uFF1A'
+													),
+													_react2.default.createElement('input', { type: 'text', className: 'text-input readonly', id: 'contact_tel', readonly: true }),
+													_react2.default.createElement('p', null)
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u662F\u5426\u672C\u4EBA\uFF1A'
+															)
+													),
+													_react2.default.createElement(
+															'div',
+															{ className: 'radio-box', id: 'is_self' },
+															_react2.default.createElement(
+																	'span',
+																	null,
+																	_react2.default.createElement('input', { type: 'radio', className: 'radio1', name: 'radio2', id: 'checkbox10', value: '1' }),
+																	_react2.default.createElement('label', { 'for': 'checkbox10' }),
+																	'\u662F'
+															),
+															_react2.default.createElement(
+																	'span',
+																	null,
+																	_react2.default.createElement('input', { type: 'radio', className: 'radio1', name: 'radio2', id: 'checkbox11', value: '2' }),
+																	_react2.default.createElement('label', { 'for': 'checkbox11' }),
+																	'\u5426'
+															)
+													),
+													_react2.default.createElement('p', { className: 'errorTip' })
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30', id: 'guanxi', style: { display: 'none' } },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u4E0E\u9884\u7EA6\u4EBA\u5173\u7CFB\uFF1A'
+															)
+													),
+													_react2.default.createElement('input', { value: relations, type: 'text', className: 'text-input', id: 'relations' }),
+													_react2.default.createElement('p', null)
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u6240\u5C5E\u516C\u53F8\uFF1A'
+															)
+													),
+													_react2.default.createElement(
+															'select',
+															{ name: '', id: 'company_name', className: 'select-div' },
+															_react2.default.createElement(
+																	'option',
+																	{ value: '' },
+																	'\u8BF7\u9009\u62E9'
+															),
+															companys.map(function (company) {
+																	return _react2.default.createElement(
+																			'option',
+																			{ value: company.company_code },
+																			company.company_name
+																	);
+															})
+													),
+													_react2.default.createElement('label', { className: 'inviteCode' })
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u9009\u62E9\u9879\u76EE\uFF1A'
+															)
+													),
+													_react2.default.createElement('select', { name: '', id: 'service_id', className: 'select-div' }),
+													_react2.default.createElement('p', null)
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u9884\u7EA6\u65E5\u671F\uFF1A'
+															)
+													),
+													_react2.default.createElement('input', { type: 'text', className: 'text-input layicon', id: 'visit_time', readonly: 'readonly' }),
+													_react2.default.createElement('p', null),
+													_react2.default.createElement('div', { className: 'calendarbox', id: 'inline-calendar' })
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u533B\u751F\uFF1A'
+															)
+													),
+													_react2.default.createElement(
+															'select',
+															{ onChange: chooseDoctor, name: '', id: 'doctor_id', className: 'select-div' },
+															_react2.default.createElement(
+																	'option',
+																	{ value: '' },
+																	'\u8BF7\u9009\u62E9'
+															),
+															doctors.map(function (doctor) {
+																	return _react2.default.createElement(
+																			'option',
+																			{ value: doctor.id, clinic_name: doctor.clinic_name, clinic_id: doctor.clinic_id },
+																			doctor.name
+																	);
+															})
+													),
+													_react2.default.createElement('p', null)
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															'\u8BCA\u6240\uFF1A'
+													),
+													_react2.default.createElement('input', { value: clinic_name, type: 'text', className: 'text-input readonly', id: 'clink', readonly: 'readonly' })
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box chuzhenTimebox' },
+													_react2.default.createElement(
+															'span',
+															null,
+															_react2.default.createElement(
+																	'em',
+																	{ className: 'emx' },
+																	'\u9009\u62E9\u51FA\u8BCA\u65F6\u95F4\uFF1A'
+															)
+													),
+													_react2.default.createElement('ul', { id: 'timeArry' }),
+													_react2.default.createElement('p', { id: 'timeWrong' }),
+													_react2.default.createElement('div', { className: 'clear' })
+											),
+											_react2.default.createElement(
+													'div',
+													{ className: 'input-box h30' },
+													_react2.default.createElement(
+															'span',
+															null,
+															'\u5907\u6CE8\uFF1A'
+													),
+													_react2.default.createElement('textarea', { onChange: function onChange(ev) {
+																	change(ev, 'remark');
+															}, className: 'textarea', style: { maxWidth: '245px' }, id: 'remark' }),
+													_react2.default.createElement('p', null)
+											)
+									)
+							)
+					)
+			);
+	};
+
+/***/ },
+/* 397 */
+/*!****************************************************!*\
+  !*** ./backend/modules/fillter/tabcomplete.min.js ***!
+  \****************************************************/
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	/*!
+	 * tabcomplete
+	 * http://github.com/erming/tabcomplete
+	 * v1.5.0
+	 */
+	!function (a) {
+	  function b(b, c, d) {
+	    return a.grep(c, function (a) {
+	      return d ? !a.indexOf(b) : !a.toLowerCase().indexOf(b.toLowerCase());
+	    });
+	  }function c(b) {
+	    var c = this,
+	        d = c.prev(".hint");c.css({ backgroundColor: "transparent", position: "relative" }), d.length || (c.options.wrapInput && c.wrap(a("<div>").css({ position: "relative", height: c.css("height"), display: c.css("display") })), d = c.clone().attr("tabindex", -1).removeAttr("id name placeholder").addClass("hint").insertBefore(c), d.css({ position: "absolute" }));var e = "";if ("undefined" != typeof b) {
+	      var f = c.val();e = f + b.substr(f.split(/ |\n/).pop().length);
+	    }d.val(e);
+	  }function d(a) {
+	    var b = this,
+	        c = b.val();a && (b.val(c + a.substr(c.split(/ |\n/).pop().length)), b[0].selectionStart = c.length);
+	  }var e = { backspace: 8, tab: 9, up: 38, down: 40 };a.tabcomplete = {}, a.tabcomplete.defaultOptions = { after: "", arrowKeys: !1, hint: "placeholder", match: b, caseSensitive: !1, minLength: 1, wrapInput: !0 }, a.fn.tab = a.fn.tabcomplete = function (b, f) {
+	    if (this.length > 1) return this.each(function () {
+	      a(this).tabcomplete(b, f);
+	    });var g = this.prop("tagName");if ("INPUT" == g || "TEXTAREA" == g) {
+	      this.options = f = a.extend(a.tabcomplete.defaultOptions, f), this.unbind(".tabcomplete"), this.prev(".hint").remove();var h = this,
+	          i = !1,
+	          j = -1,
+	          k = [],
+	          l = "",
+	          m = a.noop;switch (f.hint) {case "placeholder":
+	          m = c;break;case "select":
+	          m = d;}return this.on("input.tabcomplete", function () {
+	        var c = h.val(),
+	            d = c.split(/ |\n/).pop();j = -1, l = "", k = [], h[0].selectionStart == c.length && d.length && (k = f.match(d, b, f.caseSensitive), f.after && (k = a.map(k, function (a) {
+	          return a + f.after;
+	        }))), h.trigger("match", k.length), f.hint && (("select" != f.hint || !i) && d.length >= f.minLength ? m.call(h, k[0]) : m.call(h, "")), i && (i = !1);
+	      }), this.on("keydown.tabcomplete", function (a) {
+	        var b = a.which;if (b == e.tab || f.arrowKeys && (b == e.up || b == e.down)) {
+	          if (a.preventDefault(), b != e.up) j++;else {
+	            if (-1 == j) return;0 == j ? j = k.length - 1 : j--;
+	          }var c = k[j % k.length];if (!c) return;var d = h.val();if (l = l || d.split(/ |\n/).pop(), l.length < f.minLength) return;var g = "select" == f.hint ? d : d.substr(0, h[0].selectionStart - l.length) + c;h.val(g), "select" == f.hint && (h[0].selectionStart = g.length), l = c, h.trigger("tabcomplete", l), f.hint && m.call(h, "");
+	        } else a.which == e.backspace && (i = !0, j = -1, l = "");
+	      }), f.hint && m.call(this, ""), this;
+	    }
+	  };
+	}(jQuery);
+
+/***/ },
+/* 398 */
+/*!***************************************************!*\
+  !*** ./backend/modules/fillter/livefilter.min.js ***!
+  \***************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var _typeof2 = __webpack_require__(/*! babel-runtime/helpers/typeof */ 251);
+	
+	var _typeof3 = _interopRequireDefault(_typeof2);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*! ========================================================================
+	 * Live Filter: livefilter.js v2.0.0
+	 * ========================================================================
+	 * Copyright 2015, Salvatore Di Salvo (disalvo-infographiste[dot].be)
+	 * ======================================================================== */
+	(function (d) {
+	  var b = function b(f, e) {
+	    this.$element = d(f);this.options = d.extend({}, this.defaults(), e);this.structure = d.extend({}, this.parts());this.keywords = null;this.init();
+	  };b.VERSION = "2.0.0";b.DEFAULTS = { clearbtn: false, autocomplete: false, hint: "placeholder", arrowKeys: false, matches: false, caseSensitive: false, minLength: 1, wrapInput: true };b.prototype.parts = function () {
+	    return { $input: d(".live-search", this.$element), $filter: d(".list-to-filter", this.$element), $clear: d(".filter-clear", this.$element), $no_results: d(".no-search-results", this.$element), $items: d(".filter-item", this.$element), $matches: d(".matches", this.$element) };
+	  };b.prototype.defaults = function () {
+	    return { clearbtn: this.$element.attr("data-clear") || b.DEFAULTS.clearbtn, autocomplete: this.$element.attr("data-autocomplete") || b.DEFAULTS.autocomplete, hint: this.$element.attr("data-hint") || b.DEFAULTS.hint, arrowKeys: this.$element.attr("data-keys") || b.DEFAULTS.arrowKeys, matches: this.$element.attr("data-matches") || b.DEFAULTS.arrowKeys, caseSensitive: b.DEFAULTS.caseSensitive, minLength: b.DEFAULTS.minLength, wrapInput: b.DEFAULTS.wrapInput };
+	  };b.prototype.getKeywords = function () {
+	    var e = [];this.structure.$items.each(function (f) {
+	      if (!d(this).hasClass("disabled")) {
+	        e = e.concat(d(this).attr("data-filter").split("|"));
+	      }
+	    });return e;
+	  };b.prototype.init = function () {
+	    var e = this;if (e.options.autocomplete) {
+	      e.initAC();
+	    }if (e.options.clearbtn) {
+	      e.structure.$clear.click(function (f) {
+	        f.preventDefault();e.clear();
+	      });
+	    }e.structure.$input.on("keyup", function () {
+	      var f = d(this).val().toLowerCase();if (e.options.clearbtn) {
+	        e.structure.$clear.toggleClass("hide", !f).prev("span").toggle(!f);
+	      }e.structure.$no_results.hide();e.searchAndFilter(f);
+	    });e.structure.$input.val("").trigger("input").trigger("keyup");if (e.structure.$clear && e.options.clearbtn) {
+	      e.structure.$clear.addClass("hide").prev("span").show();
+	    }if (e.structure.$no_results) {
+	      e.structure.$no_results.hide();
+	    }
+	  };b.prototype.initAC = function () {
+	    var e = this;e.keywords = e.getKeywords();if (e.keywords != undefined && e.keywords != null) {
+	      e.structure.$input.tabcomplete(e.keywords, { hint: e.options.hint, arrowKeys: e.options.arrowKeys, caseSensitive: e.options.caseSensitive, minLength: e.options.minLength, wrapInput: e.options.wrapInput });if (e.options.matches) {
+	        e.structure.$input.on("match", function (g, f) {
+	          e.structure.$matches.css("opacity", f == 0 ? 0 : 1).find("span").html(f);
+	        }).on("blur", function () {
+	          e.structure.$matches.css("opacity", 0);
+	        });
+	      }
+	    } else {
+	      console.log("no keywords defined!");
+	    }
+	  };b.prototype.searchAndFilter = function (g) {
+	    var f = this,
+	        e = 0;if (!g) {
+	      this.structure.$items.each(function () {
+	        if (!d(this).hasClass("disabled")) {
+	          d(this).show();
+	        }
+	      });
+	    } else {
+	      this.structure.$items.each(function () {
+	        if (!d(this).hasClass("disabled")) {
+	          var i = d(this).attr("data-filter").split("|");var h = f.inFilter(g, i);if (h) {
+	            e++;
+	          }d(this).toggle(!!h);
+	        }
+	      });
+	    }if (e == 0 && g.length != 0) {
+	      this.structure.$no_results.find("span").text(g);this.structure.$no_results.show();
+	    } else {
+	      this.structure.$no_results.hide();
+	    }
+	  };b.prototype.clear = function () {
+	    this.structure.$input.val("").trigger("input").trigger("keyup");this.structure.$clear.addClass("hide");
+	  };b.prototype.inFilter = function (h, g) {
+	    for (var f = 0; f < g.length; f++) {
+	      var e = g[f].toLowerCase();if (e.match(h)) {
+	        return true;
+	      }
+	    }return false;
+	  };function c(e) {
+	    return this.each(function () {
+	      var h = d(this);var g = h.data("liveFilter");var f = (typeof e === "undefined" ? "undefined" : (0, _typeof3.default)(e)) == "object" && e;if (!g) {
+	        h.data("liveFilter", g = new b(this, f));
+	      }if (typeof e == "string" && g[e]) {
+	        g[e]();
+	      }
+	    });
+	  }var a = d.fn.liveFilter;d.fn.liveFilter = c;d.fn.liveFilter.Constructor = b;d.fn.toggle.noConflict = function () {
+	    d.fn.liveFilter = a;return this;
+	  };d(function () {
+	    d(".livefilter").liveFilter();
+	  });
+	})(jQuery);
+
+/***/ },
+/* 399 */
+/*!*********************************************************!*\
+  !*** ./backend/modules/fillter/src/bootstrap-select.js ***!
+  \*********************************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _typeof2 = __webpack_require__(/*! babel-runtime/helpers/typeof */ 251);
+	
+	var _typeof3 = _interopRequireDefault(_typeof2);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/*! ========================================================================
+	 * Bootstrap Select: bootstrap-select.js v2.0.0
+	 * ========================================================================
+	 * Copyright 2015, Salvatore Di Salvo (disalvo-infographiste[dot]be)
+	 * ======================================================================== */
+	
+	+function ($) {
+	    'use strict';
+	
+	    // DROPDOWN SELECT PUBLIC CLASS DEFINITION
+	    // ====================================
+	
+	    var DropdownSelect = function DropdownSelect(element, options) {
+	        this.$element = $(element);
+	        this.options = $.extend({}, this.defaults(), options);
+	        this.structure = $.extend({}, this.parts());
+	        this.init();
+	    };
+	
+	    DropdownSelect.VERSION = '2.4.0';
+	
+	    DropdownSelect.DEFAULTS = {
+	        select: this,
+	        autoclose: true,
+	        cancelbtn: false,
+	        clearbtn: false,
+	        livefilter: false,
+	        filter: null,
+	        fmethod: 'recursive',
+	        open: 'open',
+	        filled: 'filled',
+	        display: '.dropdown-toggle',
+	        list: '.dropdown-menu',
+	        placeholder: '.placeholder',
+	        items: '.items',
+	        current: '.current',
+	        clear: '.clear',
+	        selected: '.selected',
+	        cancel: '.cancel'
+	    };
+	
+	    DropdownSelect.prototype.parts = function () {
+	        return {
+	            $select: this.$element,
+	            $section: this.$element.attr('id'),
+	            $display: $(this.options.display, this.$element),
+	            $list: $(this.options.list, this.$element),
+	            $placeholder: $(this.options.placeholder, this.$element),
+	            $items: $(this.options.items, this.$element),
+	            $current: $(this.options.current, this.$element),
+	            $clear: $(this.options.clear, this.$element),
+	            $selected: this.get(),
+	            $cancel: $(this.options.cancel, this.$element)
+	        };
+	    };
+	
+	    DropdownSelect.prototype.defaults = function () {
+	        return {
+	            select: DropdownSelect.DEFAULTS.select,
+	            autoclose: this.$element.attr('data-autoclose') || DropdownSelect.DEFAULTS.autoclose,
+	            cancelbtn: this.$element.attr('data-cancel') || DropdownSelect.DEFAULTS.cancelbtn,
+	            clearbtn: this.$element.attr('data-clear') || DropdownSelect.DEFAULTS.clearbtn,
+	            livefilter: this.$element.attr('data-live') || DropdownSelect.DEFAULTS.livefilter,
+	            filter: this.$element.attr('data-filter') || DropdownSelect.DEFAULTS.filter,
+	            fmethod: this.$element.attr('data-fmethod') || DropdownSelect.DEFAULTS.fmethod,
+	            open: this.$element.attr('data-open') || DropdownSelect.DEFAULTS.open,
+	            filled: this.$element.attr('data-filled') || DropdownSelect.DEFAULTS.filled,
+	            display: DropdownSelect.DEFAULTS.display,
+	            list: DropdownSelect.DEFAULTS.list,
+	            placeholder: DropdownSelect.DEFAULTS.placeholder,
+	            items: DropdownSelect.DEFAULTS.items,
+	            current: DropdownSelect.DEFAULTS.current,
+	            clear: DropdownSelect.DEFAULTS.clear,
+	            selected: DropdownSelect.DEFAULTS.selected,
+	            cancel: DropdownSelect.DEFAULTS.cancel
+	        };
+	    };
+	
+	    DropdownSelect.prototype.init = function () {
+	        var $select = this;
+	
+	        this.structure.$display.on('click', function (e) {
+	            e.preventDefault();
+	            $select.toggle();
+	        });
+	
+	        this.structure.$items.on('click', function () {
+	            $select.select($(this));
+	        });
+	
+	        if (this.options.cancelbtn) {
+	            this.structure.$cancel.on('click', function (e) {
+	                e.preventDefault();
+	                $select.toggle('close');
+	            });
+	        }
+	
+	        if (this.options.clearbtn) {
+	            this.structure.$clear.on('click', function (e) {
+	                $select.clear(e);
+	            });
+	        }
+	
+	        if (this.options.livefilter) {
+	            $('.live-filtering', this.structure.$select).liveFilter();
+	        }
+	
+	        $(document).mouseup(function (e) {
+	            if ($select.$element.has(e.target).length === 0 && $select.$element.hasClass($select.options.open)) {
+	                $select.toggle('close');
+	                e.preventDefault();
+	            }
+	        });
+	    };
+	
+	    DropdownSelect.prototype.toggle = function (mode) {
+	        if (mode) {
+	            if (mode == 'open') this.$element.addClass(this.options.open);else if (mode == 'close') {
+	                this.$element.removeClass(this.options.open);
+	
+	                if (this.options.livefilter) {
+	                    $('.live-filtering', this.structure.$select).liveFilter('clear');
+	                }
+	            }
+	        } else {
+	            if (!this.$element.hasClass(this.options.open)) this.$element.addClass(this.options.open);else {
+	                this.$element.removeClass(this.options.open);
+	
+	                if (this.options.livefilter) {
+	                    $('.live-filtering', this.structure.$select).liveFilter('clear');
+	                }
+	            }
+	        }
+	    };
+	
+	    DropdownSelect.prototype.get = function () {
+	        return $(this.options.selected, this.$element);
+	    };
+	
+	    DropdownSelect.prototype.select = function (item) {
+	        if (this.structure.$current.length == 1) this.structure.$current.toggleClass('active');
+	
+	        this.structure.$selected = this.get();
+	        this.structure.$selected.removeClass('selected');
+	        item.addClass('selected');
+	
+	        this.updateDisplay('select', item);
+	
+	        if (this.options.filter != null) {
+	            var $toFilter = this.options.filter.split(' ');
+	
+	            if ($.isArray($toFilter) && $toFilter.length > 0) {
+	                for (var i = 0; i < $toFilter.length; i++) {
+	                    var $this = $('#' + $toFilter[i]);
+	                    $this.selectFilter({ method: this.options.fmethod });
+	                    $this.selectFilter('filter', this.structure.$section, $toFilter[i], item.data('value'));
+	                    //this.filter(this.structure.$section,$toFilter[i],item.data('value'));
+	                }
+	            }
+	        }
+	
+	        if (this.options.autoclose === true) {
+	            this.toggle('close');
+	        }
+	    };
+	
+	    DropdownSelect.prototype.clear = function (e) {
+	        if (e != undefined) e.preventDefault();
+	
+	        this.structure.$selected = this.get();
+	        this.structure.$selected.removeClass('selected');
+	
+	        this.updateDisplay('clear');
+	
+	        if (this.options.filter != null) {
+	            var $toFilter = this.options.filter.split(' ');
+	
+	            if ($.isArray($toFilter) && $toFilter.length > 0) {
+	                for (var i = 0; i < $toFilter.length; i++) {
+	                    var $this = document.getElementById($toFilter[i]);
+	                    $this.selectFilter({ method: this.options.fmethod });
+	                    $this.selectFilter('filter', this.structure.$section, $toFilter[i]);
+	                    //this.filter(this.structure.$section,$toFilter[i]);
+	                }
+	            }
+	        }
+	
+	        if (this.options.autoclose === true) {
+	            this.toggle('close');
+	        }
+	    };
+	
+	    DropdownSelect.prototype.refresh = function () {
+	        if (this.structure.$selected.data('value') != undefined) {
+	            this.updateDisplay('select');
+	        }
+	    };
+	
+	    DropdownSelect.prototype.updateDisplay = function (mode, selected) {
+	        if (mode == 'select') {
+	            this.structure.$clear.show();
+	            $('input[name="' + this.structure.$section + '"]').val(selected.data('value'));
+	            this.structure.$display.html('<span class="text">' + selected.html() + '</span><span class="caret"></span>').addClass(this.options.filled);
+	        }
+	
+	        if (mode == 'clear') {
+	            this.structure.$clear.hide();
+	            $('input[name="' + this.structure.$section + '"]').val('');
+	            this.structure.$display.html('<span class="placeholder">' + this.structure.$placeholder.html() + '</span><span class="caret"></span>').removeClass(this.options.filled);
+	        }
+	    };
+	
+	    /*DropdownSelect.prototype.filter = function( section, select, val ) {
+	        if( val ) {
+	            var $selected = $('#'+select+' .items.selected');
+	             if($selected.length) {
+	                $selected.each(function(){
+	                    if( $(this).data(section) != val ) {
+	                        $('#'+select).bootstrapSelect('clear');
+	                    }
+	                });
+	            }
+	             this.filterItem( section, select, val, this.options.fmethod );
+	        }
+	        else
+	        {
+	            this.filterItem( section, select, null, this.options.fmethod );
+	        }
+	         $('#'+select+' .live-filtering').liveFilter('initAC');
+	    }
+	     DropdownSelect.prototype.filterItem = function( section, select, val, method ) {
+	        $('#'+select+' .items').each(function(){
+	            var ref = $(this).data('ref'),
+	                valid = $(this).data('valid');
+	             if( ref != undefined && valid != undefined ) {
+	                ref = ref.split(',');
+	                valid = valid.split(',');
+	                 if ( ref.length == valid.length ) {
+	                    if (val != null) {
+	                        if (ref.indexOf(section) > -1) {
+	                            valid[ref.indexOf(section)] = val;
+	                        }else {
+	                            ref = ref.concat([section]);
+	                            valid = valid.concat([val]);
+	                        }
+	                    } else {
+	                        ref.splice(ref.indexOf(section),1);
+	                        valid.splice(ref.indexOf(section),1);
+	                    }
+	                }
+	            } else if (val != null) {
+	                ref = [section];
+	                valid = [val];
+	            }
+	             if( method == 'recursive' ) {
+	                var skip = true;
+	                for( var c = 0; c < ref.length; c++ ) {
+	                    if ( valid[c] != $(this).data(ref[c])) {
+	                        skip = false;
+	                    }
+	                }
+	            } else if ( method == 'additionnal' ) {
+	                var skip = false;
+	                for( var c = 0; c < ref.length; c++ ) {
+	                    if ( valid[c] == $(this).data(ref[c])) {
+	                        skip = true;
+	                    }
+	                }
+	            }
+	             $(this).data('ref',ref.toString()).data('valid',valid.toString());
+	            if ( !skip ) {
+	                $(this).addClass('disabled').hide();
+	            } else {
+	                $(this).removeClass('disabled').show();
+	            }
+	        });
+	    }*/
+	
+	    // DROPDOWN SELECT PLUGIN DEFINITION
+	    // ==============================
+	
+	    function Plugin(option) {
+	        return this.each(function () {
+	            var $this = $(this);
+	            var data = $this.data('bs.dropdownselect');
+	            var options = (typeof option === 'undefined' ? 'undefined' : (0, _typeof3.default)(option)) == 'object' && option;
+	
+	            if (!data) $this.data('bs.dropdownselect', data = new DropdownSelect(this, options));
+	            if (typeof option == 'string' && data[option]) data[option]();
+	        });
+	    }
+	
+	    var old = $.fn.bootstrapSelect;
+	
+	    $.fn.bootstrapSelect = Plugin;
+	    $.fn.bootstrapSelect.Constructor = DropdownSelect;
+	
+	    // DROPDOWN SELECT NO CONFLICT
+	    // ========================
+	
+	    $.fn.toggle.noConflict = function () {
+	        $.fn.bootstrapSelect = old;
+	        return this;
+	    };
+	
+	    // DROPDOWN SELECT DATA-API
+	    // =====================
+	
+	    $(function () {
+	        $('.selectpicker').bootstrapSelect();
+	    });
+	}(jQuery);
 
 /***/ }
 /******/ ]);

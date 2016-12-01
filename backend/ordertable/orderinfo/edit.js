@@ -104,7 +104,7 @@ export const asyncEvent = [{
     state => {
         return {
             auth : state.get('auth'),
-            detailEdit:  state.getIn(['order_patient','detailedit'])
+            detailEdit:  state.getIn(['order_patient','detailedit']),
             doctorRepo:  state.get('user_doctor'),
             companyRepo: state.get('user_company')
         }
