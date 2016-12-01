@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import ReactDOM  from 'react-dom'
 import { Calendar } from 'react-date-range';
 
-
 export const EditOrder = ({
   change,
   relations,
@@ -16,8 +15,17 @@ export const EditOrder = ({
   hangleSelectDate,
   visit_time,
   dateModal,
-  showDateModal
-}) => {
+  showDateModal,
+  ordertable,
+  arr
+}) => {	
+		arr.map((itemdata)=>{
+			ordertable.map((itemtable)=>{
+				if(itemtable.name==itemdata.time){
+					itemtable.check=1;
+				}
+			})
+		})
        return (<div>
 			          <div className="rtop rtop4">
 			            <div className="but-box bj-none">
@@ -30,7 +38,7 @@ export const EditOrder = ({
 			          <div className="add-box-container" style={{minHeight:'700px'}}>
 			            <div className="add-h3 add-main-box1 mtop45">
 			              <h3 className="box5-h3">基本信息<span></span></h3>
-			                <div className="main-input">
+			                <div className="main-input" style={{overflow:'scroll'}}>
 			                    <div className="input-box h30">
 			                        <span><em className="emx">就诊人姓名：</em></span>
 			                        <input type="text" onChange={(ev)=>{ change(ev,'patient_name') }} value={ patient_name } className="text-input"/>
@@ -88,7 +96,7 @@ export const EditOrder = ({
 
 			                    <div className="input-box h30">
 			                        <span><em className="emx">所属公司：</em></span>
-			                        <select name="" id="company_name" className="select-div">
+			                        <select name="" id="company_name" className="select-div" onChange={ (e)=>{ change(e,'company_name') } }>
 			                          <option value="">请选择</option>
 			                          {companys?companys.map((company)=>{
                                            return <option value={ company.company_code }>{company.name}</option>
@@ -98,7 +106,7 @@ export const EditOrder = ({
 			                    </div>
 			                    <div className="input-box h30">
 			                        <span><em className="emx">选择项目：</em></span>
-			                        <select name="" id="service_id" className="select-div">
+			                        <select name="" id="service_id" className="select-div" onChange={ (e)=>{ change(e,'project_name') } }>
 			                          {projects?projects.map((project) =>{
 			                          	  if(service_id == project.id)
 			                          	  	 return <option selected='selected' value={ project.id }>{ project.name }</option>
@@ -120,7 +128,7 @@ export const EditOrder = ({
 			                    </div>
 			                    <div className="input-box h30">
 			                        <span><em className="emx">医生：</em></span>
-			                        <select onChange={ chooseDoctor }name="" id="doctor_id" className="select-div">
+			                        <select onChange={ (e)=>{ change(e,'doctor_id') } } name="" id="doctor_id" className="select-div" >
 			                          <option value="">请选择</option>
 			                            { doctors?doctors.map((doctor)=>{
 			                          	   return <option value={ doctor.id } clinic_name={doctor.clinic_name} clinic_id={doctor.clinic_id}>{doctor.name}</option>
@@ -135,7 +143,26 @@ export const EditOrder = ({
 			                    <div className="input-box chuzhenTimebox">
 			                      <span><em className="emx">选择出诊时间：</em></span>
 			                      <ul id="timeArry">
-			                      	
+			                      	<h2 className="timeh2">上午</h2>
+			                      	{
+			                      		ordertable.map((time)=>{
+			                      			if(parseInt(time.name)<=12){
+			                      				return (
+			                      					<li className={time.check==0?'gray':''}><span>{time.name}</span></li>
+			                      				)
+			                      			}
+			                      		})
+			                      	}
+			                    	<h2 className="timeh2">下午</h2>
+			                    	{
+			                      		ordertable.map((time)=>{
+			                      			if(parseInt(time.name)>=13){
+			                      				return (
+			                      					<li className={time.check==0?'gray':''}><span>{time.name}</span></li>
+			                      				)
+			                      			}
+			                      		})
+			                      	}
 			                      </ul>
 			                      <p id="timeWrong"></p>
 			                      <div className="clear"></div>

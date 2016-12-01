@@ -45,6 +45,8 @@ import {
     asyncConnect
 } from 'redux-connect'
 
+import { table as ordertable } from 'backend/ordertable/orderinfo/config/orderedittable.js';
+
 export const asyncEvent = [{
     promise: ({ store: { dispatch, getState }, params }) => {
         var state = getState();
@@ -151,8 +153,8 @@ export default  class Edit extends Component{
     static contextTypes = {
         showRight: PropTypes.func.isRequired
     };
-    change(){
-
+    change(e,key){
+        this.props.orderEdit([{key,val:e.target.value}])
     }
     showDateModal(){
         console.log(this.dateModal);
@@ -173,16 +175,20 @@ export default  class Edit extends Component{
         let companys  = this.props.companyRepo.get('companys')?this.props.companyRepo.get('companys').toJS():[];
         let projects  = this.props.projectRepo.get('projects')?this.props.projectRepo.get('projects').toJS():[];
         console.log('AAAAAAAAAAAAAA');
-        console.log(orderdata);
+        console.log(ordertable);
+        let arr = [ { time:'09:30'}, { time:'14:30'},{ time:'15:15'}];
         return EditOrder({
             ...orderdata,
             hangleSelectDate:(::this.hangleSelectDate),
             dateModal:(this.dateModal),
             showDateModal:(::this.showDateModal),
             change:(::this.change),
+            ordertable,
             doctors,
             companys,
-            projects
+            projects,
+            arr
+
         })
     }
 }
