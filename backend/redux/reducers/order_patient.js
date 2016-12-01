@@ -10,6 +10,8 @@ const LOAD_DETAIL = 'bohe/order_patient/LOAD_DETAIL';
 const LOAD_DETAIL_SUCCESS = 'bohe/order_patient/LOAD_DETAIL_SUCCESS';
 const LOAD_DETAIL_FAIL = 'bohe/order_patient/LOAD_DETAIL_FAIL';
 
+const ORDERINFO_EDIT = 'bohe/order_patient/ORDERINFO_EDIT'
+
 const SET_ORDER_TOSHOW = 'bohe/order_patient/SHOW'
 const NEXT_GROUP_ORDERS = 'bohe/order_patient/NEXTGROUPORDERS'
 
@@ -63,6 +65,13 @@ export default function reducer(state = initialState, action = {}) {
                     }
                     return order
             }))
+        case ORDERINFO_EDIT:
+             var pairs = action.result;
+             var detailedit = {};
+             pairs.forEach((pair) => {
+                 detailedit[pair.key] = pair.val;
+             })
+             return state.merge(detailedit);
         case SET_ORDER_TOSHOW:
             return state.merge({ frontorder: action.result } )
         default:
@@ -110,6 +119,14 @@ export function LoadedorLoading_order(state,idx,id){
     return loaded || loading
 }
 
+export function orderEdit(pairs){
+
+    return {
+        type:   ORDERINFO_EDIT,
+        result: pairs
+    }
+
+}
 
 /* 当 直接采用 浏览器发起域名访问时 不会携带本地Token 所以在鉴权阶段 会转入login 登录后得到新的签发token
    当采用 微信公众号直接跳转时 鉴权阶段使用openid 通过鉴权，签发新的token到state的user中
