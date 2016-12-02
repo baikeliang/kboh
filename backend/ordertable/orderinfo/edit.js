@@ -32,6 +32,12 @@ import {
 } from 'backend/redux/reducers/user_doctor';
 
 import {
+    LoadedorLoading as successorLoading_project ,
+    load as loadProjects
+} from 'backend/redux/reducers/service_project';
+
+
+import {
     connect
 } from 'react-redux';
 
@@ -97,6 +103,26 @@ export const asyncEvent = [{
                     return Promise.resolve();
         }
     }
+},{
+    promise: ({ store: { dispatch, getState }, params }) => {
+        if (!isAuthLoaded(getState())) {
+            return dispatch(loadAuth(params)).then(function() {
+                if (!successorLoading_project(getState())) {
+                    let state = getState();
+                    let user = state.getIn(['auth', 'user']).toJS();
+                    return dispatch(loadProjects({ user }));
+                } else
+                    return Promise.resolve();
+            })
+        } else {
+                if (!successorLoading_doctor(getState())) {
+                    let state = getState();
+                    let user = state.getIn(['auth', 'user']).toJS();
+                    return dispatch(loadProjects({ user }));
+                } else
+                    return Promise.resolve();
+        }
+    }
 }]
 
 
@@ -107,7 +133,8 @@ export const asyncEvent = [{
             auth : state.get('auth'),
             detailEdit:  state.getIn(['order_patient','detailedit']),
             doctorRepo:  state.get('user_doctor'),
-            companyRepo: state.get('user_company')
+            companyRepo: state.get('user_company'),
+            projectRepo: state.get('service_project')
         }
     }, { pushState: push,orderEdit } )
 export default  class Edit extends Component{
@@ -141,7 +168,10 @@ export default  class Edit extends Component{
         this.props.orderEdit([{key:'visit_time',val:date.format('DD/MM/YY').toString()}])
     }
     render(){
-        let orderdata = this.props.detailEdit.get('data').toJS();
+        let orderdata = this.props.detailEdit.get('data')?this.props.detailEdit.get('data').toJS():{};
+        let doctors   = this.props.doctorRepo.get('doctors')?this.props.doctorRepo.get('doctors').toJS():[];
+        let companys  = this.props.companyRepo.get('companys')?this.props.companyRepo.get('companys').toJS():[];
+        let projects  = this.props.companyRepo.get('projects')?this.props.companyRepo.get('projects').toJS():[];
         console.log('AAAAAAAAAAAAAA');
         console.log(orderdata);
         return EditOrder({
@@ -149,7 +179,10 @@ export default  class Edit extends Component{
             hangleSelectDate:(::this.hangleSelectDate),
             dateModal:(this.dateModal),
             showDateModal:(::this.showDateModal),
-            change:(::this.change)
+            change:(::this.change),
+            doctors,
+            companys,
+            projects
         })
     }
 }

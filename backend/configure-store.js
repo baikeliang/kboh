@@ -35,6 +35,8 @@ import user_clinic from 'backend/redux/reducers/user_clinic'
 
 import user_company from 'backend/redux/reducers/user_company'
 
+import service_project from 'backend/redux/reducers/service_project'
+
 import clientMiddleware from 'backend/redux/middleware/clientMiddleware'
 
 
@@ -66,6 +68,7 @@ export function configureStore(history, client, initialState = {},mocker) {
         user_doctor,
         user_clinic,
         user_company,
+        service_project,
         mteeth_status,
         cteeth_status
     })
