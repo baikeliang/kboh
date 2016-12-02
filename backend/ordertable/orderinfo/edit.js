@@ -28,7 +28,10 @@ import {
 
 import {
     LoadedorLoading as successorLoading_doctor ,
-    load as loadDoctors
+    load as loadDoctors,
+    load_OndutyDoctors,
+    load_detail as load_detail_doctor,
+    load_onduty_detail
 } from 'backend/redux/reducers/user_doctor';
 
 import {
@@ -136,7 +139,7 @@ export const asyncEvent = [{
             companyRepo: state.get('user_company'),
             projectRepo: state.get('service_project')
         }
-    }, { pushState: push,orderEdit } )
+    }, { pushState: push,orderEdit,load_OndutyDoctors,load_onduty_detail } )
 export default  class Edit extends Component{
     constructor(props) {
         // code
@@ -151,8 +154,22 @@ export default  class Edit extends Component{
     static contextTypes = {
         showRight: PropTypes.func.isRequired
     };
-    change(){
-
+    change(ev,key){
+        this.props.orderEdit([{key,val:ev.target.value}]);
+    }
+    chooseDoctor(ev){
+        let id =  ev.target.value;
+        this.props.orderEdit([{key:'doctor_id',val:ev.target.value}]);
+        this.props.load_onduty_detail({id});
+    }
+    chooseProject(ev){
+        let visit_time;
+        if(visit_time = this.props.detailEdit.getIn(['data','visit_time'])){
+            this.props.orderEdit([{key:'service_id',val:ev.target.value}])
+            this.props.load_OndutyDoctors({visit_time,service_id})
+        }else{
+            this.props.orderEdit([{key:'service_id',val:ev.target.value}])
+        }
     }
     showDateModal(){
         console.log(this.dateModal);
@@ -160,29 +177,48 @@ export default  class Edit extends Component{
         console.log(this.dateModal);
         this.setState({...this.state,refresh:0});
     }
-    hangleSelectDate(date){
+    handleSelectDate(date){
         console.log(this.dateModal.display);
         console.log(date.format('DD/MM/YY').toString());
         this.dateModal.display = 'none';
         this.setState({...this.state,refresh:0});
-        this.props.orderEdit([{key:'visit_time',val:date.format('DD/MM/YY').toString()}])
+        let service_id;
+        if(service_id = this.props.detailEdit.getIn(['data','service_id'])){
+            this.props.orderEdit([{key:'visit_time',val:date.format('DD/MM/YY').toString()}])
+            this.props.load_OndutyDoctors({visit_time:date.format('DD/MM/YY').toString(),service_id})
+        }else{
+            this.props.orderEdit([{key:'visit_time',val:date.format('DD/MM/YY').toString()}])
+        }
     }
     render(){
         let orderdata = this.props.detailEdit.get('data')?this.props.detailEdit.get('data').toJS():{};
-        let doctors   = this.props.doctorRepo.get('doctors')?this.props.doctorRepo.get('doctors').toJS():[];
+        let doctors   = this.props.doctorRepo.get('dutydoctors')?this.props.doctorRepo.get('dutydoctors').toJS():[];
         let companys  = this.props.companyRepo.get('companys')?this.props.companyRepo.get('companys').toJS():[];
         let projects  = this.props.projectRepo.get('projects')?this.props.projectRepo.get('projects').toJS():[];
+        let timeRange = [];
+        let doctor_id = this.props.detailEdit.getIn(['data','doctor_id']);
+
+        doctors.forEach(( doctor )=>{
+           if(doctor.id == doctor_id){
+              timeRange = doctor.time_arr;
+           }
+        });
+
         console.log('AAAAAAAAAAAAAA');
-        console.log(orderdata);
+        console.log(timeRange);
+
         return EditOrder({
             ...orderdata,
-            hangleSelectDate:(::this.hangleSelectDate),
+            handleSelectDate:(::this.handleSelectDate),
             dateModal:(this.dateModal),
             showDateModal:(::this.showDateModal),
             change:(::this.change),
             doctors,
             companys,
-            projects
+            projects,
+            timeRange,
+            chooseDoctor:(::this.chooseDoctor),
+            chooseProject:(::this.chooseProject)
         })
     }
 }
