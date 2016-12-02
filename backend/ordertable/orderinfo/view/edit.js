@@ -11,7 +11,7 @@ export const EditOrder = ({
   companys,
   projects,
   chooseDoctor,
-  clinic_name
+  clinic_name,
   service_id,
 }) => {
        return (<div>

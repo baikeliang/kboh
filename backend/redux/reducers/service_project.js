@@ -66,7 +66,7 @@ export function load({
 
     return {
         types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
-        promise: (client) => client.GET('http://'+getApiIp()+'/user_clinic/rest?', { params }, {
+        promise: (client) => client.GET('http://'+getApiIp()+'/project/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -79,7 +79,7 @@ export function load({
 
                 if (res.valid == 1) {
 
-                    return Promise.resolve(res.clinics)
+                    return Promise.resolve(res.projects)
 
                 } else {
                     //var err = { info: 'auth' }
