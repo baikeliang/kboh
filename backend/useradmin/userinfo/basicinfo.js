@@ -163,7 +163,6 @@ export default  class BasicInfo extends Component{
                    }
                    //this.files = [];
                })
-
        }
        if((!(window.$._data(window.$("#btnCrop").get(0), "events")))||(!(window.$._data(window.$("#btnCrop").get(0), "events").click)))
                window.$('#btnCrop').on('click', function() {

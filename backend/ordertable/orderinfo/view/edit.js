@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM  from 'react-dom'
-
+import { Calendar } from 'react-date-range';
 
 
 export const EditOrder = ({
@@ -13,6 +13,10 @@ export const EditOrder = ({
   chooseDoctor,
   clinic_name,
   service_id,
+  hangleSelectDate,
+  visit_time,
+  dateModal,
+  showDateModal
 }) => {
        return (<div>
 			          <div className="rtop rtop4">
@@ -86,38 +90,41 @@ export const EditOrder = ({
 			                        <span><em className="emx">所属公司：</em></span>
 			                        <select name="" id="company_name" className="select-div">
 			                          <option value="">请选择</option>
-			                          {companys.map((company)=>{
+			                          {companys?companys.map((company)=>{
                                            return <option value={ company.company_code }>{company.company_name}</option>
-			                          })}
+			                          }):''}
 			                        </select>
 			                        <label className="inviteCode"></label>
 			                    </div>
 			                    <div className="input-box h30">
 			                        <span><em className="emx">选择项目：</em></span>
 			                        <select name="" id="service_id" className="select-div">
-			                          {  projects.map((project) =>{
+			                          {projects?projects.map((project) =>{
 			                          	  if(service_id == project.id)
 			                          	  	 return <option selected='selected' value={ project.id }>{ project.service_name }</option>
 			                          	  else
                                              return <option value={ project.id }>{ project.service_name }</option>
-			                            })
+			                            }):''
 			                          }
 			                        </select>
 			                        <p></p>
 			                    </div>
-			                    <div className="input-box h30">
+			                    <div className="input-box h30" style={{position:'relative'}}>
 			                        <span><em className="emx">预约日期：</em></span>
-			                        <input type="text" className="text-input layicon" id="visit_time" readonly="readonly"/>
+			                        <input type="text" className="text-input layicon" id="visit_time" onClick={ showDateModal } value={ visit_time?visit_time:'' } readonly="readonly"/>
 			                        <p></p>
 			                        <div className="calendarbox" id="inline-calendar"></div>
+			                        <div style={ dateModal }>
+                                      <Calendar onChange={hangleSelectDate}/>
+                                	</div>
 			                    </div>
 			                    <div className="input-box h30">
 			                        <span><em className="emx">医生：</em></span>
 			                        <select onChange={ chooseDoctor }name="" id="doctor_id" className="select-div">
 			                          <option value="">请选择</option>
-			                            { doctors.map((doctor)=>{
+			                            { doctors?doctors.map((doctor)=>{
 			                          	   return <option value={ doctor.id } clinic_name={doctor.clinic_name} clinic_id={doctor.clinic_id}>{doctor.name}</option>
-			                             }) }
+			                             }):'' }
 			                        </select>
 			                        <p></p>
 			                    </div>

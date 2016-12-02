@@ -17,7 +17,8 @@ import { EditOrder } from './view/edit.js'
 import {
    load_detail,
    LoadedorLoading,
-   LoadedorLoading_order
+   LoadedorLoading_order,
+   orderEdit
 } from 'backend/redux/reducers/order_patient.js'
 
 import {
@@ -108,11 +109,13 @@ export const asyncEvent = [{
             doctorRepo:  state.get('user_doctor'),
             companyRepo: state.get('user_company')
         }
-    }, { pushState: push } )
+    }, { pushState: push,orderEdit } )
 export default  class Edit extends Component{
     constructor(props) {
         // code
       super(props);
+      this.dateModal = { display:'none'}
+      this.state = { refresh:0 }
     }
     static contextTypes = {
         store: PropTypes.object.isRequired,
@@ -124,9 +127,29 @@ export default  class Edit extends Component{
     change(){
 
     }
+    showDateModal(){
+        console.log(this.dateModal);
+        this.dateModal.display == 'block'?this.dateModal.display='none':this.dateModal={...this.dateModal,display:'block',position:'absolute',left:150+'px',top:35+'px'};
+        console.log(this.dateModal);
+        this.setState({...this.state,refresh:0});
+    }
+    hangleSelectDate(date){
+        console.log(this.dateModal.display);
+        console.log(date.format('DD/MM/YY').toString());
+        this.dateModal.display = 'none';
+        this.setState({...this.state,refresh:0});
+        this.props.orderEdit([{key:'visit_time',val:date.format('DD/MM/YY').toString()}])
+    }
     render(){
         let orderdata = this.props.detailEdit.get('data').toJS();
-        return EditOrder({...orderdata,change:(::this.change)})
+        console.log('AAAAAAAAAAAAAA');
+        console.log(orderdata);
+        return EditOrder({
+            ...orderdata,
+            hangleSelectDate:(::this.hangleSelectDate),
+            dateModal:(this.dateModal),
+            showDateModal:(::this.showDateModal),
+            change:(::this.change)
+        })
     }
-
 }
