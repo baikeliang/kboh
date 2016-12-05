@@ -106,9 +106,9 @@ export const EditDoctor = ({
 			                          <div className="checkBone" id="service_ids">
 			                            {
 			                            	projects?projects.map((project)=>{
-		                                           return (<span>
+		                                           return (<span style={{float:'left',paddingRight: '15px',paddingLeft: '15px',position: 'relative',lineHeight:'30px',fontSize:'12px'}}>
 			                                                <input type="checkbox" className="checkbox" id={ 'checkbox_n_' + project.id  } value={ project.id }/>
-			                                                <label htmlFor={ 'checkbox_n_' + project.id  }>
+			                                                <label htmlFor={ 'checkbox_n_' + project.id  } style={{backgroundPositionY:'1px',lineHeight:'30px',paddingLeft:'19px',width: '16px',display: 'block',borderRadius: '2px',position:'absolute',top:'6px',left: '0'}}>
 			                                                </label>
 			                                                {project.name}
 			                                              </span>)
