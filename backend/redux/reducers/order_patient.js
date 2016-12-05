@@ -11,6 +11,9 @@ const LOAD_DETAIL_SUCCESS = 'bohe/order_patient/LOAD_DETAIL_SUCCESS';
 const LOAD_DETAIL_FAIL = 'bohe/order_patient/LOAD_DETAIL_FAIL';
 
 const ORDERINFO_EDIT = 'bohe/order_patient/ORDERINFO_EDIT'
+const ORDER_FLUSH = 'bohe/order_patient/ORDER_FLUSH'
+const ORDER_ADD = 'bohe/order_patient/ORDER_ADD'
+
 
 const SET_ORDER_TOSHOW = 'bohe/order_patient/SHOW'
 const NEXT_GROUP_ORDERS = 'bohe/order_patient/NEXTGROUPORDERS'
@@ -73,8 +76,24 @@ export default function reducer(state = initialState, action = {}) {
              })
              var detailedit ={ data }
              return state.mergeDeep({detailedit});
+        case ORDER_FLUSH:
+             var idx = state.getIn(['detailedit','idx']);
+             var order = state.getIn(['orders',idx]).toJS();
+             var datatomerge = state.getIn(['detailedit','data']).toJS();
+             order = {...order,...datatomerge};
+             console.log(order);
+            return  state.setIn(['orders',idx],Immutable.Map(order));
+        case ORDER_ADD:
+            var tomerge = state.getIn(['detailedit','data']).toJS();
+            console.log(tomerge);
+            var orders = state.getIn(['orders']).toJS();
+            console.log(orders);
+            orders.push(tomerge);
+            console.log(orders);
+            // var orderobj = { order };
+            return state.setIn(['orders'],Immutable.List(orders));
         case SET_ORDER_TOSHOW:
-            return state.merge({ frontorder: action.result } )
+            return state.merge({ frontorder: action.result })
         default:
             return state
     }
@@ -128,6 +147,22 @@ export function orderEdit(pairs){
     }
 
 }
+
+export function orderFlush(pairs){
+
+    return {
+        type: ORDER_FLUSH
+    }
+
+}
+
+export function orderADD(pairs){
+    return {
+        type: ORDER_ADD
+    }
+}
+
+
 
 /* 当 直接采用 浏览器发起域名访问时 不会携带本地Token 所以在鉴权阶段 会转入login 登录后得到新的签发token
    当采用 微信公众号直接跳转时 鉴权阶段使用openid 通过鉴权，签发新的token到state的user中

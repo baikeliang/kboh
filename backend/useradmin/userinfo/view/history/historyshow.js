@@ -84,17 +84,15 @@ export const HistoryShow = ({
                                 <h2><i className="row_6"></i><span>传染病</span></h2>
                                 <div className="z_checkbox_main see_hide pbtom30">
                                     <div className="z_past_desc">
-                                    	
                                     	{
                                    			historyedit.history.infection.map((item)=>{
 		                                      return ( <span><span>{item.name}</span><span>{item.describe}</span></span> )
 		                                    })
-                                   		}	
+                                   		}
                                     </div>
                                     <div className="clear"></div>
                                 </div>
                             </div>
-                            
                         </div>
                     </div> 
                 	<div className="clear"></div>
