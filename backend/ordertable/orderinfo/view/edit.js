@@ -4,6 +4,7 @@ import Calendar from 'rc-calendar';
 
 export const EditOrder = ({
   change,
+  changeIsSelf,
   changeProject,
   relations,
   patient_name,
@@ -20,14 +21,16 @@ export const EditOrder = ({
   showDateModal,
   ordertable,
   timeRange,
-  click
+  click,
+  is_self,
+  save
 }) => {	
        return (<div>
 			          <div className="rtop rtop4">
 			            <div className="but-box bj-none">
 			              <p>
 			                <a href="javascript:void(0)" className="back-but" id="back">返回</a>
-			                <a href="javascript:void(0)" className="save-but" id="save-but">保存</a>
+			                <a href="javascript:void(0)" className="save-but" onClick={ ()=>{ save() } }>保存</a>
 			              </p>
 			            </div>
 			          </div>
@@ -79,8 +82,8 @@ export const EditOrder = ({
 			                    <div className="input-box h30">
 			                        <span><em className="emx">是否本人：</em></span>
 			                        <div className="radio-box" id="is_self">
-			                            <span><input type="radio" className="radio1" name="radio2" id="checkbox10" value="1"/><label for="checkbox10"></label>是</span>
-			                            <span><input type="radio" className="radio1" name="radio2" id="checkbox11" value="2"/><label for="checkbox11"></label>否</span>
+			                            <span><input type="radio" className="radio1" name="radio2" id="checkbox10" value="1" checked={is_self&&is_self=='1'?'checked':''}/><label for="checkbox10" style={{top:'6px'}} onClick={ ()=>{ changeIsSelf('1','is_self') }}>是</label></span>
+			                            <span><input type="radio" className="radio1" name="radio2" id="checkbox11" value="2" checked={is_self&&is_self=='2'?'checked':''}/><label for="checkbox11" style={{top:'6px'}} onClick={ ()=>{ changeIsSelf('2','is_self') }}>否</label></span>
 			                        </div>
 			                        <p className="errorTip"></p>
 			                    </div>
@@ -153,10 +156,8 @@ export const EditOrder = ({
 			                      							color = 'cur';
 			                      						}
 			                      					}
-
 			                      				}):''
 			                      				return <li className={ color }><span onClick={ (e)=>{click(e,'visit_time',visit_time) }}>{tableitem.time}</span></li>
-
 			                      			}
 			                      		}):''
 			                      	}

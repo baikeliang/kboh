@@ -18,7 +18,8 @@ import {
    load_detail,
    LoadedorLoading,
    LoadedorLoading_order,
-   orderEdit
+   orderEdit,
+   orderFlush
 } from 'backend/redux/reducers/order_patient.js'
 
 import {
@@ -141,7 +142,7 @@ export const asyncEvent = [{
             companyRepo: state.get('user_company'),
             projectRepo: state.get('service_project')
         }
-    }, { pushState: push,orderEdit,load_OndutyDoctors,load_onduty_detail } )
+    }, { pushState: push,orderEdit,load_OndutyDoctors,load_onduty_detail,orderFlush } )
 export default  class Edit extends Component{
     constructor(props) {
         // code
@@ -156,6 +157,9 @@ export default  class Edit extends Component{
     static contextTypes = {
         showRight: PropTypes.func.isRequired
     };
+    save(){
+       this.props.orderFlush();
+    }
     click(e,key,time){
         console.log(time);
         time = time.split(' ')[0];
@@ -164,7 +168,15 @@ export default  class Edit extends Component{
     change(ev,key){
         this.props.orderEdit([{key,val:ev.target.value}]);
     }
+    changeIsSelf(val,key){
+        this.props.orderEdit([{key,val}]);
+    }
     chooseDoctor(ev){
+        this.props.doctorRepo.get('doctors').map((doctor)=>{
+            if(doctor.get('id') == ev.target.value){
+                this.props.orderEdit([{key:'doctor_name',val:doctor.get('name')}])
+            }
+        })
         let id =  ev.target.value;
         this.props.orderEdit([{key:'doctor_id',val:ev.target.value}]);
 
@@ -172,11 +184,15 @@ export default  class Edit extends Component{
                if(doctor.get('id') == id){
                   this.props.orderEdit([{key:'clinic_name',val:doctor.get('clinic_name')}])
                }
-
         })
         this.props.load_onduty_detail({ id });
     }
     chooseProject(ev){
+        this.props.projectRepo.get('projects').map((project)=>{
+            if(project.get('id') == ev.target.value){
+                this.props.orderEdit([{key:'service_name',val:project.get('name')}])
+            }
+        })
         let visit_time;
         if(visit_time = this.props.detailEdit.getIn(['data','visit_time'])){
             this.props.orderEdit([{key:'service_id',val:ev.target.value}])
@@ -232,12 +248,14 @@ export default  class Edit extends Component{
             dateModal:(this.dateModal),
             showDateModal:(::this.showDateModal),
             change:(::this.change),
+            changeIsSelf:(::this.changeIsSelf),
             click:(::this.click),
             ordertable,
             doctors,
             companys,
             projects,
             timeRange,
+            save:(::this.save),
             chooseDoctor:(::this.chooseDoctor),
             chooseProject:(::this.chooseProject)
         })

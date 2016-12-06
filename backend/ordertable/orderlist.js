@@ -47,6 +47,8 @@ import {
 
 import  CheckOrder, { asyncEvent as asyncEventCheck } from './orderinfo/check.js'
 
+import  Add, { asyncEvent as asyncEventAdd } from './orderinfo/add.js'
+
 export const asyncEvent = [{
     promise: ({ store: { dispatch, getState }, params }) => {
         if (!isAuthLoaded(getState())) {
@@ -152,7 +154,12 @@ export default class OrderListCom extends Component {
 
     }
     toAddOrder(){
-
+        this.context.showRight({
+            asyncProcess:asyncEventAdd,
+            comCreater:function(){
+               return <Add/>
+            }
+        })
     }
     toDeleteOrder(){
 
@@ -168,7 +175,7 @@ export default class OrderListCom extends Component {
         this.props.toDetail({ idx,id })
 
         this.context.showRight({
-            asyncProcess:asyncEventCheck,
+            asyncProcess:asyncEventAdd,
             comCreater:function(){
                return <CheckOrder/>
             }
@@ -213,8 +220,6 @@ export default class OrderListCom extends Component {
         for(let i=0;(i<10)&&((showbegin+i)<size);i++){
              orders.push(this.props.orderRepo.getIn(['orders',showbegin+i]).toJS())
         }
-
-
         console.log("ffffggg")
         console.log(doctors)
         console.log(clinics)
