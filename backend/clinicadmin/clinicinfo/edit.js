@@ -12,14 +12,14 @@ import {
   logout
 } from 'backend/redux/reducers/auth';
 
-import { EditDoctor } from './view/edit.js'
+import { EditClinic } from './view/edit.js'
 
 import {
-    LoadedorLoading as successorLoading_doctors ,
-    LoadedorLoading_doctor as successorLoading_doctor,
-    load as loadDoctors,
-    load_detail as load_detail_doctor,
-    detailEdit  as detailEditDoctor
+    LoadedorLoading as successorLoading_clinics ,
+    LoadedorLoading_clinic as successorLoading_clinic,
+    load as loadClinics,
+    load_detail as load_detail_clinic,
+    detailEdit  as detailEditClinic
 } from 'backend/redux/reducers/user_doctor';
 
 import {
@@ -39,18 +39,18 @@ import {
 export const asyncEvent = [{
     promise: ({ store: { dispatch, getState }, params }) => {
         var state = getState();
-        let id = state.getIn(['user_doctor', 'frontuserinfo', 'id']);
-        let idx = state.getIn(['user_doctor', 'frontuserinfo', 'idx']);
+        let id = state.getIn(['user_clinic', 'frontuserinfo', 'id']);
+        let idx = state.getIn(['user_clinic', 'frontuserinfo', 'idx']);
         if (!isAuthLoaded(state))
             return dispatch(loadAuth(params)).then(function() {
-                if (!successorLoading_doctor(state, idx, id))
-                    return dispatch(load_detail_doctor({ id, idx, extract: true }))
+                if (!successorLoading_clinic(state, idx, id))
+                    return dispatch(load_detail_clinic({ id, idx, extract: true }))
                 else
                     return Promise.resolve();
             })
         else
-        if (!successorLoading_doctor(state, idx, id))
-            return dispatch(load_detail_doctor({ id, idx, extract: true }))
+        if (!successorLoading_clinic(state, idx, id))
+            return dispatch(load_detail_clinic({ id, idx, extract: true }))
         else
             return Promise.resolve();
     }
@@ -80,10 +80,10 @@ export const asyncEvent = [{
 @asyncConnect(asyncEvent)
 @connect(
     state => {
-        var idx = state.getIn(['user_doctor', 'frontuserinfo','idx']);
+        var idx = state.getIn(['user_clinic', 'frontuserinfo','idx']);
         return {
             auth : state.get('auth'),
-            detailEdit:  state.getIn(['user_doctor','doctors',idx,'detailedit']),
+            detailEdit:  state.getIn(['user_clinic','clinics',idx,'detailedit']),
             projectRepo: state.get('service_project')
         }
     }, { pushState: push,detailEditDoctor } )
@@ -107,7 +107,7 @@ export default  class Edit extends Component{
         this.props.detailEditDoctor([{key,val}])
     }
     change(ev,key){
-        this.props.detailEditDoctor([{key,val:ev.target.value}])
+         this.props.detailEditDoctor([{key,val:ev.target.value}])
     }
     handleSelectDate(date){
 
