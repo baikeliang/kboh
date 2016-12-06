@@ -7,6 +7,7 @@ import 'backend/common/css/pagination.css'
 import 'backend/common/css/user.css'
 import 'backend/common/css/H_user1.css'
 import 'backend/common/css/z_user.css'
+import 'rc-calendar/assets/index.css'
 
 import Immutable from 'immutable'
 import React from 'react'

@@ -57,9 +57,9 @@ export const table = {
 			check: '0',
 		},
 		{
-			name: "最近一次体检日期",
+			name: "最近一次体检日期:",
 			date:'',
-			dateUI: { display:'none',position:'absolute'}
+			dateUI: { display:'none',position:'absolute',zIndex:'100'}
 		},
 		{
 			name: "定期洗牙",
@@ -68,7 +68,7 @@ export const table = {
 		{
 			name: "最近一次洗牙日期:",
 			date:'',
-			dateUI: { display:'none',position:'absolute'}
+			dateUI: { display:'none',position:'absolute',zIndex:'100'}
 		}
 
 	],

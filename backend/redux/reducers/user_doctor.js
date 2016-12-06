@@ -22,13 +22,14 @@ const LOAD_ONDUTY_DETAIL = 'bohe/user_doctor/LOAD_ONDUTY_DETAIL';
 const LOAD_ONDUTY_DETAIL_SUCCESS = 'bohe/user_doctor/LOAD_ONDUTY_DETAIL_SUCCESS';
 const LOAD_ONDUTY_DETAIL_FAIL = 'bohe/user_doctor/LOAD_ONDUTY_DETAIL_FAIL';
 
+const SET_USER_TOSHOWINFO = 'bohe/user_doctor/SHOWINFO'
 
-
-
+const DETAILINFO_EDIT = 'bohe/user_doctor/DETAILINFO_EDIT'
 
 const initialState = Immutable.Map({
     loaded: false,
-    loading: false
+    loading: false,
+    showbegin:0
 });
 
 export default function reducer(state = initialState, action = {}) {
@@ -36,8 +37,14 @@ export default function reducer(state = initialState, action = {}) {
         case LOAD:
             return state.merge({ loading: true })
         case LOAD_SUCCESS:
-            return state.merge({ loading: false, loaded: true, doctors: action.result })
+              if(action.showUsersBegin)
+                return state.merge({showbegin:action.showUsersBegin , loading: false, loaded: true, doctors: action.result })
+              else
+                return state.merge({loading: false, loaded: true, doctors: action.result })
         case LOAD_FAIL:
+            if(action.refresh && action.refresh.reject){
+                action.refresh.reject()
+            }
             return state.merge({ loading: false, loaded: false, error: action.error })
 
         case LOAD_ONDUTY_DOCTORS:
@@ -99,10 +106,10 @@ export default function reducer(state = initialState, action = {}) {
            else
               return state.updateIn(['doctors'], list => list.map(doctor => {
                     if(doctor.get('id') == action.result.id){
-                        return doctor.merge({loading:false, loaded:true, ...action.result})
+                        return doctor.merge({loading:false, loaded:true, ...action.result, detailedit:{ idx:action.idx, data:action.result }})
                     }
                         return doctor
-              })).merge({ detailedit:{ idx:action.idx, data:action.result }})
+              }))
         case LOAD_DETAIL_FAIL:
             return state.updateIn(['doctors'], list => list.map(doctor => {
                     if(doctor.get('id') == action.error.id){
@@ -110,6 +117,17 @@ export default function reducer(state = initialState, action = {}) {
                     }
                     return doctor
             }))
+        case SET_USER_TOSHOWINFO:
+            return state.merge({ frontuserinfo: action.result } )
+        case DETAILINFO_EDIT:
+             var idx = state.getIn(['frontuserinfo','idx']);
+             var pairs = action.result;
+             var baseinfoedit = {};
+             pairs.forEach((pair) => {
+                 baseinfoedit[pair.key] = pair.val;
+             })
+             var meta_info = state.getIn(['doctors',idx,'detailedit','data']);
+             return state.setIn(['doctors',idx,'detailedit','data'],meta_info.merge(baseinfoedit));
         default:
             return state
     }
@@ -126,6 +144,20 @@ export function LoadedorLoading(state){
     }
     return loaded || loading
 }
+
+export function LoadedorLoading_doctor(state,idx,id){
+    var loaded = false
+    var loading = false
+
+    let doctor = state.getIn(['user_doctor','doctors',idx])
+
+    if(doctor){
+            loading = doctor.get('loading');
+            loaded = doctor.get('loaded');
+    }
+    return loaded || loading
+}
+
 
 /* 当 直接采用 浏览器发起域名访问时 不会携带本地Token 所以在鉴权阶段 会转入login 登录后得到新的签发token
    当采用 微信公众号直接跳转时 鉴权阶段使用openid 通过鉴权，签发新的token到state的user中
@@ -308,6 +340,22 @@ export function load_onduty_detail({
         }),
         id
     };
+
+}
+
+export function frontUserForInfo({ idx,id }){
+     return {
+        type: SET_USER_TOSHOWINFO,
+        result:{ idx,id }
+     }
+
+}
+export function detailEdit(pairs){
+
+    return {
+        type: DETAILINFO_EDIT,
+        result: pairs
+    }
 
 }
 

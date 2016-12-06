@@ -443,7 +443,7 @@
 	float: left;
 	margin-top: 2px;
 }
-.checkbox-box span,.radio-box span{
+.checkbox-box .W120,.radio-box span{
 	float: left;
 	padding-right:15px;
 	padding-left: 15px;
@@ -1855,7 +1855,6 @@ position: relative;
 }
 
 .calendarboxmain input{
-	position: absolute;
 	bottom:-30px;
 	left:0;
 }

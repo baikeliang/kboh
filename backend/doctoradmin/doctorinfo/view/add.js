@@ -1,43 +1,28 @@
 import React, { Component } from 'react';
 import ReactDOM  from 'react-dom'
-import Calendar from 'rc-calendar';
 
-export const EditOrder = ({
-  change,
-  changeProject,
-  relations,
-  patient_name,
-  doctors,
-  companys,
-  projects,
-  chooseDoctor,
-  chooseProject,
-  clinic_name,
-  service_id,
-  handleSelectDate,
-  visit_time,
-  dateModal,
-  showDateModal,
-  ordertable,
-  timeRange,
-  click
-}) => {	
-       return (<div>
+
+
+export const AddOrder = ({
+     change,
+     doctors
+}) => {
+            return (<div>
 			          <div className="rtop rtop4">
-			            <div className="but-box bj-none">
+			              <div className="but-box bj-none">
 			              <p>
 			                <a href="javascript:void(0)" className="back-but" id="back">返回</a>
-			                <a href="javascript:void(0)" className="save-but" id="save-but">保存</a>
+			                <input type="button" className="save-but" id="save-but" value="保存"/>
 			              </p>
 			            </div>
 			          </div>
-			          <div className="add-box-container" style={{minHeight:'700px'}}>
+			         <div className="add-box-container" style={{minHeight:'700px'}}>
 			            <div className="add-h3 add-main-box1 mtop45">
 			              <h3 className="box5-h3">基本信息<span></span></h3>
-			                <div className="main-input" style={{overflow:'scroll'}}>
+			                <div className="main-input">
 			                    <div className="input-box h30">
 			                        <span><em className="emx">就诊人姓名：</em></span>
-			                        <input type="text" onChange={(ev)=>{ change(ev,'patient_name') }} value={ patient_name } className="text-input"/>
+			                        <input onChange={ (ev) => change(ev,'patient_name') } type="text" className="text-input" id="patient_name"/>
 			                        <p></p>
 			                    </div>
 			                    <div className="input-box h30">
@@ -84,102 +69,54 @@ export const EditOrder = ({
 			                        </div>
 			                        <p className="errorTip"></p>
 			                    </div>
-			                    <div className="input-box h30" id="guanxi" style={{display:'none'}}>
+			                    <div className="input-box h30" id="guanxi" style="display:none">
 			                        <span><em className="emx">与预约人关系：</em></span>
-			                        <input value={ relations } type="text" className="text-input" id="relations"/>
+			                        <input onChange={(ev)=>{ change(ev,'relations') }} type="text" className="text-input" id="relations"/>
 			                        <p></p>
 			                    </div>
 
 			                    <div className="input-box h30">
 			                        <span><em className="emx">所属公司：</em></span>
-			                        <select name="" id="company_name" className="select-div" onChange={ (e)=>{ change(e,'company_name') } }>
+			                        <select name="" id="company_name" className="select-div">
 			                          <option value="">请选择</option>
-			                          {companys?companys.map((company)=>{
-                                           return <option value={ company.company_code }>{company.name}</option>
-			                          }):''}
+			                          {companys.map((company)=>{
+			                          	 return  <option value={ company.company_code }>{ company.company_name }</option>
+			                          })}
 			                        </select>
 			                        <label className="inviteCode"></label>
 			                    </div>
 			                    <div className="input-box h30">
 			                        <span><em className="emx">选择项目：</em></span>
-			                        <select onChange={ chooseProject } name="" id="service_id" className="select-div">
-			                          {projects?projects.map((project) =>{
-			                          	  if(service_id == project.id)
-			                          	  	 return <option selected='selected' value={ project.id }>{ project.name }</option>
-			                          	  else
-                                             return <option value={ project.id }>{ project.name }</option>
-			                            }):''
-			                          }
+			                        <select name="" id="service_id" className="select-div">
+			                         {projects.map((project)=>{
+			                         	return <option value={project.id}>{project.service_name}</option>
+			                         })}
 			                        </select>
 			                        <p></p>
 			                    </div>
-			                    <div className="input-box h30" style={{position:'relative'}}>
+			                    <div className="input-box h30" id="jdatebox">
 			                        <span><em className="emx">预约日期：</em></span>
-			                        <input type="text" className="text-input layicon" id="visit_time" onClick={ showDateModal } value={ visit_time?visit_time:'' } readonly="readonly"/>
+			                        <input type="text" className="text-input layicon" id="visit_time" readonly="readonly"/>
 			                        <p></p>
 			                        <div className="calendarbox" id="inline-calendar"></div>
-			                        <div style={ dateModal }>
-                                      <Calendar format={'YYYY-MM-DD'} onChange={ handleSelectDate }/>
-                                	</div>
 			                    </div>
 			                    <div className="input-box h30">
 			                        <span><em className="emx">医生：</em></span>
-			                        <select onChange={ chooseDoctor } name="" id="doctor_id" className="select-div">
+			                        <select name="" id="doctor_id" className="select-div">
 			                          <option value="">请选择</option>
-			                            { doctors?doctors.map((doctor)=>{
-			                          	   return <option value={ doctor.id } clinic_name={doctor.clinic_name} clinic_id={doctor.clinic_id}>{doctor.name}</option>
-			                             }):'' }
+			                          {doctors.map((doctor) => {
+                                          return <option value={doctor.id} clinic_name={doctor.clinic_name} clinic_id={doctor.clinic_id}>{doctor.name}</option>
+			                          })}
 			                        </select>
 			                        <p></p>
 			                    </div>
 			                    <div className="input-box h30">
 			                        <span>诊所：</span>
-			                        <input value={ clinic_name } type="text" className="text-input readonly" id="clink" readonly="readonly"/>
+			                        <input type="text" className="text-input readonly" id="clink" readonly="readonly"/>
 			                    </div>
 			                    <div className="input-box chuzhenTimebox">
 			                      <span><em className="emx">选择出诊时间：</em></span>
 			                      <ul id="timeArry">
-			                      	<h2 className="timeh2">上午</h2>
-			                      	{
-			                      		ordertable?ordertable.map((tableitem)=>{
-			                      			var color = 'gray';
-			                      			console.log(parseInt(tableitem.time));
-			                      			if(parseInt(tableitem.time)<=12){
-			                      				timeRange?timeRange.map((dataitem)=>{
-			                      					if(dataitem.visit_time==tableitem.time){
-			                      						color = '';
-			                      						console.log(visit_time);
-			                      						if(visit_time.indexOf(tableitem.time)>=0){
-			                      							color = 'cur';
-			                      						}
-			                      					}
-
-			                      				}):''
-			                      				return <li className={ color }><span onClick={ (e)=>{click(e,'visit_time',visit_time) }}>{tableitem.time}</span></li>
-
-			                      			}
-			                      		}):''
-			                      	}
-			                    	<h2 className="timeh2">下午</h2>
-			                    	{
-			                      		ordertable?ordertable.map((tableitem)=>{
-			                      			var color = 'gray';
-			                      			if(parseInt(tableitem.time)>=13){
-			                      				timeRange?timeRange.map((dataitem)=>{
-			                      					if(dataitem.visit_time==tableitem.time){
-			                      						color = '';
-
-			                      						if(visit_time.indexOf(tableitem.time)>=0){
-			                      							color = 'cur';
-			                      						}
-			                      					}
-
-			                      				}):''
-			                      				return <li className={ color }><span onClick={ (e)=>{click(e,'visit_time',visit_time) }}>{tableitem.time}</span></li>
-
-			                      			}
-			                      		}):''
-			                      	}
 			                      </ul>
 			                      <p id="timeWrong"></p>
 			                      <div className="clear"></div>
@@ -187,7 +124,7 @@ export const EditOrder = ({
 
 			                    <div className="input-box h30">
 			                        <span>备注：</span>
-			                        <textarea onChange={(ev)=>{ change(ev,'remark') }} className="textarea" style={{maxWidth:'245px'}} id="remark"></textarea>
+			                        <textarea onChange={(ev)=>change(ev,'remark') } className="textarea" style={{maxWidth:'245px'}}></textarea>
 			                        <p></p>
 			                    </div>
 

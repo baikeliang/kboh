@@ -5,7 +5,7 @@ import {
     asyncConnect
 } from 'redux-connect'
 
-import { Calendar } from 'react-date-range';
+import Calendar from 'rc-calendar';
 
 function infoGet(subtable,name){
    var retitem;
@@ -55,8 +55,8 @@ export const HistoryEdit = ({
                                                                 return item.dateUI?(<div><b>{item.name}</b>
                                                                     <input type="text" className="layicon" readonly=""  value={metaitem?metaitem.date:''} onClick={()=>{showDateModalBodyCon(item)} }/>
                                                                       <div style={ item.dateUI }>
-                                                                      <Calendar  onChange={(date)=>{ handleSelectDateBodyCon(item,date)}}  date={metaitem?metaitem.date:''}/>
-                                                                    </div>
+                                                                      <Calendar format={'YYYY-MM-DD'} onSelect={ (date)=>{ handleSelectDateBodyCon(item,date)} }/>
+                                                                      </div>
                                                                     </div>):(<div><input type="checkbox" className="checkbox" id={"checkboxa_"+count} checked={(metaitem)?'checked':''}/>
                                                                     <label htmlFor={"checkboxa_"+count} onClick={()=>{ metaitem?(item.check=1):(item.check=0); click('body_condition',item) }} ><i>{item.name}</i></label></div>)})(item)
                                                             }

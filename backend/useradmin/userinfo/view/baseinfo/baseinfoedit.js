@@ -5,7 +5,9 @@ import {
     asyncConnect
 } from 'redux-connect'
 
-import { Calendar } from 'react-date-range';
+import Calendar from 'rc-calendar';
+
+import moment from 'moment';
 
 function photoBox(){
    return (<div className="new-create-opcity" style={{display:"none",position:'absolute'}}>
@@ -54,10 +56,10 @@ export const BaseInfoEdit = ({
   remark,
   change,
   click,
-  hangleSelectDate,
+  handleSelectDate,
   showDateModal,
   dateModal,
-  birthdate,
+  birthdate
 
 }) => {
       var height = window.innerHeight || document.documentElement.clientHeight
@@ -121,7 +123,7 @@ export const BaseInfoEdit = ({
                                                     <p></p>
                                                 </div>
                                                 <div style={ dateModal }>
-                                                    <Calendar onInit={hangleSelectDate} onChange={hangleSelectDate}  date={birthdate}/>
+                                                    <Calendar format={'YYYY-MM-DD'} onSelect={ handleSelectDate }/>
                                                 </div>
                                                 <div className="input-box h25">
                                                     <span>民族：</span>

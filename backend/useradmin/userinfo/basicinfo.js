@@ -123,14 +123,15 @@ export default  class BasicInfo extends Component{
    }
 
    showDateModal(){
-      this.state.dateModal.display == 'block'?this.setState({...this.state,dateModal:{display:'none'}}):this.setState({...this.state,dateModal:{display:'block',position:'absolute'}});
+      this.state.dateModal.display == 'block'?this.setState({...this.state,dateModal:{display:'none'}}):this.setState({...this.state,dateModal:{display:'block',position:'absolute',zIndex:'100'}});
    }
-   hangleSelectDate(date){
+   handleSelectDate(date){
       this.state.dateModal.display = 'none';
       var dated = new Date();
       var nowYear = dated.getFullYear();
-      var age = nowYear-date.format('Y');
-      this.props.basicInfoEdit([{key:'birthdate',val:date.format('DD/MM/YY').toString()},{key:'age',val:age}])
+      console.log('yyyYYYYYYYWWWEErrthgdrgfd')
+      var age = nowYear-date.year();
+      this.props.basicInfoEdit([{key:'birthdate',val:date.format('YYYY-MM-DD')},{key:'age',val:age}])
    }
    upLoadPhoto() {
        /*图片头像上传*/
@@ -201,7 +202,6 @@ export default  class BasicInfo extends Component{
      }
    }
    render(){
-
    	  if(this.props.auth.get('user')){
 
         var baseinfo=this.props.user.get('baseinfo').toJS();
@@ -221,7 +221,7 @@ export default  class BasicInfo extends Component{
                               ...baseinfoedit,
                               change: (::this.onChangeInfo),
                               click: (::this.onClickInfo),
-                              hangleSelectDate:(::this.hangleSelectDate),
+                              handleSelectDate:(::this.handleSelectDate),
                               showDateModal:(::this.showDateModal),
                               dateModal:(this.state.dateModal),
                               birthdate:(this.props.user.getIn(['baseinfoedit','birthdate']))

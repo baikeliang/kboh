@@ -129,10 +129,12 @@ export default  class History extends Component{
       this.setState({...this.state,refresh:0});
    }
    handleSelectDateBodyCon(item,date){
+        if(!date)
+           return
         item.dateUI.display == 'none'?item.dateUI.display='block':item.dateUI.display='none';
         console.log("handleSelectDateBodyCon!!!!!!")
         console.log(item)
-        item.date = date.format('DD/MM/YY').toString();
+        item.date = date.format('YYYY-MM-DD');
         this.setState({...this.state,refresh:0});
         this.props.historyEditADD( {key:'body_condition',val:item } )
    }

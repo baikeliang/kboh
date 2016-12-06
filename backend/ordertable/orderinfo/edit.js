@@ -193,15 +193,15 @@ export default  class Edit extends Component{
     }
     handleSelectDate(date){
         console.log(this.dateModal.display);
-        console.log(date.format('DD/MM/YY').toString());
+        console.log(date.format('YYYY-MM-DD'));
         this.dateModal.display = 'none';
         this.setState({...this.state,refresh:0});
         let service_id;
         if(service_id = this.props.detailEdit.getIn(['data','service_id'])){
-            this.props.orderEdit([{key:'visit_time',val:date.format('DD/MM/YY').toString()}])
-            this.props.load_OndutyDoctors({visit_time:date.format('DD/MM/YY').toString(),service_id})
+            this.props.orderEdit([{key:'visit_time',val:date.format('YYYY-MM-DD')}])
+            this.props.load_OndutyDoctors({visit_time:date.format('YYYY-MM-DD'),service_id})
         }else{
-            this.props.orderEdit([{key:'visit_time',val:date.format('DD/MM/YY').toString()}])
+            this.props.orderEdit([{key:'visit_time',val:date.format('YYYY-MM-DD')}])
         }
     }
     render(){
@@ -214,7 +214,12 @@ export default  class Edit extends Component{
 
         doctors.forEach(( doctor )=>{
            if(doctor.id == doctor_id){
-              timeRange = doctor.time_arr;
+              console.log('ssRRRRRSSSSssss')
+
+              let visit_time = this.props.detailEdit.getIn(['data','visit_time']);
+              console.log(visit_time)
+              console.log(doctor.time_arr)
+              timeRange = (doctor.time_arr&&doctor.time_arr[visit_time])?doctor.time_arr[visit_time]:[];
            }
         });
 

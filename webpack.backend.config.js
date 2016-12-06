@@ -64,11 +64,11 @@ module.exports = {
         { test: /\.less$/, loader: 'style!css?modules&localIdentName=[name]__[local]!less' },
         {
           test: /\.css$/,
-          exclude:/(common\.css|font-awesome\.min\.css|account\.css|table\.css|pagination\.css|z_user\.css|user\.css|H_user1\.css)/,
+          exclude:/(common\.css|font-awesome\.min\.css|account\.css|table\.css|pagination\.css|z_user\.css|user\.css|H_user1\.css|index\.css)/,
           loader: ExtractTextPlugin.extract('style-loader','css?modules&localIdentName=[name]__[local]')
         },
         {
-          test: /(common\.css|font-awesome\.min\.css|account\.css|table\.css|pagination\.css|z_user\.css|user\.css|H_user1\.css)/, loader: ExtractTextPlugin.extract('style-loader', 'css?modules&localIdentName=[local]')
+          test: /(common\.css|font-awesome\.min\.css|account\.css|table\.css|pagination\.css|z_user\.css|user\.css|H_user1\.css|index\.css)/, loader: ExtractTextPlugin.extract('style-loader', 'css?modules&localIdentName=[local]')
         },
 
         { test: /\.(woff)([\?]?.*)$/, loader: 'url?limit=100000' },
