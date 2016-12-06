@@ -157,7 +157,7 @@ export const EditOrder = ({
 			                      						}
 			                      					}
 			                      				}):''
-			                      				return <li className={ color }><span onClick={ (e)=>{click(e,'visit_time',visit_time) }}>{tableitem.time}</span></li>
+			                      				return <li className={ color } style={(color=='gray')?{pointerEvents:"none"}:{}}><span onClick={ (e)=>{click(e,'visit_time',visit_time) }}>{tableitem.time}</span></li>
 			                      			}
 			                      		}):''
 			                      	}
@@ -176,7 +176,7 @@ export const EditOrder = ({
 			                      					}
 
 			                      				}):''
-			                      				return <li className={ color }><span onClick={ (e)=>{click(e,'visit_time',visit_time) }}>{tableitem.time}</span></li>
+			                      				return <li className={ color } style={(color=='gray')?{pointerEvents:"none"}:{}}><span onClick={ (e)=>{click(e,'visit_time',visit_time) }}>{tableitem.time}</span></li>
 
 			                      			}
 			                      		}):''
