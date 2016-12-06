@@ -234,8 +234,8 @@ export default  class Edit extends Component{
 
               let visit_time = this.props.detailEdit.getIn(['data','visit_time']);
               console.log(visit_time)
-              console.log(doctor.time_arr)
-              timeRange = (doctor.time_arr&&doctor.time_arr[visit_time])?doctor.time_arr[visit_time]:[];
+              console.log(visit_time.split(' ')[0])
+              timeRange = (doctor.time_arr&&doctor.time_arr[visit_time.split(' ')[0]])?doctor.time_arr[visit_time.split(' ')[0]]:[];
            }
         });
 
