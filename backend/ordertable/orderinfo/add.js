@@ -232,7 +232,11 @@ export default  class Add extends Component{
 
         doctors.forEach(( doctor )=>{
            if(doctor.id == doctor_id){
-              timeRange = doctor.time_arr;
+              let visit_time = this.props.detailEdit.getIn(['data','visit_time']);
+              console.log(visit_time)
+              console.log(doctor.time_arr)
+              timeRange = (doctor.time_arr&&doctor.time_arr[visit_time])?doctor.time_arr[visit_time]:[];
+
            }
         });
 

@@ -84,14 +84,8 @@ export default function reducer(state = initialState, action = {}) {
              console.log(order);
             return  state.setIn(['orders',idx],Immutable.Map(order));
         case ORDER_ADD:
-            var tomerge = state.getIn(['detailedit','data']).toJS();
-            console.log(tomerge);
-            var orders = state.getIn(['orders']).toJS();
-            console.log(orders);
-            orders.push(tomerge);
-            console.log(orders);
-            // var orderobj = { order };
-            return state.setIn(['orders'],Immutable.List(orders));
+            var newdata = state.getIn(['detailedit','data']);
+            return state.updateIn(['orders'], list => list.push(newdata));
         case SET_ORDER_TOSHOW:
             return state.merge({ frontorder: action.result })
         default:

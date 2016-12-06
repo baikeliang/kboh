@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM  from 'react-dom'
-import { Calendar } from 'react-date-range';
+import Calendar from 'rc-calendar';
 
 export const AddOrder = ({
   change,
@@ -121,7 +121,7 @@ export const AddOrder = ({
 			                        <p></p>
 			                        <div className="calendarbox" id="inline-calendar"></div>
 			                        <div style={ dateModal }>
-                                      <Calendar onChange={handleSelectDate}/>
+                                      <Calendar format={'YYYY-MM-DD'} onSelect={handleSelectDate}/>
                                 	</div>
 			                    </div>
 			                    <div className="input-box h30">
