@@ -19,7 +19,8 @@ import {
     LoadedorLoading_doctor as successorLoading_doctor,
     load as loadDoctors,
     load_detail as load_detail_doctor,
-    detailEdit  as detailEditDoctor
+    detailEdit  as detailEditDoctor,
+    doctorFlush
 } from 'backend/redux/reducers/user_doctor';
 
 import {
@@ -86,7 +87,7 @@ export const asyncEvent = [{
             detailEdit:  state.getIn(['user_doctor','doctors',idx,'detailedit']),
             projectRepo: state.get('service_project')
         }
-    }, { pushState: push,detailEditDoctor } )
+    }, { pushState: push,detailEditDoctor,doctorFlush } )
 export default  class Edit extends Component{
     constructor(props) {
         // code
@@ -112,6 +113,10 @@ export default  class Edit extends Component{
     handleSelectDate(date){
 
     }
+    save(){
+        console.log('AAAAAAA');
+        this.props.doctorFlush();
+    }
     chooseBirth(date){
       this.state.dateModal.display = 'none';
       var dated = new Date();
@@ -127,17 +132,16 @@ export default  class Edit extends Component{
     render(){
         let doctordata = this.props.detailEdit.get('data')?this.props.detailEdit.get('data').toJS():{};
         let projects  = this.props.projectRepo.get('projects')?this.props.projectRepo.get('projects').toJS():[];
-
-
         return EditDoctor({
             ...doctordata,
             handleSelectDate:(::this.handleSelectDate),
             change:(::this.change),
             click:(::this.click),
+            save:(::this.save),
             projects,
             showBirthCalendar:(::this.showBirthCalendar),
             dateModal:(this.state.dateModal),
-            chooseBirth:(::this.chooseBirth),
+            chooseBirth:(::this.chooseBirth)
         })
     }
 }

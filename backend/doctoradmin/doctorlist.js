@@ -23,7 +23,7 @@ import {
 	LoadedorLoading as successorLoading ,
 	load as loadDoctors,
     frontUserForInfo as toShowUserInfo,
-    nextGroupUsers
+    nextGroupUsers,
 } from 'backend/redux/reducers/user_doctor';
 
 import {
@@ -35,6 +35,9 @@ import {
 } from 'react-redux';
 
 import  CheckDoctor, { asyncEvent as asyncEventCheck } from './doctorinfo/check.js'
+import  AddDoctor, { asyncEvent as asyncEventAdd } from './doctorinfo/add.js'
+
+
 
 
 export const asyncEvent =  [{
@@ -100,7 +103,12 @@ export default class DoctorListCom extends Component {
 
     }
     toAddUser(){
-
+        this.context.showRight({
+            asyncProcess:asyncEventAdd,
+            comCreater:function(){
+               return <AddDoctor/>
+            }
+        })
     }
     toDeleteUser(){
 

@@ -3,6 +3,8 @@ import ReactDOM  from 'react-dom'
 import Calendar from 'rc-calendar';
 const format = ('YYYY-MM-DD');
 
+import { table as ordertable } from 'backend/ordertable/orderinfo/config/orderedittable.js';
+
 function disabledDate(current,timeArr){
     let _date;
     if (!current) {
@@ -47,7 +49,8 @@ export const CheckOrder = ({
 	time_arr,
 	toEdit,
     checkDutyInfo,
-    detail
+    detail,
+    seldate
 }) => {
        return (<div>
 			        <div className="rtop rtop4">
@@ -135,16 +138,48 @@ export const CheckOrder = ({
 								                </select>
 								              </div>
 								              <div style={{borderBottom:'1px #ccc solid',margin:'auto'}}>
-								              <Calendar format={format}  style={{margin:'auto'}} onChange={ handleSelectDate } dateRender={(cur)=>{ return dateRender(cur,time_arr) }} disabledDate={(cur) => { return disabledDate(cur,time_arr) }}/>
+								              <Calendar format={format}  style={{margin:'auto'}} onSelect={ handleSelectDate } dateRender={(cur)=>{ return dateRender(cur,time_arr) }} disabledDate={(cur) => { return disabledDate(cur,time_arr) }}/>
 								              </div>
 								              <div className="timeboxmain-select">
 								                <div className="timechoose" id="timechoose"></div>
 								              </div>
 								              <input id="date" type="text" style={{opacity:'0',position: 'absolute'}}/>
 								          </div>
-								          <div className="docto_desc_main">
-								              <ul>
-								              </ul>
+								          <div className="docto_desc_main chuzhenTimebox">
+								              <ul id="timeArry">
+						                      	<h2 className="timeh2">上午</h2>
+						                      	{
+						                      		ordertable?ordertable.map((tableitem)=>{
+						                      			var color = 'gray';
+						                      			var timeRange = [];
+						                      			if(parseInt(tableitem.time)<=12){
+						                      				timeRange = seldate?time_arr[seldate]:[];
+						                      				timeRange?timeRange.map((time)=>{
+						                      					if(time.visit_time==tableitem.time){
+						                      						color = 'cur';
+						                      					}
+						                      				}):''
+						                      				return <li className={ color } style={(color=='gray')?{pointerEvents:"none",height:'auto',background:'#fff',marginBottom:'0px'}:{height:'auto',background:'#fff',marginBottom:'0px'}}><span style={{paddingLeft:'0px'}}>{tableitem.time}</span></li>
+						                      			}
+						                      		}):''
+						                      	}
+						                    	<h2 className="timeh2">下午</h2>
+						                    	{
+						                      		ordertable?ordertable.map((tableitem)=>{
+						                      			var color = 'gray';
+						                      			var timeRange = [];
+						                      			if(parseInt(tableitem.time)>=13){
+						                      				timeRange = seldate?time_arr[seldate]:[];
+						                      				timeRange?timeRange.map((time)=>{
+						                      					if(time.visit_time==tableitem.time){
+						                      						color = 'cur';
+						                      					}
+						                      				}):''
+						                      				return <li className={ color } style={(color=='gray')?{pointerEvents:"none",height:'auto',background:'#fff',marginBottom:'0px'}:{height:'auto',background:'#fff',marginBottom:'0px'}}><span style={{paddingLeft:'0px'}}>{tableitem.time}</span></li>
+						                      			}
+						                      		}):''
+						                      	}
+						                      </ul>
 								          </div>
 								          <div className="clear"></div>
 								      </div>
