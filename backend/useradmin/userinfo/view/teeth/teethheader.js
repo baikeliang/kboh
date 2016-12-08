@@ -36,7 +36,6 @@ export const TeethHeader = ({
                               <label>
                                   <span onClick={ toAdd } className="default_inputbtn z_add_btn">添加</span>
                                   <span onClick={ toEdit } className="default_inputbtn z_edit_btn">编辑</span>
-                                  <span id="pick" className="default_inputbtn z_add_btn">test</span>
                               </label>
                           </div>
                         </div>)

@@ -20,11 +20,11 @@ export const ClinicData = ({
       return (      <tr>
                     <td><span className="radio-span">
                     <input type="radio" className="radio" name="radio" id={ 'radioInputa_'+id } value={ id }/><label htmlFor={ 'radioInputa_'+id }></label></span></td>
-                    <td><span style={ paddingLeft:'20px' }>{ id }</span></td>
+                    <td><span style={ {paddingLeft:'20px'} }>{ id }</span></td>
                     <td className="W150"><span className="spanName" id="goSee" data-id={id}>{ clinic_brand }</span></td>
-                    <td className="W150"><span onClick={ toUserInfo }>{ clinic_name }</span></td>
+                    <td className="W150"><span onClick={ (ev)=>{toUserInfo(ev,rowidx,id)} }>{ clinic_name }</span></td>
                     <td className="W200"><span>{ clinic_address }</span></td>
-                    <td><span style={ paddingLeft:'20px' }>{ chair_nums }</span></td>
+                    <td><span style={ {paddingLeft:'20px'} }>{ chair_nums }</span></td>
                     <td><span>{ clinic_head_name }</span></td>
                     <td><span>{ clinic_head_phone }</span></td>
                     <td><span>{ mint_head_name }</span></td>

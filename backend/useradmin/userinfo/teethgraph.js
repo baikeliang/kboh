@@ -165,34 +165,6 @@ export default  class TeethGraph extends Component{
    clickOnCAche(ev, acheidx, curToothName,status) {
        this.props.switchachec({ acheidx, curToothName,status })
    }
-   componentDidMount() {
-       window.$("#pick").diyUpload({
-               url: '',
-               success: function(data) {
-               },
-               error: function(err) {
-                   console.log(err);
-               },
-               buttonText: '上传图片',
-               buttonText: '上传图片',
-               chunked: false,
-               auto: true,
-               // 分片大小
-               chunkSize: 1048576 * 15,
-               //最大上传的文件数量, 总文件大小,单个文件大小(单位字节);
-               fileNumLimit: 1,
-               fileSizeLimit: 1048576 * 100,
-               fileSingleSizeLimit: 1048576 * 15,
-               accept: {
-                   mimeTypes: 'image/*',
-                   extensions: 'gif,jpg,jpeg,png',
-               }
-
-           }
-
-       );
-   }
-
    render(){
 
    	  if(this.props.auth.get('user')){

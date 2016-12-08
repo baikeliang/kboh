@@ -112,6 +112,7 @@ export default class ClinicListCom extends Component {
 
     }
     toUserInfo(ev,idx,id){
+        console.log('YYYYYYYY!!!!!!YYYYYYYY')
         console.log(idx);
         console.log(this.context)
 

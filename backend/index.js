@@ -10,6 +10,9 @@ import  OrderListCom,{ asyncEvent as orderListAsync } from  './ordertable/orderl
 
 import  DoctorListCom,{ asyncEvent as doctorListAsync } from './doctoradmin/doctorlist.js'
 
+import  ClinicListCom,{ asyncEvent as clinicListAsync } from './clinicadmin/cliniclist.js'
+
+
 import { LeftList } from  'backend/common/js/partial/left_table.js'
 
 import {
@@ -134,6 +137,8 @@ export default class UserAdmin extends Component {
                 return (userListAsync)
              else if(itemid == '2-0')
                 return (doctorListAsync)
+             else if(itemid == '3-0')
+                return (clinicListAsync)
              else
                 return []
         })()
@@ -147,6 +152,8 @@ export default class UserAdmin extends Component {
                 return (<UserListCom/>)
              else if(itemid == '2-0')
                 return (<DoctorListCom/>)
+             else if(itemid == '3-0')
+                return (<ClinicListCom/>)
              else
                 return <div/>
             }

@@ -4383,10 +4383,10 @@
                     owner.trigger( e.type );
                 };
     
-                input.on( 'change', function( e ) {
-                    var fn = arguments.callee,
-                        clone;
-    
+                input.on( 'change', function picker_change_king( e ) {
+                    var fn = picker_change_king;
+                    var clone;
+                    
                     me.files = e.target.files;
     
                     // reset input

@@ -3,7 +3,7 @@ import ReactDOM  from 'react-dom'
 
 
 
-export const AddOrder = ({
+export const AddClinic = ({
      change,
      doctors
 }) => {

@@ -141,7 +141,7 @@ export function LoadedorLoading(state){
     return loaded || loading
 }
 
-export function LoadedorLoading_doctor(state,idx,id){
+export function LoadedorLoading_clinic(state,idx,id){
     var loaded = false
     var loading = false
 

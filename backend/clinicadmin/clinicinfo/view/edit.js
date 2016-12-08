@@ -24,7 +24,11 @@ export const EditClinic = ({
     account,
     clinic_pic,
     around_pic,
-    remark
+    remark,
+    dateModal,
+    chooseSetTime,
+    showSetTimeCalendar,
+    change
 }) => {
        return (<div>
 			        <div className="rtop rtop4">
@@ -99,9 +103,14 @@ export const EditClinic = ({
 			                    </div>
 			                    <div className="input-box h30">
 			                        <span><em className="emx">成立时间：</em></span>
-			                        <input onChange={ (ev)=>{ change(ev,'set_date')} } type="text" className="text-input layicon" id="set_date" readonly/>
+			                        <input value={ set_date } onClick={ showSetTimeCalendar } type="text" className="text-input layicon" id="set_date" readonly/>
 			                        <p></p>
 			                    </div>
+			                    <div style={{position:'relative'}}>
+			                      <div style={ {...dateModal,marginLeft:'150px'} }>
+                                      <Calendar format={'YYYY-MM-DD'} onSelect={ chooseSetTime }/>
+                                  </div>
+                                </div>
 			                    <div className="input-box h30">
 			                        <span><em className="emx">员工人数：</em></span>
 			                        <input onChange={ (ev)=>{ ev.target.value=ev.target.value.replace(/\D/g,''); change(ev,'staff_nums')} } type="text" className="text-input" id="staff_nums"/>
@@ -124,6 +133,11 @@ export const EditClinic = ({
 			                                <div id="picUpfile1"></div>
 			                                <div className="parentFileBox">
 			                                    <ul className="fileBoxUl">
+			                                       <li id="fileBox" className="diyUploadHover" file_path={ clinic_pic }>
+					                               <div className="viewThumb"><img src={ clinic_pic } alt="" /></div>
+					                               <div className="diyCancel"></div>
+					                               <div className="clear"></div>
+					                               </li>
 			                                    </ul>
 			                                </div>
 			                            </div>
@@ -132,13 +146,18 @@ export const EditClinic = ({
 			                        <p className="wrongfiletip wrongfiletip1"></p>
 			                        <div className="clear"></div>
 			                    </div>
-			                    <div className="input-box" style="position:relative;margin-top:20px;">
+			                    <div className="input-box" style={{ position:'relative',marginTop:'20px' }}>
 			                        <span><em className="emx">环评资质：</em></span>
 			                        <div className="file-main-box pic_file_pic" id="around_pic">
 			                            <div className="upfile-box">
 			                                <div id="picUpfile2"></div>
 			                                <div className="parentFileBox">
 			                                    <ul className="fileBoxUl">
+			                                       <li id="fileBox" className="diyUploadHover" file_path={ around_pic }>
+												   <div className="viewThumb"><img src={ around_pic } alt="" /></div>
+												   <div className="diyCancel"></div>
+												   <div className="clear"></div>
+												   </li>
 			                                    </ul>
 			                                </div>
 			                            </div>

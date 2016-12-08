@@ -22,14 +22,15 @@ export const CheckClinic = ({
     account,
     clinic_pic,
     around_pic,
-    remark
+    remark,
+    toEdit
 }) => {
        return (<div>
 			        <div className="rtop rtop4">
 			            <div className="but-box bj-none">
 			              <p>
 			                <a href="javascript:void(0)" className="back-but" id="back">返回</a>
-			                <a href="javascript:void(0)" className="edit-but" id="edit-but">编辑</a>
+			                <a onClick={ toEdit } href="javascript:void(0)" className="edit-but" id="edit-but">编辑</a>
 			              </p>
 			            </div>
 			        </div>

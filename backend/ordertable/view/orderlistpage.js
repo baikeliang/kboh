@@ -94,7 +94,7 @@ export const OrderList = ({
                                           <div className="list-to-filter">
                                                 <ul className="list-unstyled" id="doctor_id">
                                                    { clinics.map((clinic)=>{
-                                                       return <li className="filter-item items" data-filter={ clinic.name } data-value={clinic.id}>{ clinic.name }</li>
+                                                       return <li className="filter-item items" data-filter={ clinic.clinic_name } data-value={clinic.id}>{ clinic.clinic_name }</li>
                                                    })}
                                                 </ul>
                                             <div className="no-search-results">

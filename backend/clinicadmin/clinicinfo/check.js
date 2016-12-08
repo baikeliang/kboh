@@ -33,8 +33,8 @@ import {
 export const asyncEvent = [{
     promise: ({ store: { dispatch, getState }, params }) => {
         var state = getState();
-        let id  = state.getIn(['user_doctor','frontuserinfo','id']);
-        let idx = state.getIn(['user_doctor','frontuserinfo','idx']);
+        let id  = state.getIn(['user_clinic','frontuserinfo','id']);
+        let idx = state.getIn(['user_clinic','frontuserinfo','idx']);
         if(!isAuthLoaded(state))
            return dispatch(loadAuth(params)).then(function(){
               if(!LoadedorLoading_clinic(state,idx,id))
@@ -94,10 +94,10 @@ export default  class Check extends Component{
         let clinicdata = this.props.detailEdit.get('data').toJS();
         let detail = this.state.detail;
         return CheckClinic({...clinicdata,
-          handleSelectDate:(::this.handleSelectDate),
-          toEdit:(::this.toEdit),
-          checkDutyInfo:(::this.checkDutyInfo),
-          detail})
+                            handleSelectDate:(::this.handleSelectDate),
+                            toEdit:(::this.toEdit),
+                            checkDutyInfo:(::this.checkDutyInfo),
+                            detail})
     }
 
 }

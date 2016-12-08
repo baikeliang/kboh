@@ -20,7 +20,7 @@ import {
     load as loadClinics,
     load_detail as load_detail_clinic,
     detailEdit  as detailEditClinic
-} from 'backend/redux/reducers/user_doctor';
+} from 'backend/redux/reducers/user_clinic';
 
 import {
     LoadedorLoading as successorLoading_projects ,
@@ -86,7 +86,7 @@ export const asyncEvent = [{
             detailEdit:  state.getIn(['user_clinic','clinics',idx,'detailedit']),
             projectRepo: state.get('service_project')
         }
-    }, { pushState: push,detailEditDoctor } )
+    }, { pushState: push,detailEditClinic } )
 export default  class Edit extends Component{
     constructor(props) {
         // code
@@ -104,40 +104,105 @@ export default  class Edit extends Component{
         // console.log(time);
         // time = time.split(' ')[0];
         // this.props.orderEdit([{key,val:time+' '+e.target.innerHTML}]);
-        this.props.detailEditDoctor([{key,val}])
+        this.props.detailEditClinic([{key,val}])
     }
     change(ev,key){
-         this.props.detailEditDoctor([{key,val:ev.target.value}])
+         this.props.detailEditClinic([{key,val:ev.target.value}])
     }
     handleSelectDate(date){
 
     }
-    chooseBirth(date){
+    chooseSetTime(date){
       this.state.dateModal.display = 'none';
       var dated = new Date();
       var nowYear = dated.getFullYear();
       console.log('yyyYYYYYYYWWWEErrthgdrgfd')
       var age = nowYear-date.year();
-      this.props.detailEditDoctor([{key:'birthdate',val:date.format('YYYY-MM-DD')},{key:'age',val:age}])
+      this.props.detailEditClinic([{key:'set_date',val:date.format('YYYY-MM-DD')}])
     }
-    showBirthCalendar(){
-        console.log('sssss!!!!!!!!')
+    showSetTimeCalendar(){
         this.state.dateModal.display == 'block'?this.setState({...this.state,dateModal:{display:'none'}}):this.setState({...this.state,dateModal:{display:'block',position:'absolute',zIndex:'100'}});
+    }
+    upLoadFile(){
+       var comself = this;
+       window.$("#picUpfile1").diyUpload({
+               url: 'http://192.168.10.10/user_clinic/detail/file/rest',
+               success: function(data) {
+                 console.log("YYUUTTRRREEWWEERRFFFFFFF")
+                 console.log(data.file_path)
+                 comself.props.detailEditClinic([{key:'clinic_pic',val:data.file_path}])
+
+               },
+               error: function(err) {
+                   console.log("YYUUTTRRREEWWEERRFFFFFFF!!!!!!!!33")
+                   console.log(err);
+               },
+               buttonText: '上传图片',
+               buttonText: '上传图片',
+               chunked: false,
+               auto: true,
+               // 分片大小
+               chunkSize: 1048576 * 15,
+               //最大上传的文件数量, 总文件大小,单个文件大小(单位字节);
+               fileNumLimit: 1,
+               fileSizeLimit: 1048576 * 100,
+               fileSingleSizeLimit: 1048576 * 15,
+               accept: {
+                   mimeTypes: 'image/*',
+                   extensions: 'gif,jpg,jpeg,png',
+               }
+
+           }
+
+       );
+
+       window.$("#picUpfile2").diyUpload({
+               url: 'http://192.168.10.10/user_clinic/detail/file/rest',
+               success: function(data) {
+                console.log(data.file_path)
+                comself.props.detailEditClinic([{key:'around_pic',val:data.file_path}])
+               },
+               error: function(err) {
+                console.log("YYUUTTRRREEWWEERRFFFFFFF33")
+                   console.log(err);
+               },
+               buttonText: '上传图片',
+               buttonText: '上传图片',
+               chunked: false,
+               auto: true,
+               // 分片大小
+               chunkSize: 1048576 * 15,
+               //最大上传的文件数量, 总文件大小,单个文件大小(单位字节);
+               fileNumLimit: 1,
+               fileSizeLimit: 1048576 * 100,
+               fileSingleSizeLimit: 1048576 * 15,
+               accept: {
+                   mimeTypes: 'image/*',
+                   extensions: 'gif,jpg,jpeg,png',
+               }
+
+           }
+
+       );
+    }
+    componentDidMount(){
+        this.upLoadFile();
     }
     render(){
         let doctordata = this.props.detailEdit.get('data')?this.props.detailEdit.get('data').toJS():{};
         let projects  = this.props.projectRepo.get('projects')?this.props.projectRepo.get('projects').toJS():[];
 
 
-        return EditDoctor({
+        return EditClinic({
             ...doctordata,
             handleSelectDate:(::this.handleSelectDate),
             change:(::this.change),
             click:(::this.click),
             projects,
-            showBirthCalendar:(::this.showBirthCalendar),
             dateModal:(this.state.dateModal),
-            chooseBirth:(::this.chooseBirth),
+            chooseSetTime:(::this.chooseSetTime),
+            showSetTimeCalendar:(::this.showSetTimeCalendar)
+
         })
     }
 }

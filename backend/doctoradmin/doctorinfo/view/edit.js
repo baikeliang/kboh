@@ -4,6 +4,30 @@ import Calendar from 'rc-calendar';
 
 const format = ('YYYY-MM-DD');
 
+function photoBox(){
+   return (<div className="new-create-opcity" style={{display:"none",position:'absolute'}}>
+             <div className="new-uppic-bj">
+                <div className="new-uppic-box">
+                    <h4 className="toph4 nomargin">上传头像<span className="close_dialog"></span></h4>
+                    <div className="imageBox">
+                        <div className="thumbBox"></div>
+                        <div className="spinner" style={{display:"none"}}>Loading...</div>
+                    </div>
+
+                    <div className="action">
+                        <div className="filebut">
+                         <input type="file" id="base_photo_rechoose" className="choose-file"/>重新选择</div>
+                        <div className="zoom-box">
+                            <span id="btnZoomOut" className="btnZoomOut"></span>
+                            <span id="btnZoomIn" className="btnZoomIn"></span>
+                        </div>
+                        <input type="button" id="btnCrop" value="确认上传" className="btnCrop"/>
+                    </div>
+                </div>
+          </div>
+        </div>)
+}
+
 export const EditDoctor = ({
     change,
 	name,
@@ -63,8 +87,8 @@ export const EditDoctor = ({
 			                    </div>
 			                    <div className="input-box h65">
 			                        <span>医生头像：</span>
-			                        <div className="touxiang" id="logo"><img src={"../../images/user.png"} alt=""/></div>
-			                        <div className="but-input uppic-input"><input type="file" id="file2" className="but-input upfile-butt"/>上传头像</div>
+			                        <div className="touxiang" id="logo"><img src={photo?photo:require('backend/common/images/userPic.png')} alt=""/></div>
+			                        <div className="but-input uppic-input"><input type="file" id="base_doctor_photo_choose" className="but-input upfile-butt"/>上传头像</div>
 			                        <p></p>
 			                    </div>
 			                    <div className="input-box h30">
@@ -193,6 +217,7 @@ export const EditDoctor = ({
 					      <input id="date" type="text" style={{opacity:'0'}}/>
 					  </div>
 					</div>
+					{ photoBox() }
 			    </div>)
 
 }
