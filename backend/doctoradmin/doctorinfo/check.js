@@ -75,14 +75,13 @@ export default  class Check extends Component{
         showRight: PropTypes.func.isRequired
     };
     handleSelectDate(selected){
-       console.log(selected.format('YYYY-MM-DD'))
+       this.setState({...this.state,seldate:selected.format('YYYY-MM-DD')})
 
     }
     checkDutyInfo(){
        this.setState({...this.state,detail:!this.state.detail})
     }
     toEdit(){
-
         this.context.showRight({
             asyncProcess:asyncEventEdit,
             comCreater:function(){
@@ -93,7 +92,14 @@ export default  class Check extends Component{
     render(){
         let orderdata = this.props.detailEdit.get('data').toJS();
         let detail = this.state.detail;
-        return CheckOrder({...orderdata,handleSelectDate:(::this.handleSelectDate),toEdit:(::this.toEdit),checkDutyInfo:(::this.checkDutyInfo),detail})
+        return CheckOrder({
+          ...orderdata,
+          handleSelectDate:(::this.handleSelectDate),
+          toEdit:(::this.toEdit),
+          checkDutyInfo:(::this.checkDutyInfo),
+          detail,
+          seldate:(this.state.seldate)
+        })
     }
 
 }

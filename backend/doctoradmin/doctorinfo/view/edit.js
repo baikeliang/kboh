@@ -52,14 +52,15 @@ export const EditDoctor = ({
     detail,
     projects,
     showBirthCalendar,
-    dateModal
+    dateModal,
+    save
 }) => {
        return (<div>
 			        <div className="rtop rtop4">
 			            <div className="but-box bj-none">
 			              <p>
-			                <a href="javascript:void(0)" className="back-but" id="back">返回</a>
-			                <a href="javascript:void(0)" className="save-but" id="save-but">保存</a>
+			                <a href="javascript:void(0)" className="back-but">返回</a>
+			                <a href="javascript:void(0)" className="save-but" onClick={ save }>保存</a>
 			              </p>
 			            </div>
 			        </div>
@@ -69,7 +70,7 @@ export const EditDoctor = ({
 			                <div className="main-input">
 			                    <div className="input-box h30">
 			                        <span>是否显示：</span>
-			                        <div className="radio-box" id="is_show">
+			                        <div className="radio-box">
 			                            <span><input type="radio" className="radio1" name="radiov" id="checkboxvv" value="1" checked={is_show=='1'?'checked':''}/><label htmlFor="checkboxvv"></label>是</span>
 			                            <span><input type="radio" className="radio1" name="radiov" id="checkboxww" value="2" checked={is_show=='0'?'checked':''}/><label htmlFor="checkboxww"></label>否</span>
 			                        </div>

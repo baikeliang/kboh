@@ -25,6 +25,15 @@ const LOAD_ONDUTY_DETAIL_FAIL = 'bohe/user_doctor/LOAD_ONDUTY_DETAIL_FAIL';
 const SET_USER_TOSHOWINFO = 'bohe/user_doctor/SHOWINFO'
 
 const DETAILINFO_EDIT = 'bohe/user_doctor/DETAILINFO_EDIT'
+const DOCTORFLUSH = 'bohe/user_doctor/DOCTORFLUSH'
+
+const NEWDOCTORINFO_EDIT = 'bohe/user_doctor/NEWDOCTORINFO_EDIT'
+const NEWDOCTORADD = 'bohe/user_doctor/NEWDOCTORADD'
+const PROJECTADD = 'bohe/user_doctor/PROJECTADD'
+const PROJECTDEL = 'bohe/user_doctor/PROJECTDEL'
+
+
+
 
 const initialState = Immutable.Map({
     loaded: false,
@@ -128,6 +137,46 @@ export default function reducer(state = initialState, action = {}) {
              })
              var meta_info = state.getIn(['doctors',idx,'detailedit','data']);
              return state.setIn(['doctors',idx,'detailedit','data'],meta_info.merge(baseinfoedit));
+        case DOCTORFLUSH:
+             var doctorId = state.getIn(['frontuserinfo','idx']);
+             var doctoredit = state.getIn(['doctors',doctorId,'detailedit','data']);
+             return state.setIn(['doctors',doctorId],state.getIn(['doctors',doctorId]).merge(doctoredit));
+        case NEWDOCTORINFO_EDIT:
+             var pairs = action.result;
+             var baseinfoedit = {};
+             pairs.forEach((pair) => {
+                 baseinfoedit[pair.key] = pair.val;
+             })
+             var meta_info = Immutable.Map({});
+             console.log('爱沙发沙发沙发');
+             console.log(baseinfoedit);
+             console.log(state.hasIn(['newdoctor']));
+             if(state.hasIn(['newdoctor'])){
+                  meta_info = state.getIn(['newdoctor']);
+                  return state.setIn(['newdoctor'],meta_info.merge(baseinfoedit));
+             }
+             else{
+                  return state.merge( { newdoctor: {} } ).setIn(['newdoctor'],meta_info.merge(baseinfoedit));
+             }
+        case NEWDOCTORADD:
+             var newdoctor = state.getIn(['newdoctor']);
+             return state.updateIn(['doctors'], list => list.push(newdoctor));
+        case PROJECTADD:
+             var pair = action.result;
+             var projectadd = {}
+             projectadd[pair.key] = pair.val;
+             console.log(projectadd);
+             if(state.hasIn(['newdoctor','service_name_arr'])){
+                  return state.updateIn(['newdoctor','service_name_arr'],list => list.push(Immutable.Map(projectadd) ));
+             }
+             else{
+                  return state.merge( { newdoctor: { 'service_name_arr':[] } } ).updateIn(['newdoctor','service_name_arr'],list => list.push(Immutable.Map(projectadd)));
+             }
+        case PROJECTDEL:
+             var pair = action.result;
+             var index = state.getIn(['newdoctor','service_name_arr']).findIndex( value => value.get(pair.key) == pair.val);
+             return state.setIn(['newdoctor','service_name_arr'],state.getIn(['newdoctor','service_name_arr']).remove(index));
+
         default:
             return state
     }
@@ -358,8 +407,48 @@ export function detailEdit(pairs){
     }
 
 }
+export function doctorFlush(){
 
+    return {
+        type: DOCTORFLUSH
+    }
 
+}
+
+export function newdoctorinfoedit(pairs){
+
+    return {
+        type: NEWDOCTORINFO_EDIT,
+        result:pairs
+    }
+
+}
+
+export function newdoctorAdd(){
+
+    return {
+        type: NEWDOCTORADD
+    }
+
+}
+
+export function projectAdd(pairs){
+
+    return {
+        type: PROJECTADD,
+        result: pairs
+    }
+
+}
+
+export function projectDEL(pairs){
+
+    return {
+        type: PROJECTDEL,
+        result: pairs
+    }
+
+}
 
 
 

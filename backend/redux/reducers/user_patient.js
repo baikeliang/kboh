@@ -176,7 +176,7 @@ export default function reducer(state = initialState, action = {}) {
                     console.log(item)
                     if(i==(index+1)){
                          return item.merge(pair.val);
-                    } else{
+                    }else{
                          return item;
                     }
                }))
