@@ -47,7 +47,6 @@ const history = syncHistoryWithStore(browserHistory, store,{
   }
 })
 
-
 window.$ = $;
 
 window.jQuery = $;
