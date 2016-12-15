@@ -23,6 +23,8 @@ import jwt from 'jsonwebtoken'
 
 import ApiClient from 'backend/isomorphic-api/ApiClient'
 
+import { nlb } from 'backend/extensions/nlb/nlb.js'
+
 //import { URLSearchParams } from 'url-search-params-polyfill'
 
 import { URLSearchParams } from 'urlsearchparams'
@@ -36,6 +38,12 @@ var cookieParser = require('cookie-parser')
 global.__CLIENT__ = false;
 global.__SERVER__ = true;
 
+
+let rettest = nlb.getroutebyname('testphp.testlogic');
+
+console.log('RRRRRdddRRRRRqq!!!!_____')
+
+console.log(rettest);
 
 const app = express()
 
