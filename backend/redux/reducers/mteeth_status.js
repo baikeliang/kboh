@@ -20,9 +20,9 @@ const  CREATE_TEETH_BEGIN = 'bohe/mteeth_status/CREATE_TEETH_BEGIN';
 const  CREATE_TEETH_SUCCESS = 'bohe/mteeth_status/CREATE_TEETH_SUCCESS';
 const  CREATE_TEETH_FAIL = 'bohe/mteeth_status/CREATE_TEETH_BEGIN';
 
-const  UPDATE_TEETH_BEGIN = 'bohe/mteeth_status/CREATE_TEETH_BEGIN';
-const  UPDATE_TEETH_SUCCESS = 'bohe/mteeth_status/CREATE_TEETH_SUCCESS';
-const  UPDATE_TEETH_FAIL = 'bohe/mteeth_status/CREATE_TEETH_BEGIN';
+const  UPDATE_TEETH_BEGIN = 'bohe/mteeth_status/UPDATE_TEETH_BEGIN';
+const  UPDATE_TEETH_SUCCESS = 'bohe/mteeth_status/UPDATE_TEETH_SUCCESS';
+const  UPDATE_TEETH_FAIL = 'bohe/mteeth_status/UPDATE_TEETH_FAIL';
 
 var teeth_ui = {
 	        size: 0,
@@ -522,7 +522,7 @@ export function create_teeth({
 
    return {
         types:[ CREATE_TEETH_BEGIN, CREATE_TEETH_SUCCESS, CREATE_TEETH_FAIL ],
-        promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/rest?', { params }, {
+        promise: (client) => client.POST('http://' + getApiIp() + '/patient/mteeth/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -540,13 +540,13 @@ export function create_teeth({
 
                 } else {
                     //var err = { info: 'auth' }
-                    error_table.user_patient.create.msg = 'notvalid';
-                    return Promise.reject( { pos: ['user_patient','create'] } )
+                    error_table.mteeth_status.create.msg = 'notvalid';
+                    return Promise.reject( { pos: ['mteeth_status','create'] } )
                 }
             },
             error: function(err) {
-                error_table.user_patient.create.msg = 'wire';
-                return Promise.reject( { pos: ['user_patient','create'] } )
+                error_table.mteeth_status.create.msg = 'wire';
+                return Promise.reject( { pos: ['mteeth_status','create'] } )
             }
         })
     }
@@ -566,10 +566,11 @@ export function update_teeth(
  var params = {
     teeth:teeth_ui.teeth,
     time:teeth_ui.time
+    id
  }
     return {
-        types:[ UPDATE_USER_BEGIN, UPDATE_USER_SUCCESS, UPDATE_USER_FAIL ],
-        promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/rest?', { params }, {
+        types:[ UPDATE_TEETH_BEGIN, UPDATE_TEETH_SUCCESS, UPDATE_TEETH_FAIL ],
+        promise: (client) => client.PUT('http://' + getApiIp() + '/patient/mteeth/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -587,15 +588,16 @@ export function update_teeth(
 
                 } else {
                     //var err = { info: 'auth' }
-                    error_table.user_patient.create.msg = 'notvalid';
-                    return Promise.reject( { pos: ['user_patient','create'] } )
+                    error_table.mteeth_status.update[id] = {msg:'notvalid'};
+                    return Promise.reject( { pos: ['mteeth_status','update',id] } )
                 }
             },
             error: function(err) {
-                error_table.user_patient.create.msg = 'wire';
-                return Promise.reject( { pos: ['user_patient','create'] } )
+                error_table.mteeth_status.update[id] = { msg:'wire' };
+                return Promise.reject( { pos: ['mteeth_status','update',id] } )
             }
-        })
+        }),
+        id
     }
 }
 

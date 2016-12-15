@@ -50,6 +50,18 @@ export const error_table = {
             }
 
         }
+    },
+    mteeth_status:{
+        name:'牙位图',
+        load:{
+            name:'批量加载',
+        },
+        create:{
+            name:'创建'
+        },
+        update:{
+            name:'更新'
+        }
     }
 
 

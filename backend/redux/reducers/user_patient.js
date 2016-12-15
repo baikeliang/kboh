@@ -538,7 +538,7 @@ export function LoadedorLoadingUser(state) {
     if (state.hasIn(['user_patient', 'users', idx, 'loading'])) {
         loading = state.getIn(['user_patient', 'users', idx, 'loading'])
     }
-    return loaded || loading
+    return loading
 }
 
 export function LoadedorLoadingUser_History(state) {
@@ -551,7 +551,7 @@ export function LoadedorLoadingUser_History(state) {
     if (state.hasIn(['user_patient', 'users', idx, 'loading'])) {
         loading = state.getIn(['user_patient', 'users', idx, 'hisloading'])
     }
-    return loaded || loading
+    return loading
 }
 
 export function LoadedorLoadingUser_Oral(state) {
@@ -564,7 +564,7 @@ export function LoadedorLoadingUser_Oral(state) {
     if (state.hasIn(['user_patient', 'users', idx, 'loading'])) {
         loading = state.getIn(['user_patient', 'users', idx, 'oralloading'])
     }
-    return loaded || loading
+    return loading
 }
 
 export function changeTime(pos) {
@@ -860,6 +860,7 @@ export function update_baseinfo(
 
 export function create_historyinfo(
   user,
+  id,
   historyedit
 ){
 
@@ -892,7 +893,8 @@ export function create_historyinfo(
                     error_table.user_patient.create.history = { msg:'wire' };
                     return Promise.reject( { pos: ['user_patient','create','history'] } )
                 }
-            })
+            }),
+            id
         }
 }
 
@@ -942,11 +944,13 @@ export function update_historyinfo(
 
 export function create_oralinfo(
   user,
+  id
   oraledit
 ){
 
  var params = {
-    oral:oraledit.oral
+    oral:oraledit.oral,
+    id
  }
     return {
         types:[ CREATE_ORAL_BEGIN, CREATE_ORAL_SUCCESS, CREATE_ORAL_FAIL ],
@@ -976,7 +980,8 @@ export function create_oralinfo(
                 error_table.user_patient.create.oral = {msg:'wire'};
                 return Promise.reject( { pos: ['user_patient','create','oral'] } )
             }
-        })
+        }),
+        id
     }
 }
 
