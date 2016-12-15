@@ -23,7 +23,7 @@ import jwt from 'jsonwebtoken'
 
 import ApiClient from 'backend/isomorphic-api/ApiClient'
 
-import { nlb } from 'backend/extensions/nlb/nlb.js'
+/////////import { nlb } from 'backend/extensions/nlb/nlb.js'
 
 //import { URLSearchParams } from 'url-search-params-polyfill'
 
@@ -39,11 +39,11 @@ global.__CLIENT__ = false;
 global.__SERVER__ = true;
 
 
-let rettest = nlb.getroutebyname('testphp.testlogic');
+/////let rettest = nlb.getroutebyname('testphp.testlogic');
 
 console.log('RRRRRdddRRRRRqq!!!!_____')
 
-console.log(rettest);
+/////console.log(rettest);
 
 const app = express()
 

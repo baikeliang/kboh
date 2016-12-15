@@ -19,7 +19,8 @@ import {
    LoadedorLoading,
    LoadedorLoading_order,
    orderEdit,
-   orderFlush
+   orderFlush,
+   update_order
 } from 'backend/redux/reducers/order_patient.js'
 
 import {
@@ -142,7 +143,7 @@ export const asyncEvent = [{
             companyRepo: state.get('user_company'),
             projectRepo: state.get('service_project')
         }
-    }, { pushState: push,orderEdit,load_OndutyDoctors,load_onduty_detail,orderFlush } )
+    }, { pushState: push,orderEdit,load_OndutyDoctors,load_onduty_detail,orderFlush,update_order } )
 export default  class Edit extends Component{
     constructor(props) {
         // code
@@ -158,7 +159,7 @@ export default  class Edit extends Component{
         showRight: PropTypes.func.isRequired
     };
     save(){
-       this.props.orderFlush();
+       this.props.update_order();
     }
     click(e,key,time){
         console.log(time);

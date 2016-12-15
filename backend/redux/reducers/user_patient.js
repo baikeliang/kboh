@@ -39,13 +39,13 @@ const ORAL_EDIT_DEL = 'bohe/user_patient/ORAL_EDIT_DEL';
 
 const SET_USER_TOSHOWINFO = 'bohe/user_patient/SET_USER_TOSHOWINFO'
 
-const NEXT_GROUP_USERS =    'bohe/user_patient/NEXTGROUPUSERS'
+const NEXT_GROUP_USERS = 'bohe/user_patient/NEXTGROUPUSERS'
 
-const CREATE_USER_BEGIN =   'bohe/user_patient/CREATE_USER_BEGIN'
+const CREATE_USER_BEGIN = 'bohe/user_patient/CREATE_USER_BEGIN'
 
-const CREATE_USER_SUCCESS =   'bohe/user_patient/CREATE_USER_SUCCESS'
+const CREATE_USER_SUCCESS = 'bohe/user_patient/CREATE_USER_SUCCESS'
 
-const CREATE_USER_FAIL =    'bohe/user_patient/CREATE_USER_FAIL'
+const CREATE_USER_FAIL = 'bohe/user_patient/CREATE_USER_FAIL'
 
 
 
@@ -116,25 +116,25 @@ export default function reducer(state = initialState, action = {}) {
                 return state.setIn(['newuser', 'baseinfo'], infotomerge);
             }
         case BASICINFO_SAVE_BEGIN:
-             return state;
+            return state;
         case BASICINFO_SAVE_FAIL:
-             return  state.merge( { error: action.error } )
+            return state.merge({ error: action.error })
         case CREATE_USER_BEGIN:
-             return state.mergeDeep({ newuser:{ loading:true, loaded:false } });
+            return state.mergeDeep({ newuser: { loading: true, loaded: false } });
         case CREATE_USER_SUCCESS:
-             var infotomerge = state.getIn(['newuser', 'baseinfoedit']);
-             var idx = state.getIn(['frontuserinfo','idx']);
-             if(idx == 'add')
-               return state.mergeDeep({ newuser:{ loading:false, loaded:true } }).setIn(['newuser','id'],action.result.user_id).setIn(['frontuserinfo', 'id'],action.result.user_id).setIn(['newuser', 'baseinfo'], infotomerge).merge({ error:{} });
-             else
-               return state.mergeDeep({ newuser:{ loading:false, loaded:true } }).setIn(['newuser','id'],action.result.user_id).setIn(['newuser', 'baseinfo'], infotomerge).merge({ error:{} });
+            var infotomerge = state.getIn(['newuser', 'baseinfoedit']);
+            var idx = state.getIn(['frontuserinfo', 'idx']);
+            if (idx == 'add')
+                return state.mergeDeep({ newuser: { loading: false, loaded: true } }).setIn(['newuser', 'id'], action.result.user_id).setIn(['frontuserinfo', 'id'], action.result.user_id).setIn(['newuser', 'baseinfo'], infotomerge).merge({ error: {} });
+            else
+                return state.mergeDeep({ newuser: { loading: false, loaded: true } }).setIn(['newuser', 'id'], action.result.user_id).setIn(['newuser', 'baseinfo'], infotomerge).merge({ error: {} });
         case CREATE_USER_FAIL:
-             return  state.merge( { error: action.error } ).setIn(['newuser','loading'],false),setIn(['newuser','loaded'],false);
+            return state.merge({ error: action.error }).setIn(['newuser', 'loading'], false), setIn(['newuser', 'loaded'], false);
         case LOAD_DETAIL_HISTORY:
-            if(state.getIn(['newuser','id']))
+            if (state.getIn(['newuser', 'id']))
 
 
-            return state.updateIn(['users'], list => list.map(user => {
+                return state.updateIn(['users'], list => list.map(user => {
                 if (user.get('id') == action.id) {
                     return user.merge({ hisloading: true, historyedit: {} })
                 }
@@ -581,13 +581,13 @@ export function load({
 
                 } else {
                     //var err = { info: 'auth' }
-                    error_table.user_patient.load = {msg:'notvalid'};
-                    return Promise.reject( { pos: ['user_patient','load'] } )
+                    error_table.user_patient.load = { msg: 'notvalid' };
+                    return Promise.reject({ pos: ['user_patient', 'load'] })
                 }
             },
             error: function(err) {
-                error_table.user_patient.load = {msg:'wire'};
-                return Promise.reject( { pos: ['user_patient','load'] } )
+                error_table.user_patient.load = { msg: 'wire' };
+                return Promise.reject({ pos: ['user_patient', 'load'] })
             }
         }),
         refresh,
@@ -623,15 +623,15 @@ export function load_detail_baseinfo({ id }) {
 
                 } else {
                     //var err = { info: 'auth' }
-                    error_table.user_patient.loaddetail.baseinfo[id] = {msg:'notvalid'};
-                    return Promise.reject({ pos: ['user_patient','loaddetail','baseinfo',id],msg:'notvalid'})
+                    error_table.user_patient.loaddetail.baseinfo[id] = { msg: 'notvalid' };
+                    return Promise.reject({ pos: ['user_patient', 'loaddetail', 'baseinfo', id], msg: 'notvalid' })
                 }
             },
             error: function(err) {
                 console.log(err)
                 console.log('GGGGGGGGGGGGGG1')
-                error_table.user_patient.loaddetail.baseinfo[id] = {msg:'wire'};
-                return Promise.reject({ pos: ['user_patient','loaddetail','baseinfo',id]})
+                error_table.user_patient.loaddetail.baseinfo[id] = { msg: 'wire' };
+                return Promise.reject({ pos: ['user_patient', 'loaddetail', 'baseinfo', id] })
             }
         }),
         id
@@ -665,15 +665,15 @@ export function load_detail_history({ id }) {
 
                 } else {
                     //var err = { info: 'auth' }
-                    error_table.user_patient.loaddetail.history[id] = { msg:'notvalid'}
-                    return Promise.reject({ pos: ['user_patient','loaddetail','history',id] })
+                    error_table.user_patient.loaddetail.history[id] = { msg: 'notvalid' }
+                    return Promise.reject({ pos: ['user_patient', 'loaddetail', 'history', id] })
                 }
             },
             error: function(err) {
                 console.log(err)
                 console.log('GGGGGGGGGGGGGG1')
-                error_table.user_patient.loaddetail.history[id] = { msg:'wire'}
-                return Promise.reject({ pos: ['user_patient','loaddetail','history',id] })
+                error_table.user_patient.loaddetail.history[id] = { msg: 'wire' }
+                return Promise.reject({ pos: ['user_patient', 'loaddetail', 'history', id] })
             }
         }),
         id
@@ -708,15 +708,15 @@ export function load_detail_oral({ id }) {
 
                 } else {
                     //var err = { info: 'auth' }
-                    error_table.user_patient.loaddetail.oral[id] = {msg : 'notvalid'};
-                    return Promise.reject({ pos: ['user_patient','loaddetail','oral',id] })
+                    error_table.user_patient.loaddetail.oral[id] = { msg: 'notvalid' };
+                    return Promise.reject({ pos: ['user_patient', 'loaddetail', 'oral', id] })
                 }
             },
             error: function(err) {
                 console.log(err)
                 console.log('GGGGGGGGGGGGGG1')
-                error_table.user_patient.loaddetail.oral[id] = {msg : 'wire'};
-                return Promise.reject({ pos: ['user_patient','loaddetail','oral',id] })
+                error_table.user_patient.loaddetail.oral[id] = { msg: 'wire' };
+                return Promise.reject({ pos: ['user_patient', 'loaddetail', 'oral', id] })
             }
         }),
         id
@@ -727,12 +727,12 @@ export function load_detail_oral({ id }) {
 ///////post
 
 export function create_user({
-  user,
-  baseinfoedit
-}){
+    user,
+    baseinfoedit
+}) {
     var params = baseinfoedit;
     return {
-        types:[ CREATE_USER_BEGIN, CREATE_USER_SUCCESS, CREATE_USER_FAIL ],
+        types: [CREATE_USER_BEGIN, CREATE_USER_SUCCESS, CREATE_USER_FAIL],
         promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
@@ -752,12 +752,12 @@ export function create_user({
                 } else {
                     //var err = { info: 'auth' }
                     error_table.user_patient.create.msg = 'notvalid';
-                    return Promise.reject( { pos: ['user_patient','create'] } )
+                    return Promise.reject({ pos: ['user_patient', 'create'] })
                 }
             },
             error: function(err) {
                 error_table.user_patient.create.msg = 'wire';
-                return Promise.reject( { pos: ['user_patient','create'] } )
+                return Promise.reject({ pos: ['user_patient', 'create'] })
             }
         })
     }
@@ -766,14 +766,14 @@ export function create_user({
 
 
 export function update_baseinfo(
-  user,
-  id,
-  baseinfoedit
-){
+    user,
+    id,
+    baseinfoedit
+) {
 
- var params = baseinfoedit;
+    var params = baseinfoedit;
     return {
-        types:[ BASICINFO_SAVE_BEGIN, BASICINFO_SAVE, BASICINFO_SAVE_FAIL ],
+        types: [BASICINFO_SAVE_BEGIN, BASICINFO_SAVE, BASICINFO_SAVE_FAIL],
         promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/basicinfo/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
@@ -793,28 +793,28 @@ export function update_baseinfo(
                 } else {
                     //var err = { info: 'auth' }
                     error_table.user_patient.create.msg = 'notvalid';
-                    return Promise.reject( { pos: ['user_patient','create'] } )
+                    return Promise.reject({ pos: ['user_patient', 'create'] })
                 }
             },
             error: function(err) {
                 error_table.user_patient.create.msg = 'wire';
-                return Promise.reject( { pos: ['user_patient','create'] } )
+                return Promise.reject({ pos: ['user_patient', 'create'] })
             }
         })
     }
 }
 
 export function create_historyinfo(
-  user,
-  id,
-  historyedit
-){
+    user,
+    id,
+    historyedit
+) {
 
- var params = {};
+    var params = {};
     params.history = historyedit.history;
     params.time = historyedit.time;
     return {
-        types:[ CREATE_USER_BEGIN, CREATE_USER_SUCCESS, CREATE_USER_FAIL ],
+        types: [CREATE_USER_BEGIN, CREATE_USER_SUCCESS, CREATE_USER_FAIL],
         promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/history/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
@@ -834,28 +834,28 @@ export function create_historyinfo(
                 } else {
                     //var err = { info: 'auth' }
                     error_table.user_patient.create.msg = 'notvalid';
-                    return Promise.reject( { pos: ['user_patient','create'] } )
+                    return Promise.reject({ pos: ['user_patient', 'create'] })
                 }
             },
             error: function(err) {
                 error_table.user_patient.create.msg = 'wire';
-                return Promise.reject( { pos: ['user_patient','create'] } )
+                return Promise.reject({ pos: ['user_patient', 'create'] })
             }
         })
     }
 }
 
 export function update_historyinfo(
-  user,
-  id,
-  historyedit
-){
+    user,
+    id,
+    historyedit
+) {
 
- var params = {};
+    var params = {};
     params.history = historyedit.history;
     params.time = historyedit.time;
     return {
-        types:[ CREATE_USER_BEGIN, CREATE_USER_SUCCESS, CREATE_USER_FAIL ],
+        types: [CREATE_USER_BEGIN, CREATE_USER_SUCCESS, CREATE_USER_FAIL],
         promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/history/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
@@ -875,12 +875,12 @@ export function update_historyinfo(
                 } else {
                     //var err = { info: 'auth' }
                     error_table.user_patient.create.msg = 'notvalid';
-                    return Promise.reject( { pos: ['user_patient','create'] } )
+                    return Promise.reject({ pos: ['user_patient', 'create'] })
                 }
             },
             error: function(err) {
                 error_table.user_patient.create.msg = 'wire';
-                return Promise.reject( { pos: ['user_patient','create'] } )
+                return Promise.reject({ pos: ['user_patient', 'create'] })
             }
         })
     }
@@ -888,17 +888,17 @@ export function update_historyinfo(
 
 
 export function create_oralinfo(
-  user,
-  id,
-  oraledit
-){
+    user,
+    id,
+    oraledit
+) {
 
- var params = {
-    oral:oraledit.oral,
-    time:oraledit.time
- }
+    var params = {
+        oral: oraledit.oral,
+        time: oraledit.time
+    }
     return {
-        types:[ CREATE_USER_BEGIN, CREATE_USER_SUCCESS, CREATE_USER_FAIL ],
+        types: [CREATE_USER_BEGIN, CREATE_USER_SUCCESS, CREATE_USER_FAIL],
         promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
@@ -918,29 +918,29 @@ export function create_oralinfo(
                 } else {
                     //var err = { info: 'auth' }
                     error_table.user_patient.create.msg = 'notvalid';
-                    return Promise.reject( { pos: ['user_patient','create'] } )
+                    return Promise.reject({ pos: ['user_patient', 'create'] })
                 }
             },
             error: function(err) {
                 error_table.user_patient.create.msg = 'wire';
-                return Promise.reject( { pos: ['user_patient','create'] } )
+                return Promise.reject({ pos: ['user_patient', 'create'] })
             }
         })
     }
 }
 
 export function update_oralinfo(
-  user,
-  id,
-  oraledit
-){
+    user,
+    id,
+    oraledit
+) {
 
- var params = {
-    oral:oraledit.oral,
-    time:oraledit.time
- }
+    var params = {
+        oral: oraledit.oral,
+        time: oraledit.time
+    }
     return {
-        types:[ CREATE_USER_BEGIN, CREATE_USER_SUCCESS, CREATE_USER_FAIL ],
+        types: [CREATE_USER_BEGIN, CREATE_USER_SUCCESS, CREATE_USER_FAIL],
         promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
@@ -960,12 +960,12 @@ export function update_oralinfo(
                 } else {
                     //var err = { info: 'auth' }
                     error_table.user_patient.create.msg = 'notvalid';
-                    return Promise.reject( { pos: ['user_patient','create'] } )
+                    return Promise.reject({ pos: ['user_patient', 'create'] })
                 }
             },
             error: function(err) {
                 error_table.user_patient.create.msg = 'wire';
-                return Promise.reject( { pos: ['user_patient','create'] } )
+                return Promise.reject({ pos: ['user_patient', 'create'] })
             }
         })
     }
