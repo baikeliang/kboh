@@ -307,7 +307,7 @@ export function update_order({
     console.log(id)
     return {
         types: [ UPDATE_ORDER_FLUSH, ORDER_FLUSH, UPDATE_ORDER_FLUSH_FAIL ],
-        promise: (client) => client.POST('http://'+getApiIp()+'/patient/orderInfo/rest?', { params }, {
+        promise: (client) => client.PUT('http://'+getApiIp()+'/patient/orderinfo/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -387,7 +387,7 @@ export function deleteOrder({
     console.log(id)
     return {
         types: [ DELETE_ORDER_BEGIN, DELETE_ORDER_SUCCESS, DELETE_ORDER_FAIL ],
-        promise: (client) => client.POST('http://'+getApiIp()+'/patient/orderInfo/rest?', { params }, {
+        promise: (client) => client.DELETE('http://'+getApiIp()+'/patient/orderInfo/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");

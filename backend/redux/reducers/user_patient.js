@@ -314,7 +314,7 @@ export default function reducer(state = initialState, action = {}) {
         case LOAD_DETAIL_ORAL:
             return state.updateIn(['users'], list => list.map(user => {
                 if (user.get('id') == action.id) {
-                    return user.merge({ oralloading: true, oraledit: {} })
+                    return user.merge({ oralloading: true, oraledit: {userid:action.id} })
                 }
                 return user
             }))
@@ -936,7 +936,6 @@ export function update_historyinfo(
             }
         }),
         id
-        
     }
 }
 
