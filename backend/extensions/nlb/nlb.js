@@ -31,7 +31,15 @@ export const nlb = {
 
      getroutebyname:function(service_name){
 
-         var routeid = new routetype({ip:0,port:0,type:1});
-         return libnlb.getroutebyname_wrapper(service_name,routeid.ref())
+         let routeid = new routetype({ ip:0, port:0, type:1 });
+         let result = libnlb.getroutebyname_wrapper(service_name,routeid.ref());
+         let routeid_ret = { result };
+         routeid_ret.ip = routeid.ip;
+         routeid_ret.port = routeid.port;
+         routeid_ret.type = routeid.type;
+
+
+         return routeid_ret;
+
      }
 }

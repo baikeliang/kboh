@@ -51,13 +51,13 @@ window.$ = $;
 
 window.jQuery = $;
 
-require.ensure(['./modules/diyUploader/js/webuploader.html5only.js','./modules/diyUploader/js/diyUpload.js','./modules/imageUploader/upPic.js'], function(require){
+require.ensure(['./modules/diyuploader/js/webuploader.html5only.js','./modules/diyuploader/js/diyUpload.js','./modules/imageuploader/upPic.js'], function(require){
 
-      window.WebUploader = require('./modules/diyUploader/js/webuploader.html5only.js');
+      window.WebUploader = require('./modules/diyuploader/js/webuploader.html5only.js');
 
-      require('./modules/diyUploader/js/diyUpload.js');
+      require('./modules/diyuploader/js/diyUpload.js');
 
-      require('./modules/imageUploader/upPic.js')
+      require('./modules/imageuploader/upPic.js')
 
 })
 

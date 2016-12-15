@@ -45,9 +45,9 @@ var __asyncEvent = function({ dispatch, getState }) {
 
 }
 export const BaseInfoHead = ({
-  edit,
-  check,
-  add,
+    edit,
+    check,
+    add,
     toEdit,
     toSave,
 }) => {
