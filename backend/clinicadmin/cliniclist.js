@@ -23,7 +23,8 @@ import {
 	LoadedorLoading as successorLoading ,
 	load as loadClinics,
     frontUserForInfo as toShowUserInfo,
-    nextGroupUsers
+    nextGroupUsers,
+    clinicAdd
 } from 'backend/redux/reducers/user_clinic';
 
 import {
@@ -35,6 +36,8 @@ import {
 } from 'react-redux';
 
 import  CheckClinic, { asyncEvent as asyncEventCheck } from './clinicinfo/check.js'
+
+import  AddClinic, { asyncEvent as asyncEventAdd } from './clinicinfo/add.js'
 
 
 export const asyncEvent =  [{
@@ -69,7 +72,7 @@ export const asyncEvent =  [{
         	auth : state.get('auth'),
             clinicRepo: state.get('user_clinic')
         }
-    }, { pushState: push, load: loadClinics, toDetail:toShowUserInfo,nextGroupUsers })
+    }, { pushState: push, load: loadClinics, toDetail:toShowUserInfo,nextGroupUsers,clinicAdd })
 export default class ClinicListCom extends Component {
 	// methods
 	static propTypes = {
@@ -81,13 +84,10 @@ export default class ClinicListCom extends Component {
 	handlePan(ev) {
 
 	}
-
     handleRefresh(resolve, reject) {
 
         this.props.load( { num: 10, begin: 0, refresh:{ flag:true, resolve,reject } } )
     }
-
-
     componentWillMount() {
         if (this.props.auth.has('user')) {
             return;
@@ -97,7 +97,6 @@ export default class ClinicListCom extends Component {
             }
         }
         return;
-
     }
     toAddUser(){
 
@@ -134,6 +133,14 @@ export default class ClinicListCom extends Component {
     componentDidMount() {
 
     }
+    clinicadd(){
+        this.context.showRight({
+            asyncProcess:asyncEventAdd,
+            comCreater:function(){
+               return <AddClinic/>
+            }
+        })
+    }
 	render() {
         console.log(this.props.clinicRepo.toJS())
         if(this.props.auth.has('user')){
@@ -164,12 +171,11 @@ export default class ClinicListCom extends Component {
                 options,
                 length: size,
                 handlePan: (::this.handlePan),
-                handleRefresh:(::this.handleRefresh)
+                handleRefresh:(::this.handleRefresh),
+                clinicadd:(::this.clinicadd)
             })
 	    }else{
 	    return <div/>;
 	    }
 	}
-
-
 }

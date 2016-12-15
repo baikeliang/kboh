@@ -31,7 +31,7 @@ export const DoctorData = ({
                     <span onClick={(ev)=>{toUserInfo(ev,rowidx,id)}}  className="spanName">{ account }</span>
                     </td>
                     <td>{ name }</td>
-                    <td><span className="user-pic">{ photo }</span></td>
+                    <td><span className="user-pic" ><img src={ photo?photo:require('backend/common/images/user_default.png') }/></span></td>
                     <td><span>{ birth }</span></td>
                     <td><span>{ age }</span></td>
                     <td><span>{ sex }</span></td>

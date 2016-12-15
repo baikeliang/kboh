@@ -37,6 +37,7 @@ import {
 
 import  UserInfoCom from './userinfo/container.js'
 
+
 export const asyncEvent =  [{
     promise: ({ store: { dispatch, getState }, params }) => {
         if (!isAuthLoaded(getState())) {
@@ -100,7 +101,14 @@ export default class UserListCom extends Component {
 
     }
     toAddUser(){
+        this.props.toDetail({ idx:'add',id:'add' })
 
+        this.context.showRight({
+            asyncProcess:[],
+            comCreater:function(){
+               return <UserInfoCom/>
+            }
+        })
     }
     toDeleteUser(){
 
@@ -128,7 +136,6 @@ export default class UserListCom extends Component {
        let selected = data.selected;
 
        this.props.load( { num: 10, begin: (selected*10), showbegin:(selected*10)  })
-
     }
     componentDidMount() {
 

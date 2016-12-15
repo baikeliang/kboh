@@ -95,9 +95,10 @@ export const asyncEvent =  [{
 @connect(
     state => {
         var idx = state.getIn(['user_patient', 'frontuserinfo','idx']);
+        console.log(idx);
         return {
         	  auth : state.get('auth'),
-            user:  state.getIn(['user_patient','users',idx])
+            user:  (idx=='add')?state.getIn(['user_patient','newuser']):state.getIn(['user_patient','users',idx])
         }
     }, { pushState: push,basicInfoEdit,basicInfoSave})
 export default  class BasicInfo extends Component{
@@ -121,7 +122,6 @@ export default  class BasicInfo extends Component{
       console.log(val)
       this.props.basicInfoEdit([{key,val}])
    }
-
    showDateModal(){
       this.state.dateModal.display == 'block'?this.setState({...this.state,dateModal:{display:'none'}}):this.setState({...this.state,dateModal:{display:'block',position:'absolute',zIndex:'100'}});
    }
@@ -203,9 +203,10 @@ export default  class BasicInfo extends Component{
    }
    render(){
    	  if(this.props.auth.get('user')){
-
-        var baseinfo=this.props.user.get('baseinfo').toJS();
-        var baseinfoedit=this.props.user.get('baseinfoedit').toJS();
+        console.log(this.props.user);
+        var baseinfo= this.props.user.get('baseinfo').toJS();
+        var baseinfoedit= this.props.user.get('baseinfoedit').toJS();
+        console.log(baseinfo);
         return  (
             <div>
               { BaseInfoHead({
@@ -224,7 +225,7 @@ export default  class BasicInfo extends Component{
                               handleSelectDate:(::this.handleSelectDate),
                               showDateModal:(::this.showDateModal),
                               dateModal:(this.state.dateModal),
-                              birthdate:(this.props.user.getIn(['baseinfoedit','birthdate']))
+                              birthdate:(this.props.user.getIn(['baseinfoedit','birthdate'] ))
                            })
               }
 

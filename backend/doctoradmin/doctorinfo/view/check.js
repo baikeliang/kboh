@@ -50,7 +50,10 @@ export const CheckOrder = ({
 	toEdit,
     checkDutyInfo,
     detail,
-    seldate
+    seldate,
+    label,
+    projects,
+    birthdate
 }) => {
        return (<div>
 			        <div className="rtop rtop4">
@@ -87,7 +90,7 @@ export const CheckOrder = ({
 			                    </div>
 			                    <div className="input-box h30 gray-span">
 			                        <span>出生年月：</span>
-			                        <div className="see-main">{ birth }</div>
+			                        <div className="see-main">{ birthdate }</div>
 			                    </div>
 			                    <div className="input-box h30 gray-span">
 			                        <span>年龄：</span>
@@ -105,8 +108,8 @@ export const CheckOrder = ({
 			                        <span>服务项目：</span>
 			                        <div className="see-main">
 			                          {
-			                          	service_name_arr?service_name_arr.map((service_name)=>{
-			                          	  return service_name+',';
+			                          	projects?projects.map((project)=>{
+			                          	  return <span style={{paddingRight:'20px'}}>{project.name}</span>
 			                             }):''
 			                          }
 			                        </div>
@@ -187,13 +190,13 @@ export const CheckOrder = ({
 								</div>
 			                    <div className="input-box h30 gray-span">
 			                        <span>手机：</span>
-			                        <div className="see-main">{ phone }</div>
+			                        <div className="see-main">{ phone?phone:'' }</div>
 			                    </div>
 			                    <div className="input-box h30 gray-span">
 			                        <span>标签：</span>
 			                        <div className="see-main">
-			                          { label_arr?label_arr.map((label)=>{
-			                          	  return label+','
+			                          { label?label.map((label)=>{
+			                          	  return <span style={{paddingRight:'20px'}}>{label.name}</span>
 			                          }):''}
 			                        </div>
 			                    </div>

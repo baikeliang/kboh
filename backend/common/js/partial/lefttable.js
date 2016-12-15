@@ -18,6 +18,9 @@ export const table = {
         }, {
             name: '服务项目',
             id: '2-1'
+        }, {
+            name: '标签设置',
+            id: '2-2'
         }]
     }, {
         name: '诊所管理',

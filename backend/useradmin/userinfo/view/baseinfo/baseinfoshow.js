@@ -44,19 +44,19 @@ export const BaseInfoShow = ({
                                             <div className="z_main_left">
                                                 <div className="input-box h25 chakanspan"> 
                                                     <span>账号：</span>
-                                                    <div className="z_textinfo">{account}</div>
+                                                    <div className="z_textinfo">{account?account:''}</div>
                                                     <div className="clear"></div>
                                                 </div>
                                                 <div className="input-box h25 chakanspan"> 
                                                     <span>手机：</span>
-                                                    <div className="z_textinfo">{phone}</div>
+                                                    <div className="z_textinfo">{phone?phone:''}</div>
                                                     <div className="clear"></div>
                                                 </div>
                                             </div>
                                             <div className="z_main_right">
                                                 <div className="input-box h25 chakanspan"> 
                                                     <span>用户名：</span>
-                                                    <div className="z_textinfo">{name}</div>
+                                                    <div className="z_textinfo">{name?name:''}</div>
                                                     <div className="clear"></div>
                                                 </div>
                                             </div>
@@ -67,17 +67,17 @@ export const BaseInfoShow = ({
                                             <div className="z_main_left">
                                                 <div className="input-box h25 chakanspan"> 
                                                     <span>真实姓名：</span>
-                                                    <div className="z_textinfo" >{real_name}</div>
+                                                    <div className="z_textinfo" >{real_name?real_name:''}</div>
                                                     <div className="clear"></div>
                                                 </div>
                                                 <div className="input-box h25 chakanspan"> 
                                                     <span>出生年月：</span>
-                                                    <div className="z_textinfo" >{birthdate}</div>
+                                                    <div className="z_textinfo" >{birthdate?birthdate:''}</div>
                                                     <div className="clear"></div>
                                                 </div>
                                                 <div className="input-box h25 chakanspan"> 
                                                     <span>民族：</span>
-                                                    <div className="z_textinfo" >{race}</div>
+                                                    <div className="z_textinfo" >{race?race:''}</div>
                                                     <div className="clear"></div>
                                                 </div>
                                                 
@@ -88,7 +88,7 @@ export const BaseInfoShow = ({
                                                 </div>
                                                 <div className="input-box h25 chakanspan"> 
                                                     <span>证件号码：</span>
-                                                    <div className="z_textinfo">{card_id}</div>
+                                                    <div className="z_textinfo">{card_id?card_id:''}</div>
                                                     <div className="clear"></div>
                                                 </div>
                                             </div>
@@ -100,7 +100,7 @@ export const BaseInfoShow = ({
                                                 </div>
                                                 <div className="input-box h25 chakanspan"> 
                                                     <span>年龄：</span>
-                                                    <div className="z_textinfo">{age}</div>
+                                                    <div className="z_textinfo">{age?age:''}</div>
                                                     <div className="clear"></div>
                                                 </div>
                                                 <div className="input-box h25 chakanspan"> 
@@ -120,39 +120,39 @@ export const BaseInfoShow = ({
                                             <div className="z_main_left">
                                                 <div className="input-box h25 chakanspan"> 
                                                     <span>工作单位：</span>
-                                                    <div className="z_textinfo">{company_name}</div>
+                                                    <div className="z_textinfo">{company_name?company_name:''}</div>
                                                     <div className="clear"></div>
                                                 </div>
                                                 <div className="input-box h25 chakanspan"> 
                                                     <span>职业：</span>
-                                                    <div className="z_textinfo">{job}</div>
+                                                    <div className="z_textinfo">{job?job:''}</div>
                                                     <div className="clear"></div>
                                                 </div>
                                             </div>
                                             <div className="z_main_right">
                                                 <div className="input-box h25 chakanspan"> 
                                                     <span>Email：</span>
-                                                    <div className="z_textinfo">{email}</div>
+                                                    <div className="z_textinfo">{email?email:''}</div>
                                                     <div className="clear"></div>
                                                 </div>
                                                 <div className="input-box h25 chakanspan"> 
                                                     <span>社保号：</span>
-                                                    <div className="z_textinfo">{society_number}</div>
+                                                    <div className="z_textinfo">{society_number?society_number:''}</div>
                                                     <div className="clear"></div>
                                                 </div>
                                             </div>
                                             <div className="clear"></div>
                                             <div className="input-box h25 chakanspan"> 
                                                 <span>邮寄地址：</span>
-                                                <div className="z_textinfo W520">{post_address}</div>
+                                                <div className="z_textinfo W520">{post_address?post_address:''}</div>
                                                 <div className="clear"></div>
                                             </div>
                                             <div className="input-box h25 chakanspan"> 
                                                 <span>备注：</span>
-                                                <div className="z_textinfo W520">{remark}</div>
+                                                <div className="z_textinfo W520">{remark?remark:''}</div>
                                                 <div className="clear"></div>
                                             </div>
-                                        </div>                                           
+                                        </div>
                                     </div>
                                 </div>
                               </div>

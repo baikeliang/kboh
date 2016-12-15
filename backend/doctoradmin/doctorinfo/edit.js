@@ -20,7 +20,11 @@ import {
     load as loadDoctors,
     load_detail as load_detail_doctor,
     detailEdit  as detailEditDoctor,
-    doctorFlush
+    doctorFlush,
+    labelEdit,
+    projectEdit,
+    selectDay,
+    selectTime
 } from 'backend/redux/reducers/user_doctor';
 
 import {
@@ -85,14 +89,15 @@ export const asyncEvent = [{
         return {
             auth : state.get('auth'),
             detailEdit:  state.getIn(['user_doctor','doctors',idx,'detailedit']),
+            labels: state.getIn(['user_doctor','labels']),
             projectRepo: state.get('service_project')
         }
-    }, { pushState: push,detailEditDoctor,doctorFlush } )
+    }, { pushState: push,detailEditDoctor,doctorFlush,labelEdit,projectEdit,selectDay,selectTime } )
 export default  class Edit extends Component{
     constructor(props) {
         // code
       super(props);
-      this.state = { dateModal:{display:"none"} };
+      this.state = { dateModal:{display:"none"},detail:false };
     }
     static contextTypes = {
         store: PropTypes.object.isRequired,
@@ -107,11 +112,26 @@ export default  class Edit extends Component{
         // this.props.orderEdit([{key,val:time+' '+e.target.innerHTML}]);
         this.props.detailEditDoctor([{key,val}])
     }
+    labelclick(val){
+        var value = { name:val }
+        this.props.labelEdit(value)
+    }
+    proClick(val){
+        var provalue = { name:val }
+        this.props.projectEdit(provalue)
+    }
     change(ev,key){
         this.props.detailEditDoctor([{key,val:ev.target.value}])
     }
-    handleSelectDate(date){
-
+    handleSelectDate(selected){
+       this.props.selectDay({key:selected.format('YYYY-MM-DD') });
+    }
+    checkDutyInfo(){
+       this.setState({...this.state,detail:!this.state.detail})
+    }
+    selecttime(time,curDate){
+        console.log(time);
+        this.props.selectTime({key:'visit_time',val:time,todate:curDate})
     }
     save(){
         console.log('AAAAAAA');
@@ -197,17 +217,25 @@ export default  class Edit extends Component{
     }
     render(){
         let doctordata = this.props.detailEdit.get('data')?this.props.detailEdit.get('data').toJS():{};
-        let projects  = this.props.projectRepo.get('projects')?this.props.projectRepo.get('projects').toJS():[];
+        let allprojects  = this.props.projectRepo.get('projects')?this.props.projectRepo.get('projects').toJS():[];
+        let labels  = this.props.labels?this.props.labels.toJS():[];
+        console.log(labels);
         return EditDoctor({
             ...doctordata,
             handleSelectDate:(::this.handleSelectDate),
             change:(::this.change),
             click:(::this.click),
             save:(::this.save),
-            projects,
+            allprojects,
+            labels,
             showBirthCalendar:(::this.showBirthCalendar),
             dateModal:(this.state.dateModal),
-            chooseBirth:(::this.chooseBirth)
+            chooseBirth:(::this.chooseBirth),
+            labelclick:(::this.labelclick),
+            proClick:(::this.proClick),
+            checkDutyInfo:(::this.checkDutyInfo),
+            detail:(this.state.detail),
+            selecttime:(::this.selecttime)
         })
     }
 }

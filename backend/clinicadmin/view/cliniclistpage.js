@@ -17,14 +17,15 @@ export const ClinicList = ({
      toEditUser,
      toUserInfo,
      handlePageClick,
-     pageNum
+     pageNum,
+     clinicadd
      }) => {
       var  rowidx=0;
       return (<div>
                   <div className="rtop rtop2">
                     <div className="but-box">
                       <p>
-                        <a href="add.html#Clinic" className="add-but" id="add">新建</a>
+                        <a href="javascript:void(0)" className="add-but" onClick={ clinicadd }>新建</a>
                         <a href="javascript:void(0)" className="edit-but" id="edit">修改</a>
                         <a href="javascript:void(0)" className="delete-but" id="delete">删除</a>
                       </p>

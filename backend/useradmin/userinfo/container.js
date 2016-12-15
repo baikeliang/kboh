@@ -53,7 +53,6 @@ export default  class Container extends Component{
         },function(e){
 
         })
-
     }
     render(){
       return (<div style={{height:"100%"}}>
@@ -66,5 +65,4 @@ export default  class Container extends Component{
                </div>
               </div>)
    }
-
 }

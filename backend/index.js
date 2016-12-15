@@ -12,6 +12,8 @@ import  DoctorListCom,{ asyncEvent as doctorListAsync } from './doctoradmin/doct
 
 import  ClinicListCom,{ asyncEvent as clinicListAsync } from './clinicadmin/cliniclist.js'
 
+import  Labelset,{ asyncEvent as labelAsync } from './doctoradmin/LabelSet.js'
+
 
 import { LeftList } from  'backend/common/js/partial/left_table.js'
 
@@ -137,6 +139,8 @@ export default class UserAdmin extends Component {
                 return (userListAsync)
              else if(itemid == '2-0')
                 return (doctorListAsync)
+             else if(itemid == '2-2')
+                return (labelAsync)
              else if(itemid == '3-0')
                 return (clinicListAsync)
              else
@@ -152,6 +156,8 @@ export default class UserAdmin extends Component {
                 return (<UserListCom/>)
              else if(itemid == '2-0')
                 return (<DoctorListCom/>)
+             else if(itemid == '2-2')
+                return (<Labelset/>)
              else if(itemid == '3-0')
                 return (<ClinicListCom/>)
              else

@@ -32,6 +32,16 @@ const NEWDOCTORADD = 'bohe/user_doctor/NEWDOCTORADD'
 const PROJECTADD = 'bohe/user_doctor/PROJECTADD'
 const PROJECTDEL = 'bohe/user_doctor/PROJECTDEL'
 
+const LOAD_LABEL = 'bohe/user_doctor/LOAD_LABEL';
+const LOAD_LABEL_SUCCESS = 'bohe/user_doctor/LOAD_LABEL_SUCCESS';
+const LOAD_LABEL_FAIL = 'bohe/user_doctor/LOAD_LABEL_FAIL';
+
+const LABELADD = 'bohe/user_doctor/LABELADD';
+const DETAILINFO_LABEL_EDIT = 'bohe/user_doctor/DETAILINFO_LABEL_EDIT';
+
+const PROJECTEDIT = 'bohe/user_doctor/PROJECTEDIT';
+const SELECTDAY = 'bohe/user_doctor/SELECTDAY';
+const SELECTTIME = 'bohe/user_doctor/SELECTTIME';
 
 
 
@@ -55,6 +65,17 @@ export default function reducer(state = initialState, action = {}) {
                 action.refresh.reject()
             }
             return state.merge({ loading: false, loaded: false, error: action.error })
+        case LOAD_LABEL:
+            return state.merge({ label_loading: true })
+        case LOAD_LABEL_SUCCESS:
+            console.log('RTRTREEEWWWWEEEEWWWWWaaaaaa')
+            console.log(action.result)
+            return state.merge({ label_loading: false, label_loaded: true, labels: action.result })
+        case LOAD_LABEL_FAIL:
+            if(action.refresh && action.refresh.reject){
+                action.refresh.reject()
+            }
+            return state.merge({ label_loading: false, label_loaded: false, error: action.error })
 
         case LOAD_ONDUTY_DOCTORS:
             return state.merge({ loading: true })
@@ -137,6 +158,25 @@ export default function reducer(state = initialState, action = {}) {
              })
              var meta_info = state.getIn(['doctors',idx,'detailedit','data']);
              return state.setIn(['doctors',idx,'detailedit','data'],meta_info.merge(baseinfoedit));
+        case DETAILINFO_LABEL_EDIT:
+             var idx = state.getIn(['frontuserinfo','idx']);
+             var pair = action.result;
+             var meta_info = state.getIn(['doctors',idx,'detailedit','data','label']);
+             console.log(pair);
+             if(meta_info){
+                var index;
+                if((index = meta_info.findIndex(value => value.get('name') == pair.name))>=0){
+                    meta_info = meta_info.remove(index);
+                }else{
+                    console.log(pair);
+                    meta_info = meta_info.push(Immutable.Map(pair))
+                }
+             }else{
+                let _pair = Immutable.Map(pair);
+                meta_info = Immutable.List([]);
+                meta_info = meta_info.push(_pair);
+             }
+             return state.setIn(['doctors',idx,'detailedit','data','label'],meta_info);
         case DOCTORFLUSH:
              var doctorId = state.getIn(['frontuserinfo','idx']);
              var doctoredit = state.getIn(['doctors',doctorId,'detailedit','data']);
@@ -163,7 +203,7 @@ export default function reducer(state = initialState, action = {}) {
              return state.updateIn(['doctors'], list => list.push(newdoctor));
         case PROJECTADD:
              var pair = action.result;
-             var projectadd = {}
+             var projectadd = {};
              projectadd[pair.key] = pair.val;
              console.log(projectadd);
              if(state.hasIn(['newdoctor','service_name_arr'])){
@@ -172,11 +212,52 @@ export default function reducer(state = initialState, action = {}) {
              else{
                   return state.merge( { newdoctor: { 'service_name_arr':[] } } ).updateIn(['newdoctor','service_name_arr'],list => list.push(Immutable.Map(projectadd)));
              }
+        case PROJECTEDIT:
+             var idx = state.getIn(['frontuserinfo','idx']);
+             var pair = action.result;
+             var meta_info = state.getIn(['doctors',idx,'detailedit','data','projects']);
+             console.log(pair);
+             if(meta_info){
+                var index;
+                if((index = meta_info.findIndex(value => value.get('name') == pair.name))>=0){
+                    meta_info = meta_info.remove(index);
+                }else{
+                    console.log(pair);
+                    meta_info = meta_info.push(Immutable.Map(pair))
+                    console.log(meta_info.toJS());
+                }
+             }else{
+                let _pair = Immutable.Map(pair);
+                meta_info = Immutable.List([]);
+                meta_info = meta_info.push(_pair);
+                console.log('TTTTTTTTYYYYYYYTTRRdddd!')
+                console.log(meta_info)
+             }
+             return state.setIn(['doctors',idx,'detailedit','data','projects'],meta_info);
         case PROJECTDEL:
              var pair = action.result;
              var index = state.getIn(['newdoctor','service_name_arr']).findIndex( value => value.get(pair.key) == pair.val);
              return state.setIn(['newdoctor','service_name_arr'],state.getIn(['newdoctor','service_name_arr']).remove(index));
-
+        case LABELADD:
+             var pair = action.result;
+             var label = {};
+             label[pair.key] = pair.val;
+             return state.updateIn(['labels'],list => list.push(Immutable.Map(label) ));
+        case SELECTDAY:
+             var idx = state.getIn(['frontuserinfo','idx']);
+             var pair = action.result;
+             if(state.getIn(['doctors',idx,'detailedit','data','time_arr',pair.key])){
+                return state.setIn(['doctors',idx,'detailedit','data','curDate'],pair.key);
+             }else{
+                return state.setIn(['doctors',idx,'detailedit','data','time_arr',pair.key],Immutable.List([])).setIn(['doctors',idx,'detailedit','data','curDate'],pair.key);
+             }
+        case SELECTTIME:
+             var idx = state.getIn(['frontuserinfo','idx']);
+             var pair = action.result;
+             var _pair = {};
+             _pair[pair.key] = pair.val;
+             console.log(_pair);
+             return state.setIn(['doctors',idx,'detailedit','data','time_arr',pair.todate],state.getIn(['doctors',idx,'detailedit','data','time_arr',pair.todate]).push(Immutable.Map(_pair)));
         default:
             return state
     }
@@ -392,6 +473,61 @@ export function load_onduty_detail({
 
 }
 
+export function load_labels({
+    user,
+    req
+}) {
+    var params = {};
+
+    if ((typeof window === 'undefined')||(window.__SERVER__ == true)) { ///server side
+        if (user.token) ///  鉴权通过 已经持有 token
+        {
+            params.token = user.token;
+
+
+        } else { // server side none key to login
+
+            return {
+                type: LOAD_FAIL,
+                promise: () => Promise.reject({ info: 'auth' })
+            }
+
+        }
+    }else{
+
+    }
+
+    return {
+        types: [LOAD_LABEL, LOAD_LABEL_SUCCESS , LOAD_LABEL_FAIL],
+        promise: (client) => client.GET('http://'+getApiIp()+'/user_doctor/label/rest?', { params }, {
+            format: function(response) {
+                if (response.status >= 400) {
+                    throw new Error("Bad response from server");
+                }
+                return response.json();
+            },
+            done: function(res) {
+
+                console.log(res);
+
+                if (res.valid == 1) {
+                    console.log('QWERQWER');
+                    console.log(res.labels);
+                    return Promise.resolve(res.labels)
+
+                } else {
+                    //var err = { info: 'auth' }
+                    return Promise.reject({ info: 'notvalid' })
+                }
+            },
+            error: function(err) {
+                return Promise.reject({ info: 'wire' })
+            }
+        })
+    };
+
+}
+
 export function frontUserForInfo({ idx,id }){
      return {
         type: SET_USER_TOSHOWINFO,
@@ -446,6 +582,51 @@ export function projectDEL(pairs){
     return {
         type: PROJECTDEL,
         result: pairs
+    }
+
+}
+
+export function labelAdd(pairs){
+
+    return {
+        type: LABELADD,
+        result: pairs
+    }
+
+}
+
+export function labelEdit(pair){
+
+    return {
+        type: DETAILINFO_LABEL_EDIT,
+        result: pair
+    }
+
+}
+
+export function projectEdit(pair){
+
+    return {
+        type: PROJECTEDIT,
+        result: pair
+    }
+
+}
+
+export function selectDay(pair){
+
+    return {
+        type: SELECTDAY,
+        result: pair
+    }
+
+}
+
+export function selectTime(pair){
+
+    return {
+        type: SELECTTIME,
+        result: pair
     }
 
 }

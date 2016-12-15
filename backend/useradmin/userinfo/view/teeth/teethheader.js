@@ -16,6 +16,7 @@ export const TeethHeader = ({
     toEdit,
     toCheck,
     saveTeethGraph,
+    addTeethGraph,
     changeCheckTime,
     changeEditTime
 }) => {
@@ -60,10 +61,15 @@ export const TeethHeader = ({
              	return (<div className="time z_time_edit">
                           <div className="z_time_btn">
                             <p>
-                                <em className="see_page_em">基于最新（<font className="new_time">{addTime}</font>）信息上进行添加</em>
+                            {
+                               (function(){
+                                 if(addTime)
+                                   return (<em className="see_page_em">基于最新（<font className="new_time">{addTime}</font>）信息上进行添加</em>)
+                                })()
+                            }
                             </p>
                             <label>
-                                <span onClick={toCheck} className="default_inputbtn z_save_btn">保存</span>
+                                <span onClick={ addTeethGraph } className="default_inputbtn z_save_btn">保存</span>
                             </label>
                           </div>
                         </div>)

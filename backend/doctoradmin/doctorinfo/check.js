@@ -76,7 +76,6 @@ export default  class Check extends Component{
     };
     handleSelectDate(selected){
        this.setState({...this.state,seldate:selected.format('YYYY-MM-DD')})
-
     }
     checkDutyInfo(){
        this.setState({...this.state,detail:!this.state.detail})

@@ -21,6 +21,9 @@ const LOAD_ONDUTY_DETAIL_FAIL = 'bohe/user_clinic/LOAD_ONDUTY_DETAIL_FAIL';
 const SET_USER_TOSHOWINFO = 'bohe/user_clinic/SHOWINFO'
 
 const DETAILINFO_EDIT = 'bohe/user_clinic/DETAILINFO_EDIT'
+const CLINICFLUSH = 'bohe/user_clinic/CLINICFLUSH'
+const CLINICADD = 'bohe/user_clinic/CLINICADD'
+const CLINICSAVE = 'bohe/user_clinic/CLINICSAVE'
 
 const initialState = Immutable.Map({
     loaded: false,
@@ -124,6 +127,30 @@ export default function reducer(state = initialState, action = {}) {
              })
              var meta_info = state.getIn(['clinics',idx,'detailedit','data']);
              return state.setIn(['clinics',idx,'detailedit','data'],meta_info.merge(baseinfoedit));
+        case CLINICFLUSH:
+             var idx = state.getIn(['frontuserinfo','idx']);
+             var toclinic = state.getIn(['clinics',idx,'detailedit','data']);
+             return state.setIn(['clinics',idx],state.getIn(['clinics',idx]).merge(toclinic));
+        case CLINICADD:
+             var pairs = action.result;
+             var baseinfoedit = {};
+             pairs.forEach((pair) => {
+                 baseinfoedit[pair.key] = pair.val;
+             })
+             var meta_info = Immutable.Map({});
+             console.log('爱沙发沙发沙发');
+             console.log(baseinfoedit);
+             console.log(state.hasIn(['newclinic']));
+             if(state.hasIn(['newclinic'])){
+                  meta_info = state.getIn(['newclinic']);
+                  return state.setIn(['newclinic'],meta_info.merge(baseinfoedit));
+             }
+             else{
+                  return state.merge( { newclinic: {} } ).setIn(['newclinic'],meta_info.merge(baseinfoedit));
+             }
+        case CLINICSAVE:
+             var newclinic = state.getIn(['newclinic']);
+             return state.updateIn(['clinics'], list => list.push(newclinic));
         default:
             return state
     }
@@ -351,6 +378,30 @@ export function detailEdit(pairs){
     }
 
 }
+export function clinicFlush(){
+
+    return {
+        type: CLINICFLUSH
+    }
+
+}
+export function clinicAdd(pairs){
+
+    return {
+        type: CLINICADD,
+        result:pairs
+    }
+
+}
+export function clinicSave(){
+
+    return {
+        type: CLINICSAVE
+    }
+
+}
+
+
 
 
 

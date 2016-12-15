@@ -1,130 +1,177 @@
 import React, { Component } from 'react';
 import ReactDOM  from 'react-dom'
+import Calendar from 'rc-calendar';
 
-
+const format = ('YYYY-MM-DD');
 
 export const AddClinic = ({
-     change,
-     doctors
+    id,
+    clinic_brand,
+    clinic_name,
+    clinic_address,
+    chair_nums,
+    clinic_head_name,
+    clinic_head_phone,
+    mint_head_name,
+    rowidx,
+    mint_head_phone,
+    toUserInfo,
+    is_show,
+    bus_line,
+    told_word,
+    set_date,
+    staff_nums,
+    account,
+    password,
+    clinic_pic,
+    around_pic,
+    remark,
+    dateModal,
+    chooseSetTime,
+    showSetTimeCalendar,
+    change,
+    clinicadd,
+    isShow
 }) => {
-            return (<div>
-			          <div className="rtop rtop4">
-			              <div className="but-box bj-none">
+       return (<div>
+			        <div className="rtop rtop4">
+			            <div className="but-box bj-none">
 			              <p>
 			                <a href="javascript:void(0)" className="back-but" id="back">返回</a>
-			                <input type="button" className="save-but" id="save-but" value="保存"/>
+			                <a href="javascript:void(0)" className="save-but" onClick={ clinicadd } >保存</a>
 			              </p>
 			            </div>
-			          </div>
-			         <div className="add-box-container" style={{minHeight:'700px'}}>
+			        </div>
+			        <div className="add-box-container">
 			            <div className="add-h3 add-main-box1 mtop45">
-			              <h3 className="box5-h3">基本信息<span></span></h3>
+			                <h3 className="box5-h3">基本信息<span></span></h3>
 			                <div className="main-input">
 			                    <div className="input-box h30">
-			                        <span><em className="emx">就诊人姓名：</em></span>
-			                        <input onChange={ (ev) => change(ev,'patient_name') } type="text" className="text-input" id="patient_name"/>
-			                        <p></p>
-			                    </div>
-			                    <div className="input-box h30">
-			                        <span><em className="emx">预约人姓名：</em></span>
-			                        <div className="col-sm-8" id="PatInputbox">
-			                            <div id="bts-ex-5" className="selectpicker" data-clear="true" data-live="true">
-			                              <button data-id="prov" type="button" className="btn btn-lg btn-block btn-default dropdown-toggle">
-			                                <span className="placeholder" id="PatVal" data-val="">请选择</span>
-			                                <span className="caret"></span>
-			                              </button>
-			                              <div className="dropdown-menu">
-			                                <div className="live-filtering" data-clear="true" data-autocomplete="true" data-keys="true">
-			                                  <label className="sr-only" htmlFor="input-bts-ex-5"></label>
-			                                  <div className="search-box">
-			                                    <div className="input-group">
-			                                      <input type="text" placeholder="请输入搜索内容" id="input-bts-ex-5" className="form-control live-search" aria-describedby="search-icon5" tabindex="1" />
-			                                    </div>
-			                                  </div>
-			                                  <div className="list-to-filter">
-			                                        <ul className="list-unstyled" id="patient_id">
-			                                        </ul>
-			                                    <div className="no-search-results">
-			                                      <div className="alert alert-warning" role="alert"><i className="fa fa-warning margin-right-sm"></i>没有找到 <strong>'<span></span>'</strong>相关数据</div>
-			                                    </div>
-			                                  </div>
-			                                </div>
-			                              </div>
-			                              <input type="hidden" name="bts-ex-5" value=""/>
-			                            </div>
-			                        </div>
-			                        <p></p>
-			                    </div>
-
-			                    <div className="input-box h30">
-			                        <span>联系方式：</span>
-			                        <input type="text" className="text-input readonly" id="contact_tel" readonly/>
-			                        <p></p>
-			                    </div>
-			                    <div className="input-box h30">
-			                        <span><em className="emx">是否本人：</em></span>
-			                        <div className="radio-box" id="is_self">
-			                            <span><input type="radio" className="radio1" name="radio2" id="checkbox10" value="1"/><label for="checkbox10"></label>是</span>
-			                            <span><input type="radio" className="radio1" name="radio2" id="checkbox11" value="2"/><label for="checkbox11"></label>否</span>
+			                        <span>是否显示：</span>
+			                        <div className="radio-box" id="is_show">
+			                            <span><input type="radio" className="radio1" name="radiov" id="checkboxvv" value="1" checked={is_show=='1'?'checked':''}/><label onClick={ ()=>{ isShow('1','is_show')} } htmlFor="checkboxvv" style={{top:'5px'}}></label>是</span>
+			                            <span><input type="radio" className="radio1" name="radiov" id="checkboxww" value="2" checked={is_show=='0'?'checked':''}/><label onClick={ ()=>{ isShow('0','is_show')} } htmlFor="checkboxww" style={{top:'5px'}}></label>否</span>
 			                        </div>
 			                        <p className="errorTip"></p>
 			                    </div>
-			                    <div className="input-box h30" id="guanxi" style="display:none">
-			                        <span><em className="emx">与预约人关系：</em></span>
-			                        <input onChange={(ev)=>{ change(ev,'relations') }} type="text" className="text-input" id="relations"/>
-			                        <p></p>
-			                    </div>
-
 			                    <div className="input-box h30">
-			                        <span><em className="emx">所属公司：</em></span>
-			                        <select name="" id="company_name" className="select-div">
-			                          <option value="">请选择</option>
-			                          {companys.map((company)=>{
-			                          	 return  <option value={ company.company_code }>{ company.company_name }</option>
-			                          })}
-			                        </select>
-			                        <label className="inviteCode"></label>
-			                    </div>
-			                    <div className="input-box h30">
-			                        <span><em className="emx">选择项目：</em></span>
-			                        <select name="" id="service_id" className="select-div">
-			                         {projects.map((project)=>{
-			                         	return <option value={project.id}>{project.service_name}</option>
-			                         })}
-			                        </select>
-			                        <p></p>
-			                    </div>
-			                    <div className="input-box h30" id="jdatebox">
-			                        <span><em className="emx">预约日期：</em></span>
-			                        <input type="text" className="text-input layicon" id="visit_time" readonly="readonly"/>
-			                        <p></p>
-			                        <div className="calendarbox" id="inline-calendar"></div>
-			                    </div>
-			                    <div className="input-box h30">
-			                        <span><em className="emx">医生：</em></span>
-			                        <select name="" id="doctor_id" className="select-div">
-			                          <option value="">请选择</option>
-			                          {doctors.map((doctor) => {
-                                          return <option value={doctor.id} clinic_name={doctor.clinic_name} clinic_id={doctor.clinic_id}>{doctor.name}</option>
-			                          })}
-			                        </select>
+			                        <span><em className="emx">诊所品牌：</em></span>
+			                        <input onChange={ (ev)=>{ change(ev,'clinic_brand')} } value={clinic_brand?clinic_brand:''} type="text" className="text-input" placeholder="欢乐口腔 / 瑞尔口腔 / 瑞泰口腔"/>
 			                        <p></p>
 			                    </div>
 			                    <div className="input-box h30">
-			                        <span>诊所：</span>
-			                        <input type="text" className="text-input readonly" id="clink" readonly="readonly"/>
+			                        <span><em className="emx">诊所名称：</em></span>
+			                        <input onChange={ (ev)=>{ change(ev,'clinic_name')} } value={clinic_name?clinic_name:''} type="text" className="text-input" placeholder="" id="clinic_name"/>
+			                        <p></p>
 			                    </div>
-			                    <div className="input-box chuzhenTimebox">
-			                      <span><em className="emx">选择出诊时间：</em></span>
-			                      <ul id="timeArry">
-			                      </ul>
-			                      <p id="timeWrong"></p>
-			                      <div className="clear"></div>
-			                    </div>
-
 			                    <div className="input-box h30">
-			                        <span>备注：</span>
-			                        <textarea onChange={(ev)=>change(ev,'remark') } className="textarea" style={{maxWidth:'245px'}}></textarea>
+			                        <span><em className="emx">诊所地址：</em></span>
+			                        <input onChange={ (ev)=>{ change(ev,'clinic_address')} } value={clinic_address?clinic_address:''} type="text" className="text-input" placeholder="" id="clinic_address"/>
+			                        <p></p>
+			                    </div>
+			                    <div className="input-box h65">
+			                        <span>乘车路线：</span>
+			                        <textarea onChange={ (ev)=>{ change(ev,'bus_line')} } value={bus_line?bus_line:''} name="" className="text-input" placeholder="" id="bus_line"></textarea>
+			                        <p></p>
+			                    </div>
+			                    <div className="input-box h65">
+			                        <span>嘱咐说明：</span>
+			                        <textarea onChange={ (ev)=>{ change(ev,'told_word')} } value={told_word?told_word:''} className="text-input" placeholder="" id="told_word"></textarea>
+			                        <p></p>
+			                    </div>
+			                    <div className="input-box h30">
+			                        <span><em className="emx">牙椅数量：</em></span>
+			                        <input onChange={ (ev)=>{ ev.target.value=ev.target.value.replace(/\D/g,''); change(ev,'chair_nums')} } value={chair_nums?chair_nums:''} type="text" className="text-input" id="chair_nums" placeholder="只能输入数字"/>
+			                        <p></p>
+			                    </div>
+			                    <div className="input-box h30">
+			                        <span>诊所负责人：</span>
+			                        <input onChange={ (ev)=>{ change(ev,'clinic_head_name')} } value={clinic_head_name?clinic_head_name:''} type="text" className="text-input" id="clinic_head_name"/>
+			                        <p></p>
+			                    </div>
+			                    <div className="input-box h30">
+			                        <span>负责人电话：</span>
+			                        <input onChange={(ev)=>{ ev.target.value=ev.target.value.replace(/\D/g,''); change(ev,'clinic_head_phone')}} value={clinic_head_phone?clinic_head_phone:''} type="text" className="text-input" id="clinic_head_phone"  maxLength="11" />
+			                        <p></p>
+			                    </div>
+			                    <div className="input-box h30">
+			                        <span>薄荷对接人：</span>
+			                        <input onChange={ (ev)=>{ change(ev,'mint_head_name')} } value={mint_head_name?mint_head_name:''} type="text" className="text-input" id="mint_head_name"/>
+			                        <p></p>
+			                    </div>
+			                    <div className="input-box h30">
+			                        <span>对接人电话：</span>
+			                        <input onChange={ (ev)=>{ ev.target.value=ev.target.value.replace(/\D/g,''); change(ev,'mint_head_phone')} } value={mint_head_phone?mint_head_phone:''} type="text" className="text-input" id="mint_head_phone" maxLength="11" />
+			                        <p></p>
+			                    </div>
+			                    <div className="input-box h30">
+			                        <span><em className="emx">成立时间：</em></span>
+			                        <input value={ set_date?set_date:'' } onClick={ showSetTimeCalendar } type="text" className="text-input layicon" id="set_date" readonly/>
+			                        <p></p>
+			                    </div>
+			                    <div style={{position:'relative'}}>
+			                      <div style={ {...dateModal,marginLeft:'150px'} }>
+                                      <Calendar format={'YYYY-MM-DD'} onSelect={ chooseSetTime }/>
+                                  </div>
+                                </div>
+			                    <div className="input-box h30">
+			                        <span><em className="emx">员工人数：</em></span>
+			                        <input onChange={ (ev)=>{ ev.target.value=ev.target.value.replace(/\D/g,''); change(ev,'staff_nums')} } value={staff_nums?staff_nums:''} type="text" className="text-input" id="staff_nums"/>
+			                        <p></p>
+			                    </div>
+			                    <div className="input-box h30">
+			                        <span><em className="emx">诊所账号：</em></span>
+			                        <input onChange={ (ev)=>{ ev.target.value=ev.target.value.replace(/\D/g,''); change(ev,'account')} } value={account?account:''} type="text" className="text-input" placeholder="请输如您的手机号" id="account" maxLength="11"/>
+			                        <p></p>
+			                    </div>
+			                    <div className="input-box h30">
+			                        <span><em className="emx">密码：</em></span>
+			                        <input onChange={ (ev)=>{ change(ev,'password')} } value={password?password:''} type="password" className="text-input" placeholder="请输入您的密码（6-20）位" id="password"/>
+			                        <p></p>
+			                    </div>
+			                    <div className="input-box" style={{ position:'relative',marginTop:'20px'}}>
+			                        <span><em className="emx">诊所资质：</em></span>
+			                        <div className="file-main-box pic_file_pic" id="clinic_pic">
+			                            <div className="upfile-box">
+			                                <div id="picUpfile1"></div>
+			                                <div className="parentFileBox">
+			                                    <ul className="fileBoxUl">
+			                                       <li id="fileBox" className="diyUploadHover" file_path={ clinic_pic }>
+					                               <div className="viewThumb"><img src={ clinic_pic } alt="" /></div>
+					                               <div className="diyCancel"></div>
+					                               <div className="clear"></div>
+					                               </li>
+			                                    </ul>
+			                                </div>
+			                            </div>
+			                        </div>
+			                        <label className="tip_wrong">图片建议尺寸：3:2</label>
+			                        <p className="wrongfiletip wrongfiletip1"></p>
+			                        <div className="clear"></div>
+			                    </div>
+			                    <div className="input-box" style={{ position:'relative',marginTop:'20px' }}>
+			                        <span><em className="emx">环评资质：</em></span>
+			                        <div className="file-main-box pic_file_pic" id="around_pic">
+			                            <div className="upfile-box">
+			                                <div id="picUpfile2"></div>
+			                                <div className="parentFileBox">
+			                                    <ul className="fileBoxUl">
+			                                       <li id="fileBox" className="diyUploadHover" file_path={ around_pic }>
+												   <div className="viewThumb"><img src={ around_pic } alt="" /></div>
+												   <div className="diyCancel"></div>
+												   <div className="clear"></div>
+												   </li>
+			                                    </ul>
+			                                </div>
+			                            </div>
+			                        </div>
+			                        <label className="tip_wrong">图片建议尺寸：3:2</label>
+			                        <p className="wrongfiletip wrongfiletip2"></p>
+			                        <div className="clear"></div>
+			                    </div>
+			                    <div className="input-box h30">
+			                        <span>排序：</span>
+			                        <input onChange={ (ev)=>{ ev.target.value=ev.target.value.replace(/\D/g,''); change(ev,'sort')} } type="text" className="text-input" id="sort" maxLength="11" />
 			                        <p></p>
 			                    </div>
 

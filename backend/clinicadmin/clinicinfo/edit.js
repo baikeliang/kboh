@@ -1,4 +1,5 @@
 import React , { Component,PropTypes } from 'react';
+import  getApiIp  from 'backend/util/apiinterface.js'
 
 import Promise from 'bluebird'
 
@@ -19,7 +20,8 @@ import {
     LoadedorLoading_clinic as successorLoading_clinic,
     load as loadClinics,
     load_detail as load_detail_clinic,
-    detailEdit  as detailEditClinic
+    detailEdit  as detailEditClinic,
+    clinicFlush
 } from 'backend/redux/reducers/user_clinic';
 
 import {
@@ -86,7 +88,7 @@ export const asyncEvent = [{
             detailEdit:  state.getIn(['user_clinic','clinics',idx,'detailedit']),
             projectRepo: state.get('service_project')
         }
-    }, { pushState: push,detailEditClinic } )
+    }, { pushState: push,detailEditClinic,clinicFlush } )
 export default  class Edit extends Component{
     constructor(props) {
         // code
@@ -101,16 +103,19 @@ export default  class Edit extends Component{
         showRight: PropTypes.func.isRequired
     };
     click(e,key,val){
-        // console.log(time);
-        // time = time.split(' ')[0];
-        // this.props.orderEdit([{key,val:time+' '+e.target.innerHTML}]);
         this.props.detailEditClinic([{key,val}])
     }
     change(ev,key){
          this.props.detailEditClinic([{key,val:ev.target.value}])
     }
+    isShow(val,key){
+         this.props.detailEditClinic([{key,val}])
+    }
     handleSelectDate(date){
 
+    }
+    clinicsave(){
+      this.props.clinicFlush();
     }
     chooseSetTime(date){
       this.state.dateModal.display = 'none';
@@ -126,7 +131,7 @@ export default  class Edit extends Component{
     upLoadFile(){
        var comself = this;
        window.$("#picUpfile1").diyUpload({
-               url: 'http://192.168.10.10/user_clinic/detail/file/rest',
+               url: 'http://'+getApiIp()+'/user_clinic/detail/file/rest',
                success: function(data) {
                  console.log("YYUUTTRRREEWWEERRFFFFFFF")
                  console.log(data.file_path)
@@ -157,7 +162,7 @@ export default  class Edit extends Component{
        );
 
        window.$("#picUpfile2").diyUpload({
-               url: 'http://192.168.10.10/user_clinic/detail/file/rest',
+               url: 'http://'+getApiIp()+'/user_clinic/detail/file/rest',
                success: function(data) {
                 console.log(data.file_path)
                 comself.props.detailEditClinic([{key:'around_pic',val:data.file_path}])
@@ -189,20 +194,18 @@ export default  class Edit extends Component{
         this.upLoadFile();
     }
     render(){
-        let doctordata = this.props.detailEdit.get('data')?this.props.detailEdit.get('data').toJS():{};
-        let projects  = this.props.projectRepo.get('projects')?this.props.projectRepo.get('projects').toJS():[];
-
-
+        let clinicdata = this.props.detailEdit.get('data').toJS();
+        let detail = this.state.detail;
         return EditClinic({
-            ...doctordata,
+            ...clinicdata,
             handleSelectDate:(::this.handleSelectDate),
             change:(::this.change),
             click:(::this.click),
-            projects,
             dateModal:(this.state.dateModal),
             chooseSetTime:(::this.chooseSetTime),
-            showSetTimeCalendar:(::this.showSetTimeCalendar)
-
+            showSetTimeCalendar:(::this.showSetTimeCalendar),
+            clinicsave:(::this.clinicsave),
+            isShow:(::this.isShow)
         })
     }
 }

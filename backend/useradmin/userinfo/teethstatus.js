@@ -42,6 +42,7 @@ import { table as oraltable } from 'backend/useradmin/userinfo/config/oraltable.
 var __asyncEvent = function({ dispatch, getState }) {
     let state = getState();
     let id = state.getIn(['user_patient', 'frontuserinfo','id']); 
+    id=id||'add';
     return dispatch(load_detail_oral({ id }))
 }
 export const asyncEvent =  [{
@@ -74,7 +75,7 @@ export const asyncEvent =  [{
         var idx = state.getIn(['user_patient', 'frontuserinfo','idx']);
         return {
             auth : state.get('auth'),
-            oraledit:  state.getIn(['user_patient','users',idx,'oraledit'])
+            oraledit:  idx=='add'?state.getIn(['user_patient','newuser','oraledit']):state.getIn(['user_patient','users',idx,'oraledit'])
         }
     }, { pushState: push,oralEditADD,oralFlush,changeOralTime,oralEditDEL})
 
