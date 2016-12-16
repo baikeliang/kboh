@@ -936,6 +936,7 @@ export function update_historyinfo(
             }
         }),
         id
+        
     }
 }
 
