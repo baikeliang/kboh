@@ -52,7 +52,11 @@ module.exports = {
           { test: /\.(png|jpg|jpeg|svg)$/, loader: 'fake-url?limit=25000' },
       ],
   },
-
+  resolve: {
+        alias: {
+            backend: path.join(__dirname, "./backend")
+        }
+  },
   plugins: [
     //new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin(),
