@@ -28,12 +28,18 @@ const BASICINFO_EDIT = 'bohe/user_patient/BASICINFO_EDIT';
 const HISTORY_SAVE = 'bohe/user_patient/HISTORY_SAVE';
 const HISTORY_EDIT_ADD = 'bohe/user_patient/HISTORY_EDIT_ADD';
 const HISTORY_EDIT_DEL = 'bohe/user_patient/HISTORY_EDIT_DEL';
+
+const UPDATE_HISTORY_BEGIN = 'bohe/user_patient/UPDATE_HISTORY_BEGIN'
 const HISTORY_FLUSH = 'bohe/user_patient/HISTORY_FLUSH';
+const UPDATE_HISTORY_FAIL = 'bohe/user_patient/UPDATE_HISTORY_FAIL'
+
 const HISTORY_CHANGE_TIME = 'bohe/user_patient/HISTORY_CHANGE_TIME';
 
 
 const ORAL_EDIT_ADD = 'bohe/user_patient/ORAL_EDIT_ADD';
+const UPDATE_ORAL_BEGIN = 'bohe/user_patient/UPDATE_ORAL_BEGIN'
 const ORAL_FLUSH = 'bohe/user_patient/ORAL_FLUSH';
+const UPDATE_ORAL_FAIL = 'bohe/user_patient/UPDATE_ORAL_FAIL';
 const ORAL_CHANGE_TIME = 'bohe/user_patient/ORAL_CHANGE_TIME';
 const ORAL_EDIT_DEL = 'bohe/user_patient/ORAL_EDIT_DEL';
 
@@ -47,6 +53,17 @@ const CREATE_USER_SUCCESS =   'bohe/user_patient/CREATE_USER_SUCCESS'
 
 const CREATE_USER_FAIL =    'bohe/user_patient/CREATE_USER_FAIL'
 
+const CREATE_HISTORY_BEGIN = 'bohe/user_patient/CREATE_HISTORY_BEGIN'
+
+const CREATE_HISTORY_SUCCESS = 'bohe/user_patient/CREATE_HISTORY_SUCCESS'
+
+const CREATE_HISTORY_FAIL = 'bohe/user_patient/CREATE_HISTORY_FAIL'
+
+const CREATE_ORAL_BEGIN = 'bohe/user_patient/CREATE_ORAL_BEGIN'
+
+const CREATE_ORAL_SUCCESS = 'bohe/user_patient/CREATE_ORAL_SUCCESS'
+
+const CREATE_ORAL_FAIL = 'bohe/user_patient/CREATE_ORAL_FAIL'
 
 
 const initialState = Immutable.Map({
@@ -105,20 +122,20 @@ export default function reducer(state = initialState, action = {}) {
                 var meta_info = state.getIn(['newuser', 'baseinfoedit']);
                 return state.setIn(['newuser', 'baseinfoedit'], meta_info.merge(baseinfoedit));
             }
-        case BASICINFO_SAVE:
-            var idx = state.getIn(['frontuserinfo', 'idx']);
-            if (idx != 'add') {
-                var infotomerge = state.getIn(['users', idx, 'baseinfoedit']);
-                var metainfo = state.getIn(['users', idx, 'baseinfo']);
-                return state.setIn(['users', idx, 'baseinfo'], metainfo.merge(infotomerge));
-            } else {
-                var infotomerge = state.getIn(['newuser', 'baseinfoedit']);
-                return state.setIn(['newuser', 'baseinfo'], infotomerge);
-            }
         case BASICINFO_SAVE_BEGIN:
              return state;
+        case BASICINFO_SAVE:
+            var idx = state.getIn(['users']).findIndex(value => value.get('id') == action.id)
+            if (idx >= 0) {
+                let infotomerge = state.getIn(['users', idx, 'baseinfoedit']);
+                let metainfo = state.getIn(['users', idx, 'baseinfo']);
+                return state.setIn(['users', idx, 'baseinfo'], metainfo.merge(infotomerge));
+            } else {
+                let infotomerge = state.getIn(['newuser', 'baseinfoedit']);
+                return state.setIn(['newuser', 'baseinfo'], infotomerge);
+            }
         case BASICINFO_SAVE_FAIL:
-             return  state.merge( { error: action.error } )
+             return  state.setIn(['error'],action.error);
         case CREATE_USER_BEGIN:
              return state.mergeDeep({ newuser:{ loading:true, loaded:false } });
         case CREATE_USER_SUCCESS:
@@ -129,11 +146,9 @@ export default function reducer(state = initialState, action = {}) {
              else
                return state.mergeDeep({ newuser:{ loading:false, loaded:true } }).setIn(['newuser','id'],action.result.user_id).setIn(['newuser', 'baseinfo'], infotomerge).merge({ error:{} });
         case CREATE_USER_FAIL:
-             return  state.merge( { error: action.error } ).setIn(['newuser','loading'],false),setIn(['newuser','loaded'],false);
+             return  state.setIn( ['error'],action.error ).setIn(['newuser','loading'],false),setIn(['newuser','loaded'],false);
         case LOAD_DETAIL_HISTORY:
             if(state.getIn(['newuser','id']))
-
-
             return state.updateIn(['users'], list => list.map(user => {
                 if (user.get('id') == action.id) {
                     return user.merge({ hisloading: true, historyedit: {} })
@@ -184,21 +199,40 @@ export default function reducer(state = initialState, action = {}) {
             }
         case NEXT_GROUP_USERS:
             return state.merge({ showbegin: action.result })
-        case HISTORY_FLUSH:
-            var idx = state.getIn(['frontuserinfo', 'idx']);
-            if (idx != 'add') {
-                var historytomerge = state.getIn(['users', idx, 'historyedit', 'history']);
-                var historyidx = state.getIn(['users', idx, 'historyedit', 'idx']);
-                console.log('WWWWWWWWWWWWWW');
-                console.log(historyidx);
+        case CREATE_HISTORY_BEGIN:
+            return state;
+        case CREATE_HISTORY_SUCCESS:
+            var idx = state.getIn(['users']).findIndex(value => value.get('id') == action.id)
+            if(idx >=0 ){
+                let historytomerge = state.getIn(['users', idx, 'historyedit', 'history']);
+                let historyidx = state.getIn(['users', idx, 'historyedit', 'idx']).setIn(['time'],action.result.time);
                 if (historyidx >= 0) {
-                    console.log("TTTTTTTTTTTTTTRRRRRRR")
                     return state.setIn(['users', idx, 'allhistory', historyidx, 'history'], historytomerge);
                 } else
                     return state
-            } else {
-                var historytomerge = state.getIn(['newuser', 'historyedit', 'history']);
-                return state.setIn(['newuser', 'historyinfo'], historytomerge);
+            }else if( state.hasIn(['newuser','id'])&&( state.getIn(['newuser','id']) == action.id )){
+                let historytomerge = state.getIn(['newuser', 'historyedit']).setIn(['time'],action.result.time);
+                let historyidx = state.getIn(['newuser', 'allhistory']).size;
+                return state.setIn(['newuser','historyedit','idx'],historyidx).updateIn(['newuser', 'allhistory'],list=>list.push(historytomerge));
+            }
+        case CREATE_HISTORY_FAIL:
+            return state.setIn(['error'],action.error);
+        case HISTORY_FLUSH:
+            var idx = state.getIn(['users']).findIndex(value => value.get('id') == action.id)
+            if(idx >=0 ){
+                let historytomerge = state.getIn(['users', idx, 'historyedit', 'history']);
+                let historyidx = state.getIn(['users', idx, 'historyedit', 'idx']);
+                if (historyidx >= 0) {
+                    return state.setIn(['users', idx, 'allhistory', historyidx, 'history'], historytomerge);
+                } else
+                    return state
+            }else if( state.hasIn(['newuser','id'])&&( state.getIn(['newuser','id']) == action.id )){
+                let historytomerge = state.getIn(['newuser', 'historyedit', 'history']);
+                let historyidx = state.getIn(['newuser', 'historyedit', 'idx']);
+                if(historyidx>=0)
+                    return state.setIn(['newuser', 'allhistory',historyidx,'history'], historytomerge);
+                else
+                    return state;
             }
         case HISTORY_EDIT_ADD:
             var idx = state.getIn(['frontuserinfo', 'idx']);
@@ -340,17 +374,37 @@ export default function reducer(state = initialState, action = {}) {
             } else {
                 return state.setIn(_pairkey, state.getIn(_pairkey).push(Immutable.Map(pair.val)));
             }
+        case CREATE_ORAL_BEGIN:
+            return state;
+        case CREATE_ORAL_SUCCESS:
+            let idx = state.getIn(['users']).findIndex(value => value.get('id') == action.id)
+            if (idx >= 0 ) {
+                let oraltomerge = state.getIn(['users', idx, 'oraledit', 'oral']).setIn(['time'],action.result.time);
+                let oralidx = state.getIn(['users', idx, 'oraledit', 'idx']);
+                if (oralidx >= 0) {
+                    return state.setIn(['users', idx, 'alloral', oralidx, 'oral'], oraltomerge);
+                } else
+                    return state
+            } else if(state.hasIn(['newuser','id'])&&( state.getIn(['newuser','id']) == action.id )) {
+                let oraltomerge = state.getIn(['newuser', 'oraledit']).setIn(['time'],action.result.time);
+                let oralidx = state.getIn(['newuser', 'alloral']).size;
+                return state.setIn(['newuser','oraledit','idx'],oralidx).updateIn(['newuser', 'alloral'],list=>list.push(oraltomerge));
+            }
+        case CREATE_ORAL_FAIL:
+            return state.setIn(['error'],action.error);
         case ORAL_FLUSH:
-            var idx = state.getIn(['frontuserinfo', 'idx']);
-            if (idx != 'add') {
+            var idx = state.getIn(['users']).findIndex(value => value.get('id') == action.id)
+            if (idx >= 0 ) {
                 var oraltomerge = state.getIn(['users', idx, 'oraledit', 'oral']);
                 var oralidx = state.getIn(['users', idx, 'oraledit', 'idx']);
                 if (oralidx >= 0) {
                     return state.setIn(['users', idx, 'alloral', oralidx, 'oral'], oraltomerge);
                 } else
                     return state
-            } else {
-                return state;
+            } else if(state.hasIn(['newuser','id'])&&( state.getIn(['newuser','id']) == action.id )) {
+                var oraltomerge = state.getIn(['newuser', 'oraledit', 'oral']);
+                var oralidx = state.getIn(['newuser', 'oraledit', 'idx']);
+                return  state.setIn(['newuser', 'alloral',oralidx,'oral'], oraltomerge);
             }
         case ORAL_CHANGE_TIME:
             var pos = action.result;
@@ -750,14 +804,13 @@ export function create_user({
                     return Promise.resolve(res)
 
                 } else {
-                    //var err = { info: 'auth' }
-                    error_table.user_patient.create.msg = 'notvalid';
-                    return Promise.reject( { pos: ['user_patient','create'] } )
+                    error_table.user_patient.create.baseinfo = {msg:'notvalid'};
+                    return Promise.reject( { pos: ['user_patient','create','baseinfo'] } )
                 }
             },
             error: function(err) {
-                error_table.user_patient.create.msg = 'wire';
-                return Promise.reject( { pos: ['user_patient','create'] } )
+                error_table.user_patient.create.baseinfo = {msg:'notvalid'};
+                return Promise.reject( { pos: ['user_patient','create','baseinfo'] } )
             }
         })
     }
@@ -771,78 +824,76 @@ export function update_baseinfo(
   baseinfoedit
 ){
 
- var params = baseinfoedit;
-    return {
-        types:[ BASICINFO_SAVE_BEGIN, BASICINFO_SAVE, BASICINFO_SAVE_FAIL ],
-        promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/basicinfo/rest?', { params }, {
-            format: function(response) {
-                if (response.status >= 400) {
-                    throw new Error("Bad response from server");
+    var params = { ...baseinfoedit, id };
+        return {
+            types:[ BASICINFO_SAVE_BEGIN, BASICINFO_SAVE, BASICINFO_SAVE_FAIL ],
+            promise: (client) => client.PUT('http://' + getApiIp() + '/user_patient/basicinfo/rest?', { params }, {
+                format: function(response) {
+                    if (response.status >= 400) {
+                        throw new Error("Bad response from server");
+                    }
+                    console.log('>>>>>>>>>>>>>>>>')
+                    return response.json();
+                },
+                done: function(res) {
+
+                    console.log(res);
+
+                    if (res.code == 1) {
+                        console.log(res)
+                        return Promise.resolve(res)
+
+                    } else {
+                        //var err = { info: 'auth' }
+                        error_table.user_patient.update.baseinfo[id] = { msg:'notvalid' };
+                        return Promise.reject( { pos: ['user_patient','update','baseinfo',id] } )
+                    }
+                },
+                error: function(err) {
+                    error_table.user_patient.update.baseinfo[id] = { msg:'wire' };
+                    return Promise.reject( { pos: ['user_patient','update','baseinfo',id] } )
                 }
-                console.log('>>>>>>>>>>>>>>>>')
-                return response.json();
-            },
-            done: function(res) {
-
-                console.log(res);
-
-                if (res.code == 1) {
-                    console.log(res)
-                    return Promise.resolve(res)
-
-                } else {
-                    //var err = { info: 'auth' }
-                    error_table.user_patient.create.msg = 'notvalid';
-                    return Promise.reject( { pos: ['user_patient','create'] } )
-                }
-            },
-            error: function(err) {
-                error_table.user_patient.create.msg = 'wire';
-                return Promise.reject( { pos: ['user_patient','create'] } )
-            }
-        })
-    }
+            }),
+            id
+        }
 }
 
 export function create_historyinfo(
   user,
-  id,
   historyedit
 ){
 
- var params = {};
-    params.history = historyedit.history;
-    params.time = historyedit.time;
-    return {
-        types:[ CREATE_USER_BEGIN, CREATE_USER_SUCCESS, CREATE_USER_FAIL ],
-        promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/history/rest?', { params }, {
-            format: function(response) {
-                if (response.status >= 400) {
-                    throw new Error("Bad response from server");
+    var params = {};
+        params.history = historyedit.history;
+        return {
+            types:[ CREATE_HISTORY_BEGIN, CREATE_HISTORY_SUCCESS, CREATE_HISTORY_FAIL ],
+            promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/history/rest?', { params }, {
+                format: function(response) {
+                    if (response.status >= 400) {
+                        throw new Error("Bad response from server");
+                    }
+                    console.log('>>>>>>>>>>>>>>>>')
+                    return response.json();
+                },
+                done: function(res) {
+
+                    console.log(res);
+
+                    if (res.code == 1) {
+                        console.log(res)
+                        return Promise.resolve(res)
+
+                    } else {
+                        error_table.user_patient.create.history = { msg:'notvalid' };
+                        return Promise.reject( { pos: ['user_patient','create','history'] } )
+                    }
+                },
+                error: function(err) {
+                    error_table.user_patient.create.history = { msg:'wire' };
+                    return Promise.reject( { pos: ['user_patient','create','history'] } )
                 }
-                console.log('>>>>>>>>>>>>>>>>')
-                return response.json();
-            },
-            done: function(res) {
-
-                console.log(res);
-
-                if (res.code == 1) {
-                    console.log(res)
-                    return Promise.resolve(res)
-
-                } else {
-                    //var err = { info: 'auth' }
-                    error_table.user_patient.create.msg = 'notvalid';
-                    return Promise.reject( { pos: ['user_patient','create'] } )
-                }
-            },
-            error: function(err) {
-                error_table.user_patient.create.msg = 'wire';
-                return Promise.reject( { pos: ['user_patient','create'] } )
-            }
-        })
-    }
+            })
+        }
 }
 
 export function update_historyinfo(
@@ -854,9 +905,10 @@ export function update_historyinfo(
  var params = {};
     params.history = historyedit.history;
     params.time = historyedit.time;
+    params.id = id;
     return {
-        types:[ CREATE_USER_BEGIN, CREATE_USER_SUCCESS, CREATE_USER_FAIL ],
-        promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/history/rest?', { params }, {
+        types:[ UPDATE_HISTORY_BEGIN, HISTORY_FLUSH, UPDATE_HISTORY_FAIL ],
+        promise: (client) => client.PUT('http://' + getApiIp() + '/user_patient/history/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -874,32 +926,31 @@ export function update_historyinfo(
 
                 } else {
                     //var err = { info: 'auth' }
-                    error_table.user_patient.create.msg = 'notvalid';
-                    return Promise.reject( { pos: ['user_patient','create'] } )
+                    error_table.user_patient.update.history[id] = { msg: 'notvalid' };
+                    return Promise.reject( { pos: ['user_patient','update','history',id] } )
                 }
             },
             error: function(err) {
-                error_table.user_patient.create.msg = 'wire';
-                return Promise.reject( { pos: ['user_patient','create'] } )
+                error_table.user_patient.update.history[id] = { msg: 'wire' };
+                return Promise.reject( { pos: ['user_patient','update','history',id] } )
             }
-        })
+        }),
+        id
     }
 }
 
 
 export function create_oralinfo(
   user,
-  id,
   oraledit
 ){
 
  var params = {
-    oral:oraledit.oral,
-    time:oraledit.time
+    oral:oraledit.oral
  }
     return {
-        types:[ CREATE_USER_BEGIN, CREATE_USER_SUCCESS, CREATE_USER_FAIL ],
-        promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/rest?', { params }, {
+        types:[ CREATE_ORAL_BEGIN, CREATE_ORAL_SUCCESS, CREATE_ORAL_FAIL ],
+        promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/oral/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -917,13 +968,13 @@ export function create_oralinfo(
 
                 } else {
                     //var err = { info: 'auth' }
-                    error_table.user_patient.create.msg = 'notvalid';
-                    return Promise.reject( { pos: ['user_patient','create'] } )
+                    error_table.user_patient.create.oral = {msg:'notvalid'};
+                    return Promise.reject( { pos: ['user_patient','create','oral'] } )
                 }
             },
             error: function(err) {
-                error_table.user_patient.create.msg = 'wire';
-                return Promise.reject( { pos: ['user_patient','create'] } )
+                error_table.user_patient.create.oral = {msg:'wire'};
+                return Promise.reject( { pos: ['user_patient','create','oral'] } )
             }
         })
     }
@@ -937,11 +988,12 @@ export function update_oralinfo(
 
  var params = {
     oral:oraledit.oral,
-    time:oraledit.time
+    time:oraledit.time,
+    id
  }
     return {
-        types:[ CREATE_USER_BEGIN, CREATE_USER_SUCCESS, CREATE_USER_FAIL ],
-        promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/rest?', { params }, {
+        types:[ UPDATE_ORAL_BEGIN, ORAL_FLUSH, UPDATE_ORAL_FAIL ],
+        promise: (client) => client.PUT('http://' + getApiIp() + '/user_patient/oral/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -959,14 +1011,15 @@ export function update_oralinfo(
 
                 } else {
                     //var err = { info: 'auth' }
-                    error_table.user_patient.create.msg = 'notvalid';
-                    return Promise.reject( { pos: ['user_patient','create'] } )
+                    error_table.user_patient.update.oral[id] = {msg:'notvalid'};
+                    return Promise.reject( { pos: ['user_patient','update','oral',id ] } )
                 }
             },
             error: function(err) {
-                error_table.user_patient.create.msg = 'wire';
-                return Promise.reject( { pos: ['user_patient','create'] } )
+                error_table.user_patient.update.oral[id] = {msg:'wire'};
+                return Promise.reject( { pos: ['user_patient','update','oral',id ] } )
             }
-        })
+        }),
+        id
     }
 }

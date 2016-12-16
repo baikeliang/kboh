@@ -18,7 +18,17 @@ export const error_table = {
             }
         },
         create: {
-            name: '创建'
+            name: '创建',
+            baseinfo: {
+                name: '基础信息',
+
+            },
+            history: {
+                name: '既往史',
+            },
+            oral: {
+                name: '口腔情况',
+            }
         },
         delete: {
             name: '删除',
@@ -26,7 +36,7 @@ export const error_table = {
                 name: '用户'
             }
         },
-        edit: {
+        update: {
             name: '修改',
             baseinfo: {
                 name: '基础信息',

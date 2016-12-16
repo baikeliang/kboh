@@ -7,7 +7,7 @@ import 'url-search-params-polyfill'
 var URLSearchParams = (typeof window !=="undefined")?window.URLSearchParams:require('urlsearchparams').URLSearchParams;
 //import { URLSearchParams } from 'urlsearchparams'
 
-const methods = ['GET', 'POST'];
+const methods = ['GET', 'POST','PUT','DELETE'];
 export default class ApiClient {
     constructor(args) {
         // code
@@ -20,11 +20,11 @@ export default class ApiClient {
                     mode: 'cors',
                     cache: 'default'
                 }
-                if ((method == 'GET') && params) {
+                if (((method == 'GET') || (method == 'DELETE')) && params) {
                     for (var key of Object.keys(params)) {
                       u.append(key, params[key])
                     }
-                } else if (method == 'POST' && data) {
+                } else if (((method == 'POST')||(method == 'PUT')) && data) {
                     console.log(data)
                     console.log("pppppppp")
                     req.body = JSON.stringify(data)

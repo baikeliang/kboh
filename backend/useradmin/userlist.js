@@ -38,26 +38,24 @@ import {
 import  UserInfoCom from './userinfo/container.js'
 
 
-export const asyncEvent =  [{
+export const asyncEvent = [{
     promise: ({ store: { dispatch, getState }, params }) => {
         if (!isAuthLoaded(getState())) {
             return dispatch(loadAuth(params)).then(function() {
-                if (!successorLoading(getState())){
+                if (!successorLoading(getState())) {
                     let state = getState();
-                    let user = state.getIn(['auth','user']).toJS();
-                    return dispatch(loadUsers( { user, num: 10, begin: 0, refresh:{flag:true} }));
-                }
-                else
+                    let user = state.getIn(['auth', 'user']).toJS();
+                    return dispatch(loadUsers({ user, num: 10, begin: 0, refresh: { flag: true } }));
+                } else
                     return Promise.resolve();
             })
-        }else{
-             if (!successorLoading(getState())){
-                   let state = getState();
-                   let user = state.getIn(['auth','user']).toJS();
-                   return dispatch(loadUsers( { user, num: 10, begin: 0, refresh:{flag:true}  }));
-             }
-             else
-                   return Promise.resolve();
+        } else {
+            if (!successorLoading(getState())) {
+                let state = getState();
+                let user = state.getIn(['auth', 'user']).toJS();
+                return dispatch(loadUsers({ user, num: 10, begin: 0, refresh: { flag: true } }));
+            } else
+                return Promise.resolve();
         }
     }
 }];
