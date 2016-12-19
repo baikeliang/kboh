@@ -565,7 +565,7 @@ export function update_teeth(
 
  var params = {
     teeth:teeth_ui.teeth,
-    time:teeth_ui.time
+    time:teeth_ui.time,
     id
  }
     return {

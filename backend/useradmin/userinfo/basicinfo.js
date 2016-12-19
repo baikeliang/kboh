@@ -22,7 +22,9 @@ import {
   LoadedorLoadingUser as successorLoading,
   load_detail_baseinfo,
   basicInfoEdit,
-  basicInfoSave
+  basicInfoSave,
+  update_baseinfo,
+  create_user
 } from 'backend/redux/reducers/user_patient'
 
 import {
@@ -98,9 +100,10 @@ export const asyncEvent =  [{
         console.log(idx);
         return {
         	  auth : state.get('auth'),
-            user:  (idx=='add')?state.getIn(['user_patient','newuser']):state.getIn(['user_patient','users',idx])
+            user:  (idx=='add')?state.getIn(['user_patient','newuser']):state.getIn(['user_patient','users',idx]),
+            idx: idx
         }
-    }, { pushState: push,basicInfoEdit,basicInfoSave})
+    }, { pushState: push,basicInfoEdit,basicInfoSave,create_user,update_baseinfo})
 export default  class BasicInfo extends Component{
    constructor(props) {
        // code
@@ -111,7 +114,12 @@ export default  class BasicInfo extends Component{
        this.setState({...this.state, check: false, edit: true})
    }
    toSave() {
-       this.props.basicInfoSave();
+       var baseinfoedit = this.props.user.get('baseinfoedit').toJS();
+       if(this.props.idx=='add'){
+          this.props.create_user({baseinfoedit});
+       }else{
+          this.props.update_baseinfo({baseinfoedit});
+       }
        this.setState({...this.state, check: true, edit: false})
    }
    onChangeInfo(ev,key) {

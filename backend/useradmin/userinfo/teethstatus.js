@@ -78,6 +78,7 @@ export const asyncEvent =  [{
         return {
             auth : state.get('auth'),
             oraledit:  idx=='add'?state.getIn(['user_patient','newuser','oraledit']):state.getIn(['user_patient','users',idx,'oraledit'])
+
         }
     }, { pushState: push,oralEditADD,oralFlush,changeOralTime,oralEditDEL,update_oralinfo,create_oralinfo})
 
@@ -95,11 +96,13 @@ export default  class TeethStatus extends Component{
        this.setState({...this.state, check: false, edit: true, add: false })
     }
     UpdateThenCheck() {
-        this.props.update_oralinfo();
+        var oraledit = this.props.oraledit.toJS();
+        this.props.update_oralinfo({ oraledit });
         this.setState({...this.state, check: true, edit: false, add: false })
     }
     CreateThenCheck(){
-        this.props.create_oralinfo();
+        var oraledit = this.props.oraledit.toJS();
+        this.props.create_oralinfo({oraledit});
         this.setState({...this.state, check: true, edit: false, add: false })
     }
     changeCheckTime(e) {
