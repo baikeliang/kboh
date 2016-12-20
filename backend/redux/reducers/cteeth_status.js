@@ -308,7 +308,7 @@ export function load({ user,patient,index,req,refresh}) {
 
     return {
         types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
-        promise: (client) => client.GET('http://'+getApiIp()+'/patient/cteeth/rest?', { params }, {
+        promise: (client) => client.GET('http://'+getApiIp()+'/user_patient/cteeth/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");

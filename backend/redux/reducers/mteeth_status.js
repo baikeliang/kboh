@@ -2,6 +2,8 @@ import Immutable from 'immutable'
 import Promise from 'bluebird'
 import getApiIp from 'backend/util/apiinterface.js'
 
+import { error_table } from 'backend/redux/config/error_table.js'
+
 const LOAD = 'bohe/mteeth_status/LOAD';
 const LOAD_SUCCESS = 'bohe/mteeth_status/LOAD_SUCCESS';
 const LOAD_FAIL = 'bohe/mteeth_status/LOAD_FAIL';
@@ -336,10 +338,10 @@ export default function reducer(state = initialState, action = {}) {
                    state = state.setIn(['allUserTeeth',userid],Immutable.List([]));
                 }
                 if((idx = state.getIn(['allUserTeeth',userid]).findIndex(value => value.get('time') == time))>=0){
-                     return state.setIn(['allUserTeeth',userid,idx],newteeth_imu).merge({ error:{ post_success } });
+                     return state.setIn(['allUserTeeth',userid,idx],newteeth_imu).merge({ error:{ post_success:action.post_success,msg:'创建成功' } });
                 }else{
                      let size = state.getIn(['allUserTeeth',userid]).size;
-                     return state.setIn(['teeth_ui','idx'],size).updateIn(['allUserTeeth',userid],list => list.push(newteeth_imu)).merge( { error:{ post_success } });
+                     return state.setIn(['teeth_ui','idx'],size).updateIn(['allUserTeeth',userid],list => list.push(newteeth_imu)).merge( { error:{ post_success:action.post_success, msg:'创建成功' } });
                 }
             }
             return state;
@@ -356,7 +358,7 @@ export default function reducer(state = initialState, action = {}) {
                 return state.merge( { error: { pos: ['mteeth_status','update',userid] }});
             }
             if((idx = state.getIn(['allUserTeeth',userid]).findIndex(value => value.get('time') == action.time))>=0)
-                return  state.setIn(['allUserTeeth',userid,idx,'teeth'],newteeth);
+                return  state.setIn(['allUserTeeth',userid,idx,'teeth'],newteeth).merge({ error:{ post_success:action.post_success,msg:'创建成功' } });
             else{
                 error_table.mteeth_status.update[userid] = { msg:'graphy disapeared' };
                 return state.merge( { error: { pos: ['mteeth_status','update',userid] }});
@@ -515,10 +517,8 @@ export function create_teeth({
   teeth_ui,
   post_success
 }){
-  userid = teeth_ui.userid;
    var params = {
-       teeth:teeth_ui.teeth,
-       userid
+       teeth:teeth_ui.teeth
    }
 
    return {
@@ -559,10 +559,11 @@ export function create_teeth({
 
 
 
-export function update_teeth(
+export function update_teeth({
   user,
-  teeth_ui
-){
+  teeth_ui,
+  post_success
+}){
  var time = teeth_ui.time;
  var userid = teeth_ui.userid;
  var params = {
@@ -570,6 +571,8 @@ export function update_teeth(
     time,
     userid
  }
+    console.log(userid)
+    console.log('LOLOLOLLOLOOOOLLLLLLLOOOOOLLLLL');
     return {
         types:[ UPDATE_TEETH_BEGIN, FLUSH_GRAPHY_DATA, UPDATE_TEETH_FAIL ],
         promise: (client) => client.PUT('http://' + getApiIp() + '/user_patient/mteeth/rest?', { params }, {
@@ -586,6 +589,7 @@ export function update_teeth(
 
                 if (res.code == 1) {
                     console.log(res)
+                    console.log("hhhhhhhhhhyyyyyyff")
                     return Promise.resolve(res)
 
                 } else {
@@ -600,7 +604,8 @@ export function update_teeth(
             }
         }),
         userid,
-        time
+        time,
+        post_success
     }
 }
 

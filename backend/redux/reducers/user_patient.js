@@ -149,13 +149,16 @@ export default function reducer(state = initialState, action = {}) {
         case CREATE_USER_FAIL:
              return  state.setIn( ['error'],action.error ).setIn(['newuser','loading'],false),setIn(['newuser','loaded'],false);
         case LOAD_DETAIL_HISTORY:
-            if(state.getIn(['newuser','id']))
-            return state.updateIn(['users'], list => list.map(user => {
-                if (user.get('id') == action.id) {
-                    return user.merge({ hisloading: true, historyedit: { userid:action.id} })
-                }
-                return user
-            }))
+            console.log("sssssvvvvbbccdsda")
+            if(state.getIn(['newuser','id']) == action.id)
+                return state.mergeDeep({'newuser':{ hisloading: true, historyedit: { userid:action.id } }})
+            else
+                return state.updateIn(['users'], list => list.map(user => {
+                    if (user.get('id') == action.id) {
+                        return user.merge({ hisloading: true, historyedit: { userid:action.id} })
+                    }
+                    return user
+                }))
         case LOAD_DETAIL_HISTORY_SUCCESS:
             if(state.getIn(['newuser','id']) == action.result.id){
                     var historyedit = { userid:action.result.id,history: { body_condition: [], allergy: [], family_history: [], infection: [], medicine: [], surgery: [] }, time: '', timelist: [] };
@@ -209,11 +212,14 @@ export default function reducer(state = initialState, action = {}) {
                 }))
             }
         case LOAD_DETAIL_HISTORY_FAIL:
-            return state.updateIn(['users'], list => list.map(user => {
-                if (user.get('id') == action.error.id) {
-                    return user.merge({ hisloading: false, hisloaded: false, error: action.error.info })
-                }
-                return user
+            if(state.getIn(['newuser','id']) == action.id)
+                return state.mergeDeep({'newuser':{ hisloading: false,hisloaded: false, error: action.error.info }})
+            else
+                return state.updateIn(['users'], list => list.map(user => {
+                    if (user.get('id') == action.id) {
+                        return user.merge({ hisloading: false, hisloaded: false, error: action.error.info })
+                    }
+                    return user
             }))
         case SET_USER_TOSHOWINFO:
             if (action.result.idx == 'add') {
@@ -360,14 +366,17 @@ export default function reducer(state = initialState, action = {}) {
             }
             return state;
         case LOAD_DETAIL_ORAL:
-            return state.updateIn(['users'], list => list.map(user => {
-                if (user.get('id') == action.id) {
-                    console.log('QWERQWERQWERQWER');
-                    console.log(action.id);
-                    return user.merge({ oralloading: true, oraledit: {} })
-                }
-                return user
-            }))
+            if(state.getIn(['newuser','id']) == action.id){
+                return state.merge( { 'newuser': { oralloading: true, oraledit: {} }})
+            }else
+                return state.updateIn(['users'], list => list.map(user => {
+                    if (user.get('id') == action.id) {
+                        console.log('QWERQWERQWERQWER');
+                        console.log(action.id);
+                        return user.merge({ oralloading: true, oraledit: {} })
+                    }
+                    return user
+                }))
         case LOAD_DETAIL_ORAL_SUCCESS:
             if(state.getIn(['newuser','id']) == action.result.id){
                   var oraledit = { userid:action.result.id, oral: { teetharound: [], mucosa: [], surgery: [], repairhis: [] }, time: '', timelist: [] };
@@ -422,12 +431,15 @@ export default function reducer(state = initialState, action = {}) {
                 return user
             }))
         case LOAD_DETAIL_ORAL_FAIL:
-            return state.updateIn(['users'], list => list.map(user => {
-                if (user.get('id') == action.error.id) {
-                    return user.merge({ oralloading: false, oralloaded: false, error: action.error.info })
-                }
-                return user
-            }))
+            if(state.getIn(['newuser','id']) == action.id){
+                return state.merge( { 'newuser': { oralloading: false, oralloaded: false, error: action.error.info }})
+            }else
+                return state.updateIn(['users'], list => list.map(user => {
+                    if (user.get('id') == action.error.id) {
+                        return user.merge({ oralloading: false, oralloaded: false, error: action.error.info })
+                    }
+                    return user
+                }))
         case ORAL_EDIT_ADD:
             var idx = state.getIn(['frontuserinfo', 'idx']);
             var pair = action.result;
@@ -820,7 +832,7 @@ export function load_detail_history({ id }) {
             done: function(res) {
 
                 console.log(res);
-
+                console.log("GGGGGGGGGGGGGGGGGGGGGGG!!!!!!!!")
                 if (res.valid == 1) {
                     console.log(res.allhistory)
                     return Promise.resolve(res)
@@ -925,10 +937,10 @@ export function create_user({
 }
 
 
-export function update_baseinfo(
+export function update_baseinfo({
   user,
   baseinfoedit
-){
+ }){
     var id = baseinfoedit.userid;
     var params = { ...baseinfoedit, id };
         return {

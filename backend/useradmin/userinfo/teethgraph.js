@@ -113,7 +113,7 @@ export const asyncEvent =  [{
             mteeth_ui: state.getIn(['mteeth_status','teeth_ui']),
             cteeth_ui: state.getIn(['cteeth_status','teeth_ui'])
         }
-    }, { pushState: push ,switchteethm,switchteethc,switchachem,switchachec,switchtoothm,switchtoothc })
+    }, { pushState: push ,switchteethm,switchteethc,switchachem,switchachec,switchtoothm,switchtoothc,update_mteeth,create_mteeth })
 export default  class TeethGraph extends Component{
    constructor(props) {
        // code
@@ -132,12 +132,10 @@ export default  class TeethGraph extends Component{
        this.setState({...this.state, check: false, edit: false, add: true, addtime })
    }
    save(){
-      this.props.update_mteeth()
-      this.toCheck();
+      this.props.update_mteeth({ post_success:(::this.toCheck),teeth_ui:this.props.mteeth_ui.toJS() })
    }
    add(){
-      this.props.create_mteeth()
-      this.toCheck();
+      this.props.create_mteeth({ post_success:(::this.toCheck),teeth_ui:this.props.mteeth_ui.toJS() })
    }
    toEdit() {
        this.setState({ ...this.state, check: false, edit: true, add: false })

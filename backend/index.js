@@ -17,7 +17,7 @@ import  Labelset,{ asyncEvent as labelAsync } from './doctoradmin/LabelSet.js'
 
 import { LeftList } from  'backend/common/js/partial/left_table.js'
 
-import ErrorCenter from 'backend/errorcenter/errorcenter.js'
+import ErrorCenter from 'backend/errorcenter/teeth/errorcenter.js'
 
 import {
     asyncConnect
@@ -198,7 +198,7 @@ export default class UserAdmin extends Component {
         var  table = this.state.table;
         console.log(table)
         console.log("ooooooooo")
-	    return(<div style={{position:"fixed",width:'100%',height:'100%',top:'0px'}}>
+	    return (<div style={{position:"fixed",width:'100%',height:'100%',top:'0px'}}>
                  <div className='header'>
                    <div className="logo">
                    <img src={require('backend/common/images/logo2.png')} alt=""/>
