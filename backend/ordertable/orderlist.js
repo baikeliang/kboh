@@ -23,7 +23,8 @@ import {
 	LoadedorLoading as successorLoading ,
 	load as loadOrders,
     frontOrder as toShowOrderInfo,
-    nextGroupOrders
+    nextGroupOrders,
+    deleteOrder
 } from 'backend/redux/reducers/order_patient';
 
 import {
@@ -123,8 +124,12 @@ export const asyncEvent = [{
             doctorRepo: state.get('user_doctor'),
             clinicRepo: state.get('user_clinic')
         }
-    }, { pushState: push, load: loadOrders, toDetail:toShowOrderInfo,nextGroupOrders })
+    }, { pushState: push, load: loadOrders, toDetail:toShowOrderInfo,nextGroupOrders,deleteOrder })
 export default class OrderListCom extends Component {
+    constructor(props) {
+      super(props);
+      this.deleteid = '';
+    }
 	// methods
 	static propTypes = {
 		orderRepo:React.PropTypes.object.isRequired,
@@ -135,6 +140,7 @@ export default class OrderListCom extends Component {
 	handlePan(ev) {
 
 	}
+
 
     handleRefresh(resolve, reject) {
 
@@ -162,7 +168,10 @@ export default class OrderListCom extends Component {
         })
     }
     toDeleteOrder(){
-
+        this.props.deleteOrder(this.deleteid);
+    }
+    getdeleteid(id){
+        this.deleteid = id;
     }
     toEditOrder(){
 
@@ -224,7 +233,19 @@ export default class OrderListCom extends Component {
         console.log(doctors)
         console.log(clinics)
 
-            return OrderList({moreSlider:(::this.moreSlider),handlePageClick:(::this.handlePageClick), toOrderInfo:(::this.toOrderInfo), toSearch:(::this.toSearch),toAddOrder:(::this.toAddOrder), toDeleteOrder:(::this.toDeleteOrder), toEditOrder:(::this.toEditOrder), doctors, clinics, orders, nodata, options, length: size, handlePan: (::this.handlePan),handleRefresh:(::this.handleRefresh) })
+            return OrderList({
+                moreSlider:(::this.moreSlider),
+                handlePageClick:(::this.handlePageClick),
+                toOrderInfo:(::this.toOrderInfo),
+                toSearch:(::this.toSearch),
+                toAddOrder:(::this.toAddOrder),
+                toDeleteOrder:(::this.toDeleteOrder),
+                toEditOrder:(::this.toEditOrder),
+                doctors, clinics, orders, nodata, options, length: size,
+                handlePan: (::this.handlePan),
+                handleRefresh:(::this.handleRefresh),
+                getdeleteid:(::this.getdeleteid)
+            })
 	    }else{
 	        return <div/>;
 	    }

@@ -20,7 +20,8 @@ import {
    LoadedorLoading_order,
    orderEdit,
    orderFlush,
-   orderADD
+   orderADD,
+   create_order
 } from 'backend/redux/reducers/order_patient.js'
 
 import {
@@ -143,7 +144,7 @@ export const asyncEvent = [{
             companyRepo: state.get('user_company'),
             projectRepo: state.get('service_project')
         }
-    }, { pushState: push,orderEdit,load_OndutyDoctors,load_onduty_detail,orderADD } )
+    }, { pushState: push,orderEdit,load_OndutyDoctors,load_onduty_detail,orderADD,create_order } )
 export default  class Add extends Component{
     constructor(props) {
         // code
@@ -159,7 +160,7 @@ export default  class Add extends Component{
         showRight: PropTypes.func.isRequired
     };
     save(){
-       this.props.orderADD();
+       this.props.create_order();
     }
     click(e,key,time){
         console.log(time);

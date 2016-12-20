@@ -20,7 +20,8 @@ export const OrderList = ({
      toOrderInfo,
      handlePageClick,
      pageNum,
-     moreSlider
+     moreSlider,
+     getdeleteid
      }) => {
 	  var  rowidx=0;
       return (<div>
@@ -137,7 +138,7 @@ export const OrderList = ({
                </thead>
                <tbody id="accountTbody">
                   {orders.map((row)=>{
-                  	var ret = OrderRow({...row,rowidx,toOrderInfo});
+                  	var ret = OrderRow({...row,rowidx,toOrderInfo,getdeleteid});
                   	rowidx++;
                   	return ret;
                   })}

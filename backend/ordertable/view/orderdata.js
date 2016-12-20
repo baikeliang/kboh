@@ -18,13 +18,14 @@ export const OrderData = ({
     remark,
     is_self,
     rowidx,
-    toOrderInfo
+    toOrderInfo,
+    getdeleteid
 }) => {
       return (    <tr>
                   <td>
                   <span className="radio-span">
                   <input type="radio" className="radio" name="radio" id={ 'radioInputa_' +rowidx } value={ id }/>
-                  <label htmlFor={ 'radioInputa_' +rowidx }></label>
+                  <label htmlFor={ 'radioInputa_' +rowidx } onClick={ ()=>{ getdeleteid(id) } } ></label>
                   </span>
                   </td>
                   <td>

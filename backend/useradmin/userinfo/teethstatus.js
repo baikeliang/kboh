@@ -21,7 +21,9 @@ import {
   oralEditADD,
   oralFlush,
   changeOralTime,
-  oralEditDEL
+  oralEditDEL,
+  update_oralinfo,
+  create_oralinfo
 } from 'backend/redux/reducers/user_patient'
 
 import {
@@ -76,8 +78,9 @@ export const asyncEvent =  [{
         return {
             auth : state.get('auth'),
             oraledit:  idx=='add'?state.getIn(['user_patient','newuser','oraledit']):state.getIn(['user_patient','users',idx,'oraledit'])
+
         }
-    }, { pushState: push,oralEditADD,oralFlush,changeOralTime,oralEditDEL})
+    }, { pushState: push,oralEditADD,oralFlush,changeOralTime,oralEditDEL,update_oralinfo,create_oralinfo})
 
 export default  class TeethStatus extends Component{
     constructor(props) {
@@ -92,12 +95,15 @@ export default  class TeethStatus extends Component{
     toEdit() {
        this.setState({...this.state, check: false, edit: true, add: false })
     }
-    toCheck() {
-       this.toSave();
-       this.setState({...this.state, check: true, edit: false, add: false })
+    UpdateThenCheck() {
+        var oraledit = this.props.oraledit.toJS();
+        this.props.update_oralinfo({ oraledit });
+        this.setState({...this.state, check: true, edit: false, add: false })
     }
-    toSave(){
-    	this.props.oralFlush();
+    CreateThenCheck(){
+        var oraledit = this.props.oraledit.toJS();
+        this.props.create_oralinfo({oraledit});
+        this.setState({...this.state, check: true, edit: false, add: false })
     }
     changeCheckTime(e) {
       this.props.changeOralTime({ idx: e.target.value -1 })
@@ -128,15 +134,16 @@ export default  class TeethStatus extends Component{
 		 		{
 		 			TeethStatusHead({
 		 				oraledit,
-                           edit: (this.state.edit),
-                           check: (this.state.check),
-                           add: (this.state.add),
-                           addTime:(this.state.addTime),
-                           toEdit: (::this.toEdit),
-                           toAdd: (::this.toAdd),
-                           toCheck: (::this.toCheck),
-                           changeCheckTime: (::this.changeCheckTime),
-                           changeEditTime: (::this.changeEditTime)
+             edit: (this.state.edit),
+             check: (this.state.check),
+             add: (this.state.add),
+             addTime:(this.state.addTime),
+             toEdit: (::this.toEdit),
+             toAdd: (::this.toAdd),
+             UpdateThenCheck: (::this.UpdateThenCheck),
+             CreateThenCheck: (::this.CreateThenCheck),
+             changeCheckTime: (::this.changeCheckTime),
+             changeEditTime: (::this.changeEditTime)
 		 			})
 		 		}
 		 		{
@@ -162,7 +169,8 @@ export const TeethStatusHead = ({
   addTime,
     toAdd,
     toEdit,
-    toCheck,
+    CreateThenCheck,
+    UpdateThenCheck,
     changeCheckTime,
     changeEditTime
 }) => {
@@ -207,7 +215,7 @@ export const TeethStatusHead = ({
                                 </select>
                             </p>
                             <label>
-                                <span onClick={ toCheck } className="default_inputbtn z_save_btn">保存</span>
+                                <span onClick={ UpdateThenCheck } className="default_inputbtn z_save_btn">保存</span>
                             </label>
                           </div>
                         </div>)
@@ -218,7 +226,7 @@ export const TeethStatusHead = ({
                                 <em className="see_page_em">基于最新（<font className="new_time">{addTime}</font>）信息上进行添加</em>
                             </p>
                             <label>
-                                <span onClick={toCheck} className="default_inputbtn z_save_btn">保存</span>
+                                <span onClick={ CreateThenCheck } className="default_inputbtn z_save_btn">保存</span>
                             </label>
                           </div>
                         </div>)

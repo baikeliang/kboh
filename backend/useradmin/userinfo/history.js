@@ -23,6 +23,8 @@ import {
   historyEditDEL,
   load_detail_history,
   changeTime,
+  create_historyinfo as create_history,
+  update_historyinfo as update_history
 } from 'backend/redux/reducers/user_patient'
 
 import {
@@ -77,7 +79,7 @@ export const asyncEvent =  [{
             auth : state.get('auth'),
             historyedit: (idx=='add')?state.getIn(['user_patient','newuser','historyedit']):state.getIn(['user_patient','users',idx,'historyedit'])
         }
-    }, { pushState: push,historyFlush,historyEditADD,historyEditDEL,changeTime})
+    }, { pushState: push,historyFlush,historyEditADD,historyEditDEL,changeTime,create_history,update_history})
 export default  class History extends Component{
    constructor(props) {
        // code
@@ -93,12 +95,17 @@ export default  class History extends Component{
    toEdit() {
        this.setState({...this.state, check: false, edit: true, add: false })
    }
-   toCheck() {
-       this.toSave();
+   updateThenCheck(){
+       var historyedit = this.props.historyedit.toJS();
+       this.props.update_history({historyedit});
        this.setState({...this.state, check: true, edit: false, add: false })
    }
-   toSave(){
-       this.props.historyFlush();
+   createThenCheck(){
+       console.log('LOLOLOLOLOLOL');
+       var historyedit = this.props.historyedit.toJS();
+       console.log({historyedit});
+       this.props.create_history({historyedit});
+       this.setState({...this.state, check: true, edit: false, add: false })
    }
    onChangeInfo(key,val,ev) {
     console.log('onChange0000000000');
@@ -152,9 +159,10 @@ export default  class History extends Component{
                            addTime:(this.state.addTime),
                            toEdit: (::this.toEdit),
                            toAdd: (::this.toAdd),
-                           toCheck: (::this.toCheck),
                            changeCheckTime: (::this.changeCheckTime),
-                           changeEditTime: (::this.changeEditTime)
+                           changeEditTime: (::this.changeEditTime),
+                           updateThenCheck:(::this.updateThenCheck),
+                           createThenCheck:(::this.createThenCheck),
 
                        }) }
               {
@@ -190,7 +198,9 @@ export const HistoryHead = ({
     toEdit,
     toCheck,
     changeCheckTime,
-    changeEditTime
+    changeEditTime,
+    updateThenCheck,
+    createThenCheck
 }) => {
             if(check){
                let index=0;
@@ -201,9 +211,10 @@ export const HistoryHead = ({
                                   <select onChange={ (e)=>{ changeCheckTime(e) } }>
                                      {historyedit.timelist.map((time)=>{
                                       index++;
+                                      console.log(historyedit.idx);
                                       if((historyedit.idx+1) == index)
                                         return (<option selected='selected' value={ index }>{time}</option>)
-                                      else 
+                                      else
                                         return (<option value={ index }>{time}</option>)
                                      })}
                                   </select>
@@ -227,13 +238,13 @@ export const HistoryHead = ({
                                       index++;
                                       if((historyedit.idx+1) == index)
                                         return (<option selected='selected' value={ index }>{time}</option>)
-                                      else 
+                                      else
                                         return (<option value={ index }>{time}</option>)
                                      })}
                                 </select>
                             </p>
                             <label>
-                                <span onClick={ toCheck } className="default_inputbtn z_save_btn">保存</span>
+                                <span onClick={ updateThenCheck } className="default_inputbtn z_save_btn">保存</span>
                             </label>
                           </div>
                         </div>)
@@ -244,7 +255,7 @@ export const HistoryHead = ({
                                 <em className="see_page_em">基于最新（<font className="new_time">{addTime}</font>）信息上进行添加</em>
                             </p>
                             <label>
-                                <span onClick={toCheck} className="default_inputbtn z_save_btn">保存</span>
+                                <span onClick={createThenCheck} className="default_inputbtn z_save_btn">保存</span>
                             </label>
                           </div>
                         </div>)

@@ -12,11 +12,23 @@ const LOAD_DETAIL_FAIL = 'bohe/order_patient/LOAD_DETAIL_FAIL';
 
 const ORDERINFO_EDIT = 'bohe/order_patient/ORDERINFO_EDIT'
 const ORDER_FLUSH = 'bohe/order_patient/ORDER_FLUSH'
-const ORDER_ADD = 'bohe/order_patient/ORDER_ADD'
+
 
 
 const SET_ORDER_TOSHOW = 'bohe/order_patient/SHOW'
 const NEXT_GROUP_ORDERS = 'bohe/order_patient/NEXTGROUPORDERS'
+
+const UPDATE_ORDER_FLUSH = 'bohe/order_patient/UPDATE_ORDER_FLUSH'
+const UPDATE_ORDER_FLUSH_FAIL = 'bohe/order_patient/UPDATE_ORDER_FLUSH_FAIL'
+
+const CREATE_ORDER_BEGIN = 'bohe/order_patient/CREATE_ORDER_BEGIN'
+const CREATE_ORDER_SUCCESS = 'bohe/order_patient/CREATE_ORDER_SUCCESS'
+const CREATE_ORDER_FAIL = 'bohe/order_patient/CREATE_ORDER_FAIL'
+
+const DELETE_ORDER_BEGIN = 'bohe/order_patient/DELETE_ORDER_BEGIN'
+const DELETE_ORDER_SUCCESS = 'bohe/order_patient/DELETE_ORDER_SUCCESS'
+const DELETE_ORDER_FAIL = 'bohe/order_patient/DELETE_ORDER_FAIL'
+
 
 const initialState = Immutable.Map({
     loaded: false,
@@ -76,18 +88,36 @@ export default function reducer(state = initialState, action = {}) {
              })
              var detailedit ={ data }
              return state.mergeDeep({detailedit});
+        case UPDATE_ORDER_FLUSH:
+             return state.merge({loading:true});
         case ORDER_FLUSH:
              var idx = state.getIn(['detailedit','idx']);
              var order = state.getIn(['orders',idx]).toJS();
              var datatomerge = state.getIn(['detailedit','data']).toJS();
              order = {...order,...datatomerge};
              console.log(order);
-            return  state.setIn(['orders',idx],Immutable.Map(order));
-        case ORDER_ADD:
-            var newdata = state.getIn(['detailedit','data']);
-            return state.updateIn(['orders'], list => list.push(newdata));
+            return  state.merge({loading:false,loaded:true}).setIn(['orders',idx],Immutable.Map(order));
+        case UPDATE_ORDER_FLUSH_FAIL:
+            return state.merge({loading:false,loaded:false});
+        case CREATE_ORDER_BEGIN:
+            return state.merge({loading:true})
+        case CREATE_ORDER_SUCCESS:
+            var newdata = state.getIn(['detailedit','data']).merge({id:action.result.id});
+            return state.merge({loading:false,loaded:true}).updateIn(['orders'], list => list.push(newdata));
+        case CREATE_ORDER_FAIL:
+            return state.merge({loading:false,loaded:false});
         case SET_ORDER_TOSHOW:
             return state.merge({ frontorder: action.result })
+        case DELETE_ORDER_BEGIN:
+            return state.merge({loading:true,loaded:false})
+        case DELETE_ORDER_SUCCESS:
+            var index = state.getIn(['orders']).findIndex(value => value.get('id') == action.result);
+            if (index >= 0)
+                return state.merge({loading:false,loaded:true}).setIn(['orders'], state.getIn(['orders']).remove(index));
+            else
+                return state.merge({loading:false,loaded:true})
+        case DELETE_ORDER_FAIL:
+            return state.merge({loading:false,loaded:false})
         default:
             return state
     }
@@ -155,9 +185,6 @@ export function orderADD(pairs){
         type: ORDER_ADD
     }
 }
-
-
-
 /* 当 直接采用 浏览器发起域名访问时 不会携带本地Token 所以在鉴权阶段 会转入login 登录后得到新的签发token
    当采用 微信公众号直接跳转时 鉴权阶段使用openid 通过鉴权，签发新的token到state的user中
    所以本地token最大的作用是在进入usercenter时 快捷判断是否登录过
@@ -268,4 +295,124 @@ export function load_detail({
         extract
     };
 
+}
+
+//post.......................
+export function update_order({
+    detailedit
+}) {
+    var params = { ...detailedit }
+
+    console.log('load_detail!!!!!!!!!!!')
+    console.log(id)
+    return {
+        types: [ UPDATE_ORDER_FLUSH, ORDER_FLUSH, UPDATE_ORDER_FLUSH_FAIL ],
+        promise: (client) => client.PUT('http://'+getApiIp()+'/patient/orderinfo/rest?', { params }, {
+            format: function(response) {
+                if (response.status >= 400) {
+                    throw new Error("Bad response from server");
+                }
+                console.log('>>>>>>>>>>>>>>>>')
+                return response.json();
+            },
+            done: function(res) {
+
+                console.log(res);
+
+                if (res.valid == 1) {
+
+                    return Promise.resolve(res)
+
+                } else {
+                    //var err = { info: 'auth' }
+                    return Promise.reject({id, info:'notvalid'})
+                }
+            },
+            error: function(err) {
+                console.log(err)
+                console.log('GGGGGGGGGGGGGG1')
+                return Promise.reject({id, info: 'wire' })
+            }
+        })
+    };
+
+}
+
+export function create_order({
+    detailedit
+}) {
+    var params = { ...detailedit }
+
+    console.log('load_detail!!!!!!!!!!!')
+    console.log(id)
+    return {
+        types: [ CREATE_ORDER_BEGIN, CREATE_ORDER_SUCCESS, CREATE_ORDER_FAIL ],
+        promise: (client) => client.POST('http://'+getApiIp()+'/patient/orderInfo/rest?', { params }, {
+            format: function(response) {
+                if (response.status >= 400) {
+                    throw new Error("Bad response from server");
+                }
+                console.log('>>>>>>>>>>>>>>>>')
+                return response.json();
+            },
+            done: function(res) {
+
+                console.log(res);
+
+                if (res.valid == 1) {
+
+                    return Promise.resolve(res)
+
+                } else {
+                    //var err = { info: 'auth' }
+                    return Promise.reject({id, info:'notvalid'})
+                }
+            },
+            error: function(err) {
+                console.log(err)
+                console.log('GGGGGGGGGGGGGG1')
+                return Promise.reject({id, info: 'wire' })
+            }
+        })
+    };
+}
+
+
+export function deleteOrder({
+    id
+}) {
+    var params = { appointment_id:id }
+
+    console.log('load_detail!!!!!!!!!!!')
+    console.log(id)
+    return {
+        types: [ DELETE_ORDER_BEGIN, DELETE_ORDER_SUCCESS, DELETE_ORDER_FAIL ],
+        promise: (client) => client.DELETE('http://'+getApiIp()+'/patient/orderInfo/rest?', { params }, {
+            format: function(response) {
+                if (response.status >= 400) {
+                    throw new Error("Bad response from server");
+                }
+                console.log('>>>>>>>>>>>>>>>>')
+                return response.json();
+            },
+            done: function(res) {
+
+                console.log(res);
+
+                if (res.code == 1) {
+
+                    return Promise.resolve(id)
+
+                } else {
+                    //var err = { info: 'auth' }
+                    return Promise.reject({id, info:'notvalid'})
+                }
+            },
+            error: function(err) {
+                console.log(err)
+                console.log('GGGGGGGGGGGGGG1')
+                return Promise.reject({id, info: 'wire' })
+            }
+        })
+    };
 }

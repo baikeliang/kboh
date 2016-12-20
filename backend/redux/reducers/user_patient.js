@@ -89,7 +89,7 @@ export default function reducer(state = initialState, action = {}) {
         case LOAD_DETAIL_BASEINFO:
             return state.updateIn(['users'], list => list.map(user => {
                 if (user.get('id') == action.id) {
-                    return user.merge({ loading: true, baseinfoedit: {} })
+                    return user.merge({ loading: true, baseinfoedit: {userid:action.id} })
                 }
                 return user
             }))
@@ -141,6 +141,7 @@ export default function reducer(state = initialState, action = {}) {
         case CREATE_USER_SUCCESS:
              var infotomerge = state.getIn(['newuser', 'baseinfoedit']);
              var idx = state.getIn(['frontuserinfo','idx']);
+             console.log(idx);
              if(idx == 'add')
                return state.mergeDeep({ newuser:{ loading:false, loaded:true } }).setIn(['newuser','id'],action.result.user_id).setIn(['frontuserinfo', 'id'],action.result.user_id).setIn(['newuser', 'baseinfo'], infotomerge).merge({ error:{} });
              else
@@ -151,23 +152,19 @@ export default function reducer(state = initialState, action = {}) {
             if(state.getIn(['newuser','id']))
             return state.updateIn(['users'], list => list.map(user => {
                 if (user.get('id') == action.id) {
-                    return user.merge({ hisloading: true, historyedit: {} })
+                    return user.merge({ hisloading: true, historyedit: { userid:action.id} })
                 }
                 return user
             }))
         case LOAD_DETAIL_HISTORY_SUCCESS:
-            return state.updateIn(['users'], list => list.map(user => {
-                if (user.get('id') == action.result.id) {
-                    console.log("QQQQQQQQQQQQQQQQQQQQQQQ")
-
-                    var historyedit = { history: { body_condition: [], allergy: [], family_history: [], infection: [], medicine: [], surgery: [] }, time: '', timelist: [] };
-
+            if(state.getIn(['newuser','id']) == action.result.id){
+                    var historyedit = { userid:action.result.id,history: { body_condition: [], allergy: [], family_history: [], infection: [], medicine: [], surgery: [] }, time: '', timelist: [] };
                     var metahistory = action.result.allhistory ? action.result.allhistory[action.result.allhistory.length - 1] : undefined;
 
                     if (metahistory) {
 
                         historyedit.history = {...historyedit.history, ...metahistory.history }
-
+                        historyedit.userid =  historyedit.userid;
                         historyedit.time = metahistory.time;
 
                         var timelist = action.result.allhistory.map((history) => {
@@ -178,12 +175,39 @@ export default function reducer(state = initialState, action = {}) {
                         console.log("LLLHH")
                         historyedit.timelist = timelist;
                         historyedit.idx = action.result.allhistory.length - 1;
-
                     }
-                    return user.merge({ hisloading: false, hisloaded: true, historyedit, allhistory: action.result.allhistory })
-                }
-                return user
-            }))
+                    let newuser = state.getIn(['newuser']).merge({ hisloading: false, hisloaded: true, historyedit, allhistory: action.result.allhistory })
+                    return  state.merge({ newuser });
+            }else{
+                return state.updateIn(['users'], list => list.map(user => {
+                    if (user.get('id') == action.result.id) {
+                        console.log("QQQQQQQQQQQQQQQQQQQQQQQ")
+
+                        var historyedit = { userid:action.result.id,history: { body_condition: [], allergy: [], family_history: [], infection: [], medicine: [], surgery: [] }, time: '', timelist: [] };
+
+                        var metahistory = action.result.allhistory ? action.result.allhistory[action.result.allhistory.length - 1] : undefined;
+
+                        if (metahistory) {
+
+                            historyedit.history = {...historyedit.history, ...metahistory.history }
+                            historyedit.userid =  historyedit.userid;
+                            historyedit.time = metahistory.time;
+
+                            var timelist = action.result.allhistory.map((history) => {
+                                return history.time
+                            })
+
+                            console.log(historyedit)
+                            console.log("LLLHH")
+                            historyedit.timelist = timelist;
+                            historyedit.idx = action.result.allhistory.length - 1;
+
+                        }
+                        return user.merge({ hisloading: false, hisloaded: true, historyedit, allhistory: action.result.allhistory })
+                    }
+                    return user
+                }))
+            }
         case LOAD_DETAIL_HISTORY_FAIL:
             return state.updateIn(['users'], list => list.map(user => {
                 if (user.get('id') == action.error.id) {
@@ -203,17 +227,33 @@ export default function reducer(state = initialState, action = {}) {
             return state;
         case CREATE_HISTORY_SUCCESS:
             var idx = state.getIn(['users']).findIndex(value => value.get('id') == action.id)
-            if(idx >=0 ){
-                let historytomerge = state.getIn(['users', idx, 'historyedit', 'history']);
-                let historyidx = state.getIn(['users', idx, 'historyedit', 'idx']).setIn(['time'],action.result.time);
-                if (historyidx >= 0) {
-                    return state.setIn(['users', idx, 'allhistory', historyidx, 'history'], historytomerge);
-                } else
-                    return state
-            }else if( state.hasIn(['newuser','id'])&&( state.getIn(['newuser','id']) == action.id )){
-                let historytomerge = state.getIn(['newuser', 'historyedit']).setIn(['time'],action.result.time);
-                let historyidx = state.getIn(['newuser', 'allhistory']).size;
-                return state.setIn(['newuser','historyedit','idx'],historyidx).updateIn(['newuser', 'allhistory'],list=>list.push(historytomerge));
+            if (idx >= 0 ) {
+                let historyidx = state.getIn(['users', idx, 'allhistory']).size;
+                console.log('LPLLPLPLPLLPLP')
+                console.log(historyidx)
+                let historytomerge = state.getIn(['users', idx, 'historyedit']).setIn(['idx'],historyidx).setIn(['time'],action.result.time).updateIn(['timelist'],list=>list.push(action.result.time));
+                let oldidx = state.getIn(['users',idx,'allhistory']).findIndex( value => value.get('time') == action.result.time);
+                if(oldidx>=0){
+                    let historytomerge = state.getIn(['users',idx,'historyedit']).setIn(['idx'],oldidx).setIn(['time'],action.result.time).setIn(['timelist',oldidx],action.result.time);
+                    return state.setIn(['users', idx,'historyedit'],historytomerge).setIn(['users', idx, 'allhistory',oldidx],historytomerge);
+                }
+                else{
+                    let historytomerge = state.getIn(['users',idx, 'historyedit']).setIn(['idx'],historyidx).setIn(['time'],action.result.time).updateIn(['timelist'],list => list.push(action.result.time));
+                    return state.setIn(['users', idx,'historyedit'],historytomerge).updateIn(['users', idx, 'allhistory'],list=>list.push(historytomerge));
+                }
+            } else if(state.hasIn(['newuser','id'])&&( state.getIn(['newuser','id']) == action.id )) {
+                let historyidx = state.getIn(['newuser', 'allhistory']).size ;
+                console.log('QWQWQWQWQW')
+                console.log(historyidx)
+                let oldidx = state.getIn(['newuser','allhistory']).findIndex( value => value.get('time') == action.result.time);
+                if(oldidx>=0){
+                    let historytomerge = state.getIn(['newuser', 'historyedit']).setIn(['idx'],(oldidx)).setIn(['time'],action.result.time).setIn(['timelist',oldidx],action.result.time);
+                    return state.setIn(['newuser','historyedit'],historytomerge).setIn(['newuser', 'allhistory',oldidx],historytomerge);
+                }
+                else{
+                    let historytomerge = state.getIn(['newuser', 'historyedit']).setIn(['idx'],historyidx).setIn(['time'],action.result.time).updateIn(['timelist'],list => list.push(action.result.time));
+                    return state.setIn(['newuser','historyedit'],historytomerge).updateIn(['newuser', 'allhistory'],list=>list.push(historytomerge));
+                }
             }
         case CREATE_HISTORY_FAIL:
             return state.setIn(['error'],action.error);
@@ -300,29 +340,64 @@ export default function reducer(state = initialState, action = {}) {
             }
         case HISTORY_CHANGE_TIME:
             var pos = action.result;
-            var idx = state.getIn(['frontuserinfo', 'idx']);
-            var timelist = state.getIn(['users', idx, 'historyedit', 'timelist']);
-            if (pos.idx >= 0) {
-                console.log('PpPPPPPPPP');
-                console.log(pos.idx);
-                console.log(timelist);
-                console.log(state.getIn(['users', idx, 'allhistory', pos.idx]).toJS())
-                return state.setIn(['users', idx, 'historyedit'], state.getIn(['users', idx, 'allhistory', pos.idx])).setIn(['users', idx, 'historyedit', 'timelist'], timelist).setIn(['users', idx, 'historyedit', 'idx'], pos.idx);
-            } else {
-                return state
+            var id = state.getIn(['frontuserinfo', 'id']);
+            var idx = state.getIn(['users']).findIndex(value => value.get('id') == id);
+            console.log(idx);
+            if(idx>=0){
+                var timelist = state.getIn(['users', idx, 'historyedit', 'timelist']);
+                if (pos.idx >= 0) {
+                    return state.setIn(['users', idx, 'historyedit'], state.getIn(['users', idx, 'allhistory', pos.idx]).setIn(['userid'],id)).setIn(['users', idx, 'historyedit', 'timelist'], timelist).setIn(['users', idx, 'historyedit', 'idx'], pos.idx);
+                } else {
+                    return state
+                }
+            }else if(state.getIn(['newuser','id'])==id){
+                var timelist = state.getIn(['newuser', 'historyedit', 'timelist']);
+                if (pos.idx >= 0) {
+                    return state.setIn(['newuser', 'historyedit'], state.getIn(['newuser', 'allhistory', pos.idx]).setIn(['userid'],id)).setIn(['newuser', 'historyedit', 'timelist'], timelist).setIn(['newuser', 'historyedit', 'idx'], pos.idx);
+                } else {
+                    return state
+                }
             }
+            return state;
         case LOAD_DETAIL_ORAL:
             return state.updateIn(['users'], list => list.map(user => {
                 if (user.get('id') == action.id) {
+                    console.log('QWERQWERQWERQWER');
+                    console.log(action.id);
                     return user.merge({ oralloading: true, oraledit: {} })
                 }
                 return user
             }))
         case LOAD_DETAIL_ORAL_SUCCESS:
+            if(state.getIn(['newuser','id']) == action.result.id){
+                  var oraledit = { userid:action.result.id, oral: { teetharound: [], mucosa: [], surgery: [], repairhis: [] }, time: '', timelist: [] };
+
+                  var metaoral = action.result.alloral ? action.result.alloral[action.result.alloral.length - 1] : undefined;
+
+                  if (metaoral) {
+
+                        oraledit.oral = {...oraledit.oral, ...metaoral.oral }
+
+                        oraledit.time = metaoral.time;
+
+                        var timelist = action.result.alloral.map((oral) => {
+                            return oral.time
+                        })
+                        console.log('AAAAAACCCCCCCC');
+                        console.log(timelist);
+                        console.log(oraledit);
+                        oraledit.timelist = timelist;
+                        oraledit.idx = action.result.alloral.length - 1;
+                    }
+                    let newuser = state.getIn(['newuser']).merge({ oralloading: false, oralloaded: true, oraledit, alloral: action.result.alloral })
+                    return  state.merge({ newuser });
+            }
+
             return state.updateIn(['users'], list => list.map(user => {
                 if (user.get('id') == action.result.id) {
-
-                    var oraledit = { oral: { teetharound: [], mucosa: [], surgery: [], repairhis: [] }, time: '', timelist: [] };
+                    console.log("RRRRRRREEEERRRRRRRRRvv");
+                    console.log(action.result.id)
+                    var oraledit = { userid:action.result.id, oral: { teetharound: [], mucosa: [], surgery: [], repairhis: [] }, time: '', timelist: [] };
 
                     var metaoral = action.result.alloral ? action.result.alloral[action.result.alloral.length - 1] : undefined;
 
@@ -338,6 +413,7 @@ export default function reducer(state = initialState, action = {}) {
                         console.log('AAAAAACCCCCCCC');
                         console.log(timelist);
                         console.log(oraledit);
+                        console.log(action.result.alloral.length);
                         oraledit.timelist = timelist;
                         oraledit.idx = action.result.alloral.length - 1;
                     }
@@ -377,23 +453,39 @@ export default function reducer(state = initialState, action = {}) {
         case CREATE_ORAL_BEGIN:
             return state;
         case CREATE_ORAL_SUCCESS:
+            console.log(action.id);
             let idx = state.getIn(['users']).findIndex(value => value.get('id') == action.id)
             if (idx >= 0 ) {
-                let oraltomerge = state.getIn(['users', idx, 'oraledit', 'oral']).setIn(['time'],action.result.time);
-                let oralidx = state.getIn(['users', idx, 'oraledit', 'idx']);
-                if (oralidx >= 0) {
-                    return state.setIn(['users', idx, 'alloral', oralidx, 'oral'], oraltomerge);
-                } else
-                    return state
+                let oralidx = state.getIn(['users', idx, 'alloral']).size;
+                let oraltomerge = state.getIn(['users', idx, 'oraledit']).setIn(['idx'],oralidx).setIn(['time'],action.result.time).updateIn(['timelist'],list=>list.push(action.result.time));
+                let oldidx = state.getIn(['users',idx,'alloral']).findIndex( value => value.get('time') == action.result.time);
+                if(oldidx>=0){
+                    let oraltomerge = state.getIn(['users',idx,'oraledit']).setIn(['idx'],oldidx).setIn(['time'],action.result.time).setIn(['timelist',oldidx],action.result.time);
+                    return state.setIn(['users', idx,'oraledit'],oraltomerge).setIn(['users', idx, 'alloral',oldidx],oraltomerge);
+                }
+                else{
+                    let oraltomerge = state.getIn(['users',idx, 'oraledit']).setIn(['idx'],oralidx).setIn(['time'],action.result.time).updateIn(['timelist'],list => list.push(action.result.time));
+                    return state.setIn(['users', idx,'oraledit'],oraltomerge).updateIn(['users', idx, 'alloral'],list=>list.push(oraltomerge));
+                }
             } else if(state.hasIn(['newuser','id'])&&( state.getIn(['newuser','id']) == action.id )) {
-                let oraltomerge = state.getIn(['newuser', 'oraledit']).setIn(['time'],action.result.time);
                 let oralidx = state.getIn(['newuser', 'alloral']).size;
-                return state.setIn(['newuser','oraledit','idx'],oralidx).updateIn(['newuser', 'alloral'],list=>list.push(oraltomerge));
+                let oldidx = state.getIn(['newuser','alloral']).findIndex( value => value.get('time') == action.result.time);
+                if(oldidx>=0){
+                    let oraltomerge = state.getIn(['newuser', 'oraledit']).setIn(['idx'],oldidx).setIn(['time'],action.result.time).setIn(['timelist',oldidx],action.result.time);
+                    return state.setIn(['newuser','oraledit'],oraltomerge).setIn(['newuser', 'alloral',oldidx],oraltomerge);
+                }
+                else{
+                    let oraltomerge = state.getIn(['newuser', 'oraledit']).setIn(['idx'],oralidx).setIn(['time'],action.result.time).updateIn(['timelist'],list => list.push(action.result.time));
+                    return state.setIn(['newuser','oraledit'],oraltomerge).updateIn(['newuser', 'alloral'],list=>list.push(oraltomerge));
+                }
             }
         case CREATE_ORAL_FAIL:
             return state.setIn(['error'],action.error);
         case ORAL_FLUSH:
             var idx = state.getIn(['users']).findIndex(value => value.get('id') == action.id)
+            console.log('zdhzdhzdhzdhzdhzdhzdhzdhzdhzdh');
+            console.log(action.id);
+            console.log(idx);
             if (idx >= 0 ) {
                 var oraltomerge = state.getIn(['users', idx, 'oraledit', 'oral']);
                 var oralidx = state.getIn(['users', idx, 'oraledit', 'idx']);
@@ -408,17 +500,33 @@ export default function reducer(state = initialState, action = {}) {
             }
         case ORAL_CHANGE_TIME:
             var pos = action.result;
-            var idx = state.getIn(['frontuserinfo', 'idx']);
-            var timelist = state.getIn(['users', idx, 'oraledit', 'timelist']);
-            if (pos.idx >= 0) {
-                console.log('PpPPPPPPPP');
-                console.log(pos.idx);
-                console.log(timelist);
-                console.log(state.getIn(['users', idx, 'alloral', pos.idx]).toJS())
-                return state.setIn(['users', idx, 'oraledit'], state.getIn(['users', idx, 'alloral', pos.idx])).setIn(['users', idx, 'oraledit', 'timelist'], timelist).setIn(['users', idx, 'oraledit', 'idx'], pos.idx);
-            } else {
-                return state
+            var id = state.getIn(['frontuserinfo', 'id']);
+            var idx = state.getIn(['users']).findIndex(value => value.get('id') == id);
+            console.log(idx);
+            if(idx>=0){
+                var timelist = state.getIn(['users', idx, 'oraledit', 'timelist']);
+                if (pos.idx >= 0) {
+                    console.log('PpPPPPPPPP');
+                    console.log(pos.idx);
+                    console.log(timelist);
+                    console.log(state.getIn(['users', idx, 'alloral', pos.idx]).toJS())
+                    return state.setIn(['users', idx, 'oraledit'], state.getIn(['users', idx, 'alloral', pos.idx]).setIn(['userid'],id)).setIn(['users', idx, 'oraledit', 'timelist'], timelist).setIn(['users', idx, 'oraledit', 'idx'], pos.idx);
+                } else {
+                    return state
+                }
+            }else if(state.getIn(['newuser','id'])==id){
+                var timelist = state.getIn(['newuser', 'oraledit', 'timelist']);
+                if (pos.idx >= 0) {
+                    console.log('PpPPPPPPPP22222');
+                    console.log(pos.idx);
+                    console.log(timelist);
+                    console.log(state.getIn(['newuser', 'alloral', pos.idx]).toJS())
+                    return state.setIn(['newuser', 'oraledit'], state.getIn(['newuser', 'alloral', pos.idx]).setIn(['userid'],id)).setIn(['newuser', 'oraledit', 'timelist'], timelist).setIn(['newuser', 'oraledit', 'idx'], pos.idx);
+                } else {
+                    return state
+                }
             }
+            return state;
         case ORAL_EDIT_DEL:
             var idx = state.getIn(['frontuserinfo', 'idx']);
             var pair = action.result;
@@ -814,16 +922,14 @@ export function create_user({
             }
         })
     }
-
 }
 
 
 export function update_baseinfo(
   user,
-  id,
   baseinfoedit
 ){
-
+    var id = baseinfoedit.userid;
     var params = { ...baseinfoedit, id };
         return {
             types:[ BASICINFO_SAVE_BEGIN, BASICINFO_SAVE, BASICINFO_SAVE_FAIL ],
@@ -858,14 +964,15 @@ export function update_baseinfo(
         }
 }
 
-export function create_historyinfo(
+export function create_historyinfo({
   user,
-  id,
   historyedit
-){
+}){
 
+    var id = historyedit.userid;
     var params = {};
         params.history = historyedit.history;
+        params.id = id;
         return {
             types:[ CREATE_HISTORY_BEGIN, CREATE_HISTORY_SUCCESS, CREATE_HISTORY_FAIL ],
             promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/history/rest?', { params }, {
@@ -898,12 +1005,11 @@ export function create_historyinfo(
         }
 }
 
-export function update_historyinfo(
+export function update_historyinfo({
   user,
-  id,
   historyedit
-){
-
+}){
+ var id = historyedit.userid;
  var params = {};
     params.history = historyedit.history;
     params.time = historyedit.time;
@@ -919,13 +1025,10 @@ export function update_historyinfo(
                 return response.json();
             },
             done: function(res) {
-
                 console.log(res);
-
                 if (res.code == 1) {
                     console.log(res)
                     return Promise.resolve(res)
-
                 } else {
                     //var err = { info: 'auth' }
                     error_table.user_patient.update.history[id] = { msg: 'notvalid' };
@@ -938,17 +1041,15 @@ export function update_historyinfo(
             }
         }),
         id
-
     }
 }
 
 
-export function create_oralinfo(
+export function create_oralinfo({
   user,
-  id,
   oraledit
-){
-
+}){
+ var id = oraledit.userid;
  var params = {
     oral:oraledit.oral,
     id
@@ -986,12 +1087,12 @@ export function create_oralinfo(
     }
 }
 
-export function update_oralinfo(
+export function update_oralinfo({
   user,
-  id,
   oraledit
-){
-
+}){
+ var id = oraledit.userid;
+ console.log(id);
  var params = {
     oral:oraledit.oral,
     time:oraledit.time,
