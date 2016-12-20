@@ -17,6 +17,8 @@ import  Labelset,{ asyncEvent as labelAsync } from './doctoradmin/LabelSet.js'
 
 import { LeftList } from  'backend/common/js/partial/left_table.js'
 
+import ErrorCenter from 'backend/errorcenter/errorcenter.js'
+
 import {
     asyncConnect
 } from 'redux-connect'
@@ -213,6 +215,7 @@ export default class UserAdmin extends Component {
 	                    { this.state.toShowRight() }
                      </div>
                  </div>
+                 { <ErrorCenter/> }
                </div>)
         }else{
 	    return <div/>;

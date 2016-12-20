@@ -945,7 +945,7 @@ export function update_historyinfo(
 
 export function create_oralinfo(
   user,
-  id
+  id,
   oraledit
 ){
 

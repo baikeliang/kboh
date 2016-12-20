@@ -11,18 +11,13 @@ const SWITCH_TEETH = 'bohe/mteeth_status/SWITCHTEETH';
 const SWITCH_ACHE = 'bohe/mteeth_status/SWITCHACHE';
 const SWITCH_TOOTH = 'bohe/mteeth_status/SWITCHTOOTH';
 
-const ADD_TEETH = 'bohe/mteeth_status/ADD_TEETH';
-
+const  UPDATE_TEETH_BEGIN = 'bohe/mteeth_status/UPDATE_TEETH_BEGIN';
 const  FLUSH_GRAPHY_DATA = 'bohe/mteeth_status/FLUSHGRAPHYDATA';
-const  FLUSH_NEW_GRAPHY_DATA = 'bohe/mteeth_status/FLUSHNEWGRAPHYDATA';
+const  UPDATE_TEETH_FAIL = 'bohe/mteeth_status/UPDATE_TEETH_FAIL';
 
 const  CREATE_TEETH_BEGIN = 'bohe/mteeth_status/CREATE_TEETH_BEGIN';
 const  CREATE_TEETH_SUCCESS = 'bohe/mteeth_status/CREATE_TEETH_SUCCESS';
 const  CREATE_TEETH_FAIL = 'bohe/mteeth_status/CREATE_TEETH_BEGIN';
-
-const  UPDATE_TEETH_BEGIN = 'bohe/mteeth_status/UPDATE_TEETH_BEGIN';
-const  UPDATE_TEETH_SUCCESS = 'bohe/mteeth_status/UPDATE_TEETH_SUCCESS';
-const  UPDATE_TEETH_FAIL = 'bohe/mteeth_status/UPDATE_TEETH_FAIL';
 
 var teeth_ui = {
 	        size: 0,
@@ -312,7 +307,7 @@ export default function reducer(state = initialState, action = {}) {
             var _data = {};
             var teethlist = action.result;
 
-            _data[action.index.toString()] = teethlist;
+            _data[action.userid.toString()] = teethlist;
 
             var tooth_ui = (teethlist.length > 0) ? teethlist[teethlist.length - 1] : {}
 
@@ -322,44 +317,61 @@ export default function reducer(state = initialState, action = {}) {
             console.log(timelist)
             console.log('tttttt!!!!!!!!!!!eee')
             console.log(_data)
-            var teeth_ui = (teethlist.length > 0) ? { idx: teethlist.length - 1, useridx: action.index.toString(), timelist, size: teethlist.length, ...tooth_ui }:{};
+            var teeth_ui = (teethlist.length > 0) ? { idx: teethlist.length - 1, userid: action.userid.toString(), timelist, size: teethlist.length, ...tooth_ui }:{ size:0, userid: action.userid.toString() };
 
             return state.mergeDeep({ loading: false, loaded: true, teeth_ui, allUserTeeth: _data })
         case LOAD_FAIL:
             return state.merge({ loading: false, loaded: false, error: action.error })
-        case ADD_TEETH:
-            return state.setIn(['teeth_ui','idx'],'add').setIn(['teeth_ui','time'],'testadd');
+        case CREATE_TEETH_BEGIN:
+            return state;
+        case CREATE_TEETH_SUCCESS:
+            if(action.userid == state.getIn(['teeth_ui','userid'])){
+                let userid = action.userid;
+                let idx;
+                var newteeth  = state.getIn(['teeth_ui','teeth']);
+                let time = action.result.time;
+                var newteeth_imu =  Immutable.Map({ time });
+                newteeth_imu = newteeth_imu.setIn(['teeth'],newteeth)
+                if(!state.getIn(['allUserTeeth',userid])){
+                   state = state.setIn(['allUserTeeth',userid],Immutable.List([]));
+                }
+                if((idx = state.getIn(['allUserTeeth',userid]).findIndex(value => value.get('time') == time))>=0){
+                     return state.setIn(['allUserTeeth',userid,idx],newteeth_imu).merge({ error:{ post_success } });
+                }else{
+                     let size = state.getIn(['allUserTeeth',userid]).size;
+                     return state.setIn(['teeth_ui','idx'],size).updateIn(['allUserTeeth',userid],list => list.push(newteeth_imu)).merge( { error:{ post_success } });
+                }
+            }
+            return state;
+        case CREATE_TEETH_FAIL:
+            return  state.merge({ error:action.error });
+        case UPDATE_TEETH_BEGIN:
+             return state;
         case FLUSH_GRAPHY_DATA:
-            var useridx = state.getIn(['teeth_ui', 'useridx'])
-            var idx = state.getIn(['teeth_ui', 'idx'])
             var newteeth  = state.getIn(['teeth_ui','teeth']);
-            console.log("RRRRRRRRwwwqqqqq")
-            console.log(newteeth)
-            return  state.setIn(['allUserTeeth',useridx,idx,'teeth'],newteeth)
-        case FLUSH_NEW_GRAPHY_DATA:
-            var newteeth  = state.getIn(['teeth_ui','teeth']);
-            var time = state.getIn(['teeth_ui','time']);
-            var useridx = state.getIn(['teeth_ui','useridx']);
-            var newteeth_imu =  Immutable.Map({ time });
-            newteeth_imu = newteeth_imu.setIn(['teeth'],newteeth)
-            let idx=-1;
-            if(!state.getIn(['allUserTeeth',useridx])){
-                state = state.setIn(['allUserTeeth',useridx],Immutable.List([]));
+            var userid = action.userid;
+            let idx;
+            if(!state.hasIn('allUserTeeth',userid)){
+                error_table.mteeth_status.update[userid] = { msg:'user disapeared' };
+                return state.merge( { error: { pos: ['mteeth_status','update',userid] }});
             }
-            if((idx = state.getIn(['allUserTeeth',useridx]).findIndex(value => value.get('time') == time))>=0){
-                 return state.setIn(['allUserTeeth',useridx,idx],newteeth_imu);
-            }else{
-                 return state.updateIn(['allUserTeeth',useridx],list => list.push(newteeth_imu));
+            if((idx = state.getIn(['allUserTeeth',userid]).findIndex(value => value.get('time') == action.time))>=0)
+                return  state.setIn(['allUserTeeth',userid,idx,'teeth'],newteeth);
+            else{
+                error_table.mteeth_status.update[userid] = { msg:'graphy disapeared' };
+                return state.merge( { error: { pos: ['mteeth_status','update',userid] }});
             }
+        case UPDATE_TEETH_FAIL:
+            return state.merge({ error: action.error});
         case SWITCH_TEETH:
             var pos = action.result;
             var teeth;
             var dataToShow;
-            if (pos.useridx) {
-                teeth = state.get('allUserTeeth').get(pos.useridx).get(pos.idx).toJS();
-                dataToShow = {...pos, size: state.get('allUserTeeth').get(pos.useridx).size, teeth: teeth }
+            if (pos.userid) {
+                teeth = state.get('allUserTeeth').get(pos.userid).get(pos.idx).toJS();
+                dataToShow = {...pos, size: state.get('allUserTeeth').get(pos.userid).size, teeth: teeth }
             } else {
-                teeth = state.get('allUserTeeth').get(state.getIn(['teeth_ui', 'useridx'])).get(pos.idx).toJS();
+                teeth = state.get('allUserTeeth').get(state.getIn(['teeth_ui', 'userid'])).get(pos.idx).toJS();
                 dataToShow = {...pos, teeth: teeth }
             }
             return state.mergeDeep({ teeth_ui: dataToShow })
@@ -407,12 +419,6 @@ export function flushgraphydata(){
    }
 }
 
-export function flushnewgraphydata(){
-   return {
-      type: FLUSH_NEW_GRAPHY_DATA
-   }
-}
-
 
 export function switchtooth({ toothname }) {
     return {
@@ -435,27 +441,20 @@ export function switchache({acheidx,curToothName,status}){
      }
 }
 
-export function LoadedorLoading(state,useridx){
+export function LoadedorLoading(state,userid){
     var loaded = false
     var loading = false
-    if(state.hasIn(['mteeth_status','loaded'])&&(useridx == state.getIn(['teeth_ui','useridx']))){
+    if(state.hasIn(['mteeth_status','loaded'])&&(userid == state.getIn(['teeth_ui','userid']))){
         loaded = state.getIn(['mteeth_status','loaded'])
     }
-    if(state.hasIn(['mteeth_status','loading'])&&(useridx == state.getIn(['teeth_ui','useridx']))){
+    if(state.hasIn(['mteeth_status','loading'])&&(userid == state.getIn(['teeth_ui','userid']))){
         loading = state.getIn(['mteeth_status','loading'])
     }
     return loaded || loading
 }
 
-export function add_user_teeth({id}){
-     return {
-        type: ADD_TEETH,
-        id
-     }
-}
-
-export function load({ user,patient,index,req,refresh}) {
-    var params = {};
+export function load({ user,patient,userid,req,refresh}) {
+    var params = { userid };
 
     if ((typeof window === 'undefined')||(window.__SERVER__ == true)) { ///server side
         if (user.token) ///  鉴权通过 已经持有 token
@@ -479,7 +478,7 @@ export function load({ user,patient,index,req,refresh}) {
 
     return {
         types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
-        promise: (client) => client.GET('http://'+getApiIp()+'/patient/mteeth/rest?', { params }, {
+        promise: (client) => client.GET('http://'+getApiIp()+'/user_patient/mteeth/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -504,7 +503,7 @@ export function load({ user,patient,index,req,refresh}) {
             }
         }),
         refresh,
-        index
+        userid
     };
 
 }
@@ -513,16 +512,18 @@ export function load({ user,patient,index,req,refresh}) {
 
 export function create_teeth({
   user,
-  id,
-  teeth_ui
+  teeth_ui,
+  post_success
 }){
+  userid = teeth_ui.userid;
    var params = {
-    teeth:teeth_ui.teeth
+       teeth:teeth_ui.teeth,
+       userid
    }
 
    return {
         types:[ CREATE_TEETH_BEGIN, CREATE_TEETH_SUCCESS, CREATE_TEETH_FAIL ],
-        promise: (client) => client.POST('http://' + getApiIp() + '/patient/mteeth/rest?', { params }, {
+        promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/mteeth/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -548,7 +549,8 @@ export function create_teeth({
                 error_table.mteeth_status.create.msg = 'wire';
                 return Promise.reject( { pos: ['mteeth_status','create'] } )
             }
-        })
+        }),
+        post_success
     }
 
 
@@ -559,18 +561,18 @@ export function create_teeth({
 
 export function update_teeth(
   user,
-  id,
   teeth_ui
 ){
-
+ var time = teeth_ui.time;
+ var userid = teeth_ui.userid;
  var params = {
     teeth:teeth_ui.teeth,
-    time:teeth_ui.time
-    id
+    time,
+    userid
  }
     return {
-        types:[ UPDATE_TEETH_BEGIN, UPDATE_TEETH_SUCCESS, UPDATE_TEETH_FAIL ],
-        promise: (client) => client.PUT('http://' + getApiIp() + '/patient/mteeth/rest?', { params }, {
+        types:[ UPDATE_TEETH_BEGIN, FLUSH_GRAPHY_DATA, UPDATE_TEETH_FAIL ],
+        promise: (client) => client.PUT('http://' + getApiIp() + '/user_patient/mteeth/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -588,16 +590,17 @@ export function update_teeth(
 
                 } else {
                     //var err = { info: 'auth' }
-                    error_table.mteeth_status.update[id] = {msg:'notvalid'};
-                    return Promise.reject( { pos: ['mteeth_status','update',id] } )
+                    error_table.mteeth_status.update[userid] = {msg:'notvalid'};
+                    return Promise.reject( { pos: ['mteeth_status','update',userid ] } )
                 }
             },
             error: function(err) {
-                error_table.mteeth_status.update[id] = { msg:'wire' };
-                return Promise.reject( { pos: ['mteeth_status','update',id] } )
+                error_table.mteeth_status.update[userid] = { msg:'wire' };
+                return Promise.reject( { pos: ['mteeth_status','update',userid ] } )
             }
         }),
-        id
+        userid,
+        time
     }
 }
 

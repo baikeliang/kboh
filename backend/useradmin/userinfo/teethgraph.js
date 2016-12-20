@@ -25,9 +25,8 @@ import {
     switchteeth as switchteethm,
     switchache as switchachem,
     switchtooth as switchtoothm,
-    flushgraphydata as flushgraphymdata,
-    flushnewgraphydata as flushnewgraphymdata,
-    add_user_teeth as add_user_mteeth
+    create_teeth as create_mteeth,
+    update_teeth as update_mteeth
 } from 'backend/redux/reducers/mteeth_status';
 
 import {
@@ -56,20 +55,28 @@ import {
 	TeethHeader
 }  from './view/teeth/teethheader.js'
 
-var __asyncEvent = function({ dispatch, getState }) {
+var __asyncEvent = function({ dispatch, getState,userid }) {
 
-    let state = getState();
-    let user = state.getIn(['auth', 'user']).toJS();
-    let index = state.getIn(['user_patient', 'frontuserinfo','idx']);
-    console.log("RRRRRRRRRTTTTRRR!!!")
-    console.log(index)
-      let patient =  state.getIn(['user_patient','users']).get(index).toJS();
+      let state = getState();
+      let user = state.getIn(['auth', 'user']).toJS();
+      console.log("RRRRRRRRRTTTTRRR!!!")
+      console.log(userid)
+      let patient;
+      let idx = state.getIn(['user_patient','users']).findIndex(value => value.get('id') == userid)
+      if(idx >= 0)
+         patient =  state.getIn(['user_patient','users',idx]).toJS();
+      else if(state.getIn(['user_patient','newuser','id']) == userid){
+         patient =  state.getIn(['user_patient','newuser']).toJS();
+      }
+      if(!patient){
+         return Promise.reject();
+      }
       if (patient.teethtype == 'M')
-          return dispatch(loadMteeth({ user, patient, index, refresh: { flag: true } }));
+          return dispatch(loadMteeth({ user, patient, userid, refresh: { flag: true } }));
       else if (patient.teethtype == 'C')
-          return dispatch(loadCteeth({ user, patient, index, refresh: { flag: true } }));
+          return dispatch(loadCteeth({ user, patient, userid, refresh: { flag: true } }));
       else {
-          return Promise.all([dispatch(loadMteeth({ user, patient, index, refresh: { flag: true } })), dispatch(loadCteeth({ user, patient, index, refresh: { flag: true } }))])
+          return Promise.all([dispatch(loadMteeth({ user, patient, userid, refresh: { flag: true } })), dispatch(loadCteeth({ user, patient, userid, refresh: { flag: true } }))])
       }
 
 }
@@ -81,12 +88,7 @@ export const asyncEvent =  [{
             return dispatch(loadAuth(params)).then(function() {
                 let userid = getState().getIn(['user_patient', 'frontuserinfo','id'])
                 if (!(successorLoadingm(getState(),userid)||successorLoadingc(getState(),userid))){
-                      if('add' == getState().getIn(['user_patient', 'frontuserinfo','idx'])){
-                         return dispatch(add_user_mteeth({id:userid}))
-                      }else{
-                         return __asyncEvent({ dispatch, getState })
-                      }
-
+                         return __asyncEvent({ dispatch, getState, userid })
                 }
                 else
                     return Promise.resolve();
@@ -95,11 +97,7 @@ export const asyncEvent =  [{
         }else{
              let userid = getState().getIn(['user_patient', 'frontuserinfo','id'])
              if (!(successorLoadingm(getState(),userid)||successorLoadingc(getState(),userid))){
-                  if('add' == getState().getIn(['user_patient', 'frontuserinfo','idx'])){
-                       return dispatch(add_user_mteeth({id:userid}));
-                  }else{
-                       return __asyncEvent({ dispatch, getState });
-                  }
+                       return __asyncEvent({ dispatch, getState, userid });
              }
              else
                    return Promise.resolve();
@@ -115,7 +113,7 @@ export const asyncEvent =  [{
             mteeth_ui: state.getIn(['mteeth_status','teeth_ui']),
             cteeth_ui: state.getIn(['cteeth_status','teeth_ui'])
         }
-    }, { pushState: push ,switchteethm,switchteethc,switchachem,switchachec,switchtoothm,switchtoothc,flushgraphymdata,flushnewgraphymdata })
+    }, { pushState: push ,switchteethm,switchteethc,switchachem,switchachec,switchtoothm,switchtoothc })
 export default  class TeethGraph extends Component{
    constructor(props) {
        // code
@@ -134,18 +132,18 @@ export default  class TeethGraph extends Component{
        this.setState({...this.state, check: false, edit: false, add: true, addtime })
    }
    save(){
-      this.props.flushgraphymdata()
+      this.props.update_mteeth()
       this.toCheck();
    }
    add(){
-      this.props.flushnewgraphymdata()
+      this.props.create_mteeth()
       this.toCheck();
    }
    toEdit() {
-       this.setState({...this.state, check: false, edit: true, add: false })
+       this.setState({ ...this.state, check: false, edit: true, add: false })
    }
    toCheck() {
-       this.setState({...this.state, check: true, edit: false, add: false })
+       this.setState({ ...this.state, check: true, edit: false, add: false })
    }
    changeEditTime(ev) {
        (this.state.teethtype == 'M') ? this.props.switchteethm({ idx: ev.target.value }): this.props.switchteethc({ idx: ev.target.value })
