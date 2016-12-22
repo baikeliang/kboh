@@ -17,7 +17,7 @@ import  Labelset,{ asyncEvent as labelAsync } from './doctoradmin/LabelSet.js'
 
 import { LeftList } from  'backend/common/js/partial/left_table.js'
 
-import ErrorCenter from 'backend/errorcenter/teeth/errorcenter.js'
+import ErrorCenter from 'backend/errorcenter/errorcenter.js'
 
 import {
     asyncConnect

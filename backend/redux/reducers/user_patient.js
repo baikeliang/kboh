@@ -129,13 +129,13 @@ export default function reducer(state = initialState, action = {}) {
             if (idx >= 0) {
                 let infotomerge = state.getIn(['users', idx, 'baseinfoedit']);
                 let metainfo = state.getIn(['users', idx, 'baseinfo']);
-                return state.setIn(['users', idx, 'baseinfo'], metainfo.merge(infotomerge));
+                return state.setIn(['users', idx, 'baseinfo'], metainfo.merge(infotomerge)).merge({ error:{ post_success:action.post_success,msg:'修改成功' } });
             } else {
                 let infotomerge = state.getIn(['newuser', 'baseinfoedit']);
-                return state.setIn(['newuser', 'baseinfo'], infotomerge);
+                return state.setIn(['newuser', 'baseinfo'], infotomerge).merge({ error:{ post_success:action.post_success,msg:'修改成功' } });
             }
         case BASICINFO_SAVE_FAIL:
-             return  state.setIn(['error'],action.error);
+             return  state.merge({ error:action.error });
         case CREATE_USER_BEGIN:
              return state.mergeDeep({ newuser:{ loading:true, loaded:false } });
         case CREATE_USER_SUCCESS:
@@ -143,9 +143,9 @@ export default function reducer(state = initialState, action = {}) {
              var idx = state.getIn(['frontuserinfo','idx']);
              console.log(idx);
              if(idx == 'add')
-               return state.mergeDeep({ newuser:{ loading:false, loaded:true } }).setIn(['newuser','id'],action.result.user_id).setIn(['frontuserinfo', 'id'],action.result.user_id).setIn(['newuser', 'baseinfo'], infotomerge).merge({ error:{} });
+               return state.mergeDeep({ newuser:{ loading:false, loaded:true } }).setIn(['newuser','id'],action.result.user_id).setIn(['frontuserinfo', 'id'],action.result.user_id).setIn(['newuser', 'baseinfo'], infotomerge).merge({ error:{ post_success:action.post_success,msg:'创建成功' } });
              else
-               return state.mergeDeep({ newuser:{ loading:false, loaded:true } }).setIn(['newuser','id'],action.result.user_id).setIn(['newuser', 'baseinfo'], infotomerge).merge({ error:{} });
+               return state.mergeDeep({ newuser:{ loading:false, loaded:true } }).setIn(['newuser','id'],action.result.user_id).setIn(['newuser', 'baseinfo'], infotomerge).merge({ error:{ post_success:action.post_success,msg:'创建成功' } });
         case CREATE_USER_FAIL:
              return  state.setIn( ['error'],action.error ).setIn(['newuser','loading'],false),setIn(['newuser','loaded'],false);
         case LOAD_DETAIL_HISTORY:
@@ -241,11 +241,11 @@ export default function reducer(state = initialState, action = {}) {
                 let oldidx = state.getIn(['users',idx,'allhistory']).findIndex( value => value.get('time') == action.result.time);
                 if(oldidx>=0){
                     let historytomerge = state.getIn(['users',idx,'historyedit']).setIn(['idx'],oldidx).setIn(['time'],action.result.time).setIn(['timelist',oldidx],action.result.time);
-                    return state.setIn(['users', idx,'historyedit'],historytomerge).setIn(['users', idx, 'allhistory',oldidx],historytomerge);
+                    return state.setIn(['users', idx,'historyedit'],historytomerge).setIn(['users', idx, 'allhistory',oldidx],historytomerge).merge({ error:{ post_success:action.post_success,msg:'创建成功' } });
                 }
                 else{
                     let historytomerge = state.getIn(['users',idx, 'historyedit']).setIn(['idx'],historyidx).setIn(['time'],action.result.time).updateIn(['timelist'],list => list.push(action.result.time));
-                    return state.setIn(['users', idx,'historyedit'],historytomerge).updateIn(['users', idx, 'allhistory'],list=>list.push(historytomerge));
+                    return state.setIn(['users', idx,'historyedit'],historytomerge).updateIn(['users', idx, 'allhistory'],list=>list.push(historytomerge)).merge({ error:{ post_success:action.post_success,msg:'创建成功' } });
                 }
             } else if(state.hasIn(['newuser','id'])&&( state.getIn(['newuser','id']) == action.id )) {
                 let historyidx = state.getIn(['newuser', 'allhistory']).size ;
@@ -254,11 +254,11 @@ export default function reducer(state = initialState, action = {}) {
                 let oldidx = state.getIn(['newuser','allhistory']).findIndex( value => value.get('time') == action.result.time);
                 if(oldidx>=0){
                     let historytomerge = state.getIn(['newuser', 'historyedit']).setIn(['idx'],(oldidx)).setIn(['time'],action.result.time).setIn(['timelist',oldidx],action.result.time);
-                    return state.setIn(['newuser','historyedit'],historytomerge).setIn(['newuser', 'allhistory',oldidx],historytomerge);
+                    return state.setIn(['newuser','historyedit'],historytomerge).setIn(['newuser', 'allhistory',oldidx],historytomerge).merge({ error:{ post_success:action.post_success,msg:'创建成功' } });
                 }
                 else{
                     let historytomerge = state.getIn(['newuser', 'historyedit']).setIn(['idx'],historyidx).setIn(['time'],action.result.time).updateIn(['timelist'],list => list.push(action.result.time));
-                    return state.setIn(['newuser','historyedit'],historytomerge).updateIn(['newuser', 'allhistory'],list=>list.push(historytomerge));
+                    return state.setIn(['newuser','historyedit'],historytomerge).updateIn(['newuser', 'allhistory'],list=>list.push(historytomerge)).merge({ error:{ post_success:action.post_success,msg:'创建成功' } });
                 }
             }
         case CREATE_HISTORY_FAIL:
@@ -473,22 +473,22 @@ export default function reducer(state = initialState, action = {}) {
                 let oldidx = state.getIn(['users',idx,'alloral']).findIndex( value => value.get('time') == action.result.time);
                 if(oldidx>=0){
                     let oraltomerge = state.getIn(['users',idx,'oraledit']).setIn(['idx'],oldidx).setIn(['time'],action.result.time).setIn(['timelist',oldidx],action.result.time);
-                    return state.setIn(['users', idx,'oraledit'],oraltomerge).setIn(['users', idx, 'alloral',oldidx],oraltomerge);
+                    return state.setIn(['users', idx,'oraledit'],oraltomerge).setIn(['users', idx, 'alloral',oldidx],oraltomerge).merge({ error:{ post_success:action.post_success,msg:'创建成功' } });
                 }
                 else{
                     let oraltomerge = state.getIn(['users',idx, 'oraledit']).setIn(['idx'],oralidx).setIn(['time'],action.result.time).updateIn(['timelist'],list => list.push(action.result.time));
-                    return state.setIn(['users', idx,'oraledit'],oraltomerge).updateIn(['users', idx, 'alloral'],list=>list.push(oraltomerge));
+                    return state.setIn(['users', idx,'oraledit'],oraltomerge).updateIn(['users', idx, 'alloral'],list=>list.push(oraltomerge)).merge({ error:{ post_success:action.post_success,msg:'创建成功' } });
                 }
             } else if(state.hasIn(['newuser','id'])&&( state.getIn(['newuser','id']) == action.id )) {
                 let oralidx = state.getIn(['newuser', 'alloral']).size;
                 let oldidx = state.getIn(['newuser','alloral']).findIndex( value => value.get('time') == action.result.time);
                 if(oldidx>=0){
                     let oraltomerge = state.getIn(['newuser', 'oraledit']).setIn(['idx'],oldidx).setIn(['time'],action.result.time).setIn(['timelist',oldidx],action.result.time);
-                    return state.setIn(['newuser','oraledit'],oraltomerge).setIn(['newuser', 'alloral',oldidx],oraltomerge);
+                    return state.setIn(['newuser','oraledit'],oraltomerge).setIn(['newuser', 'alloral',oldidx],oraltomerge).merge({ error:{ post_success:action.post_success,msg:'创建成功' } });
                 }
                 else{
                     let oraltomerge = state.getIn(['newuser', 'oraledit']).setIn(['idx'],oralidx).setIn(['time'],action.result.time).updateIn(['timelist'],list => list.push(action.result.time));
-                    return state.setIn(['newuser','oraledit'],oraltomerge).updateIn(['newuser', 'alloral'],list=>list.push(oraltomerge));
+                    return state.setIn(['newuser','oraledit'],oraltomerge).updateIn(['newuser', 'alloral'],list=>list.push(oraltomerge)).merge({ error:{ post_success:action.post_success,msg:'创建成功' } });
                 }
             }
         case CREATE_ORAL_FAIL:
@@ -502,13 +502,13 @@ export default function reducer(state = initialState, action = {}) {
                 var oraltomerge = state.getIn(['users', idx, 'oraledit', 'oral']);
                 var oralidx = state.getIn(['users', idx, 'oraledit', 'idx']);
                 if (oralidx >= 0) {
-                    return state.setIn(['users', idx, 'alloral', oralidx, 'oral'], oraltomerge);
+                    return state.setIn(['users', idx, 'alloral', oralidx, 'oral'], oraltomerge).merge({ error:{ post_success:action.post_success,msg:'修改成功' } });
                 } else
                     return state
             } else if(state.hasIn(['newuser','id'])&&( state.getIn(['newuser','id']) == action.id )) {
                 var oraltomerge = state.getIn(['newuser', 'oraledit', 'oral']);
                 var oralidx = state.getIn(['newuser', 'oraledit', 'idx']);
-                return  state.setIn(['newuser', 'alloral',oralidx,'oral'], oraltomerge);
+                return  state.setIn(['newuser', 'alloral',oralidx,'oral'], oraltomerge).merge({ error:{ post_success:action.post_success,msg:'修改成功' } });
             }
         case ORAL_CHANGE_TIME:
             var pos = action.result;
@@ -902,12 +902,13 @@ export function load_detail_oral({ id }) {
 
 export function create_user({
   user,
-  baseinfoedit
+  baseinfoedit,
+  post_success
 }){
-    var params = baseinfoedit;
+    var data = baseinfoedit;
     return {
         types:[ CREATE_USER_BEGIN, CREATE_USER_SUCCESS, CREATE_USER_FAIL ],
-        promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/rest?', { params }, {
+        promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/rest?', { data }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -932,20 +933,22 @@ export function create_user({
                 error_table.user_patient.create.baseinfo = {msg:'notvalid'};
                 return Promise.reject( { pos: ['user_patient','create','baseinfo'] } )
             }
-        })
+        }),
+        post_success
     }
 }
 
 
 export function update_baseinfo({
   user,
-  baseinfoedit
+  baseinfoedit,
+  post_success
  }){
     var id = baseinfoedit.userid;
-    var params = { ...baseinfoedit, id };
+    var data = { ...baseinfoedit, id };
         return {
             types:[ BASICINFO_SAVE_BEGIN, BASICINFO_SAVE, BASICINFO_SAVE_FAIL ],
-            promise: (client) => client.PUT('http://' + getApiIp() + '/user_patient/basicinfo/rest?', { params }, {
+            promise: (client) => client.PUT('http://' + getApiIp() + '/user_patient/basicinfo/rest?', { data }, {
                 format: function(response) {
                     if (response.status >= 400) {
                         throw new Error("Bad response from server");
@@ -972,22 +975,24 @@ export function update_baseinfo({
                     return Promise.reject( { pos: ['user_patient','update','baseinfo',id] } )
                 }
             }),
-            id
+            id,
+            post_success
         }
 }
 
 export function create_historyinfo({
   user,
-  historyedit
+  historyedit,
+  post_success
 }){
 
     var id = historyedit.userid;
-    var params = {};
-        params.history = historyedit.history;
-        params.id = id;
+    var data = {};
+        data.history = historyedit.history;
+        data.id = id;
         return {
             types:[ CREATE_HISTORY_BEGIN, CREATE_HISTORY_SUCCESS, CREATE_HISTORY_FAIL ],
-            promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/history/rest?', { params }, {
+            promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/history/rest?', { data }, {
                 format: function(response) {
                     if (response.status >= 400) {
                         throw new Error("Bad response from server");
@@ -1013,22 +1018,24 @@ export function create_historyinfo({
                     return Promise.reject( { pos: ['user_patient','create','history'] } )
                 }
             }),
-            id
+            id,
+            post_success
         }
 }
 
 export function update_historyinfo({
   user,
-  historyedit
+  historyedit,
+  post_success
 }){
  var id = historyedit.userid;
- var params = {};
-    params.history = historyedit.history;
-    params.time = historyedit.time;
-    params.id = id;
+ var data = {};
+    data.history = historyedit.history;
+    data.time = historyedit.time;
+    data.id = id;
     return {
         types:[ UPDATE_HISTORY_BEGIN, HISTORY_FLUSH, UPDATE_HISTORY_FAIL ],
-        promise: (client) => client.PUT('http://' + getApiIp() + '/user_patient/history/rest?', { params }, {
+        promise: (client) => client.PUT('http://' + getApiIp() + '/user_patient/history/rest?', { data }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -1052,23 +1059,25 @@ export function update_historyinfo({
                 return Promise.reject( { pos: ['user_patient','update','history',id] } )
             }
         }),
-        id
+        id,
+        post_success
     }
 }
 
 
 export function create_oralinfo({
   user,
-  oraledit
+  oraledit,
+  post_success
 }){
  var id = oraledit.userid;
- var params = {
+ var data = {
     oral:oraledit.oral,
     id
  }
     return {
         types:[ CREATE_ORAL_BEGIN, CREATE_ORAL_SUCCESS, CREATE_ORAL_FAIL ],
-        promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/oral/rest?', { params }, {
+        promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/oral/rest?', { data }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -1095,24 +1104,26 @@ export function create_oralinfo({
                 return Promise.reject( { pos: ['user_patient','create','oral'] } )
             }
         }),
-        id
+        id,
+        post_success
     }
 }
 
 export function update_oralinfo({
   user,
-  oraledit
+  oraledit,
+  post_success
 }){
  var id = oraledit.userid;
  console.log(id);
- var params = {
+ var data = {
     oral:oraledit.oral,
     time:oraledit.time,
     id
  }
     return {
         types:[ UPDATE_ORAL_BEGIN, ORAL_FLUSH, UPDATE_ORAL_FAIL ],
-        promise: (client) => client.PUT('http://' + getApiIp() + '/user_patient/oral/rest?', { params }, {
+        promise: (client) => client.PUT('http://' + getApiIp() + '/user_patient/oral/rest?', { data }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -1139,6 +1150,7 @@ export function update_oralinfo({
                 return Promise.reject( { pos: ['user_patient','update','oral',id ] } )
             }
         }),
-        id
+        id,
+        post_success
     }
 }

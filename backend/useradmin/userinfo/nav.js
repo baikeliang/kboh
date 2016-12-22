@@ -12,7 +12,7 @@ import {
 
 import TeethGraph, { asyncEvent as teethgraphAsync } from  './teethgraph.js';
 import BasicInfo,  { asyncEvent as basicinfoAsync }  from './basicinfo.js';
-import History,  { asyncEvent as historyAsync }  from './history.js';
+import History,    { asyncEvent as historyAsync }  from './history.js';
 import TeethStatus , { asyncEvent as teethstatusAsync } from './teethstatus.js'
 
 const BASIC = 'BASIC';

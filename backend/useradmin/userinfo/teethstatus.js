@@ -95,15 +95,16 @@ export default  class TeethStatus extends Component{
     toEdit() {
        this.setState({...this.state, check: false, edit: true, add: false })
     }
+    toCheck(){
+        this.setState({...this.state, check: true, edit: false, add: false })
+    }
     UpdateThenCheck() {
         var oraledit = this.props.oraledit.toJS();
-        this.props.update_oralinfo({ oraledit });
-        this.setState({...this.state, check: true, edit: false, add: false })
+        this.props.update_oralinfo({ post_success:(::this.toCheck), oraledit });
     }
     CreateThenCheck(){
         var oraledit = this.props.oraledit.toJS();
-        this.props.create_oralinfo({oraledit});
-        this.setState({...this.state, check: true, edit: false, add: false })
+        this.props.create_oralinfo({ post_success:(::this.toCheck), oraledit});
     }
     changeCheckTime(e) {
       this.props.changeOralTime({ idx: e.target.value -1 })

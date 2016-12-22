@@ -92,20 +92,19 @@ export default  class History extends Component{
 
        this.setState({...this.state, check: false, edit: false, add: true ,addTime:addtime})
    }
-   toEdit() {
+   toEdit()  {
        this.setState({...this.state, check: false, edit: true, add: false })
+   }
+   toCheck() {
+       this.setState({...this.state, check: true, edit: false, add: false })
    }
    updateThenCheck(){
        var historyedit = this.props.historyedit.toJS();
-       this.props.update_history({historyedit});
-       this.setState({...this.state, check: true, edit: false, add: false })
+       this.props.update_history({ post_success:(::this.toCheck) ,historyedit });
    }
    createThenCheck(){
-       console.log('LOLOLOLOLOLOL');
        var historyedit = this.props.historyedit.toJS();
-       console.log({historyedit});
-       this.props.create_history({historyedit});
-       this.setState({...this.state, check: true, edit: false, add: false })
+       this.props.create_history({ post_success:(::this.toCheck) ,historyedit });
    }
    onChangeInfo(key,val,ev) {
     console.log('onChange0000000000');

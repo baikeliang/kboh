@@ -353,7 +353,8 @@ export default function reducer(state = initialState, action = {}) {
             var newteeth  = state.getIn(['teeth_ui','teeth']);
             var userid = action.userid;
             let idx;
-            if(!state.hasIn('allUserTeeth',userid)){
+            console.log("CSCSCSSCSCSCSCSCSCSSSCSC")
+            if(!state.hasIn(['allUserTeeth',userid])){
                 error_table.mteeth_status.update[userid] = { msg:'user disapeared' };
                 return state.merge( { error: { pos: ['mteeth_status','update',userid] }});
             }
@@ -517,13 +518,13 @@ export function create_teeth({
   teeth_ui,
   post_success
 }){
-   var params = {
+   var data = {
        teeth:teeth_ui.teeth
    }
 
    return {
         types:[ CREATE_TEETH_BEGIN, CREATE_TEETH_SUCCESS, CREATE_TEETH_FAIL ],
-        promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/mteeth/rest?', { params }, {
+        promise: (client) => client.POST('http://' + getApiIp() + '/user_patient/mteeth/rest?', { data }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -566,7 +567,7 @@ export function update_teeth({
 }){
  var time = teeth_ui.time;
  var userid = teeth_ui.userid;
- var params = {
+ var data = {
     teeth:teeth_ui.teeth,
     time,
     userid
@@ -575,7 +576,7 @@ export function update_teeth({
     console.log('LOLOLOLLOLOOOOLLLLLLLOOOOOLLLLL');
     return {
         types:[ UPDATE_TEETH_BEGIN, FLUSH_GRAPHY_DATA, UPDATE_TEETH_FAIL ],
-        promise: (client) => client.PUT('http://' + getApiIp() + '/user_patient/mteeth/rest?', { params }, {
+        promise: (client) => client.PUT('http://' + getApiIp() + '/user_patient/mteeth/rest?', { data }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");

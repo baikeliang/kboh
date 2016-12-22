@@ -113,14 +113,16 @@ export default  class BasicInfo extends Component{
    toEdit() {
        this.setState({...this.state, check: false, edit: true})
    }
+   toCheck(){
+       this.setState({...this.state, check: true, edit: false})
+   }
    toSave() {
        var baseinfoedit = this.props.user.get('baseinfoedit').toJS();
        if(this.props.idx=='add'){
-          this.props.create_user({baseinfoedit});
+          this.props.create_user({ post_success:(::this.toCheck), baseinfoedit});
        }else{
-          this.props.update_baseinfo({baseinfoedit});
+          this.props.update_baseinfo({ post_success:(::this.toCheck),baseinfoedit});
        }
-       this.setState({...this.state, check: true, edit: false})
    }
    onChangeInfo(ev,key) {
        this.props.basicInfoEdit([{key,val:ev.target.value}])
