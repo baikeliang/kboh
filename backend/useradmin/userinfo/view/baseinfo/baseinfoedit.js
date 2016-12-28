@@ -93,14 +93,14 @@ export const BaseInfoEdit = ({
                                             <div className="z_main_right">
                                                 <div className="input-box h25">
                                                     <span>用户名：</span>
-                                                    <input type="text" className="text-input yongHuming readonly" autocomplete="off" disabled/>
+                                                    <input type="text" className="text-input yongHuming readonly" autoComplete="off" disabled/>
                                                     <div className="z_default_desc">默认读取移动端用户姓名</div>
                                                     <div className="clear"></div>
                                                     <p className="z_error"></p>
                                                 </div>
                                                 <div className="input-box h25">
                                                     <span>密码设置：</span>
-                                                    <input type="password" value={password?password:''} className="text-input Mima" placeholder="6～20个字符" autocomplete="off" onChange={(ev)=>{ change(ev,'password')}}/>
+                                                    <input type="password" value={password?password:''} className="text-input Mima" placeholder="6～20个字符" autoComplete="off" onChange={(ev)=>{ change(ev,'password')}}/>
                                                     <div className="clear"></div>
                                                     <p className="z_error"></p>
                                                 </div>
@@ -118,7 +118,7 @@ export const BaseInfoEdit = ({
                                                 </div>
                                                 <div className="input-box h25">
                                                     <span>出生年月：</span>
-                                                    <input value={birthdate?birthdate:''} type="text" className="text-input layicon" readonly="readonly" onClick={showDateModal} />
+                                                    <input value={birthdate?birthdate:''} type="text" className="text-input layicon" readOnly="readonly" onClick={showDateModal} />
                                                     <div className="clear"></div>
                                                     <p></p>
                                                 </div>

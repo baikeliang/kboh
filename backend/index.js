@@ -72,11 +72,10 @@ export default class UserAdmin extends Component {
             }
         };
     }
-
 	// methods
-	static propTypes = {
+  	static propTypes = {
 
-	}
+  	}
     static contextTypes = {
         store: PropTypes.object.isRequired,
     };
@@ -105,7 +104,6 @@ export default class UserAdmin extends Component {
         asyncProcess.forEach(function(p){
              promises.push(p.promise({store:self.context.store,params:{}}))
         })
-
         Promise.all(promises).then(function(s){
           self.setState({table:{
             title:_title,
@@ -169,7 +167,7 @@ export default class UserAdmin extends Component {
 
     }
     onClickToExpand(ev, itemid) {
-
+        console.log("FFFFFFFFF11111!!!!!!!!!!!!!!!!!")
         var _list = this.state.table.list.map((item)=>{
              if (item.showchild && item.id == itemid) {
                     item.showchild = false;
@@ -192,35 +190,34 @@ export default class UserAdmin extends Component {
     componentDidMount() {
 
     }
-	render() {
-
-        if(this.props.auth.has('user')){
-        var  table = this.state.table;
-        console.log(table)
-        console.log("ooooooooo")
-	    return (<div style={{position:"fixed",width:'100%',height:'100%',top:'0px'}}>
-                 <div className='header'>
-                   <div className="logo">
-                   <img src={require('backend/common/images/logo2.png')} alt=""/>
-                   <span>薄荷口腔</span>
-                   </div>
-                   <div className="exit">
-                    <a href="#" className="exit-but">退出</a>
-                    <p>欢迎您！<span>{this.props.auth.getIn(['user','username'])}</span></p>
-                   </div>
-                 </div>
-                 {LeftList({onClick:(::this.onClick),onClickToExpand:(::this.onClickToExpand),table})}
-                 <div className="container-right">
-                     <div className="container-right-main">
-	                    { this.state.toShowRight() }
-                     </div>
-                 </div>
-                 { <ErrorCenter/> }
-               </div>)
-        }else{
-	    return <div/>;
-	    }
-	}
+  	render() {
+          if(this.props.auth.has('user')){
+                  var  table = this.state.table;
+                  console.log(table)
+                  console.log("ooooooooo")
+            	    return (<div style={{position:"fixed",width:'100%',height:'100%',top:'0px'}}>
+                             <div className='header'>
+                               <div className="logo">
+                               <img src={require('backend/common/images/logo2.png')} alt=""/>
+                               <span>薄荷口腔</span>
+                               </div>
+                               <div className="exit">
+                                <a href="#" className="exit-but">退出</a>
+                                <p>欢迎您！<span>{this.props.auth.getIn(['user','username'])}</span></p>
+                               </div>
+                             </div>
+                             {LeftList({onClick:(::this.onClick),onClickToExpand:(::this.onClickToExpand),table})}
+                             <div className="container-right">
+                                 <div className="container-right-main">
+            	                    { this.state.toShowRight() }
+                                 </div>
+                             </div>
+                             { <ErrorCenter/> }
+                           </div>)
+          }else{
+  	            return <div/>;
+  	    }
+  	}
 
 
 }

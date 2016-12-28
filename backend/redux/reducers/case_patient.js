@@ -1,17 +1,15 @@
 import Immutable from 'immutable'
 import Promise from 'bluebird'
+import { error_table } from 'backend/redux/config/error_table.js'
 
 const LOAD = 'bohe/case_patient/LOAD';
 const LOAD_SUCCESS = 'bohe/case_patient/LOAD_SUCCESS';
 const LOAD_FAIL = 'bohe/case_patient/LOAD_FAIL';
 
-const LOAD_CONTENT = 'bohe/case_patient/LOAD_CONTENT';
-const LOAD_CONTENT_SUCCESS = 'bohe/case_patient/LOAD_CONTENT_SUCCESS';
-const LOAD_CONTENT_FAIL = 'bohe/case_patient/LOAD_CONTENT_FAIL';
+const LOAD_DETAIL = 'bohe/case_patient/LOAD_DETAIL';
+const LOAD_DETAIL_SUCCESS = 'bohe/case_patient/LOAD_DETAIL_SUCCESS';
+const LOAD_DETAIL_FAIL = 'bohe/case_patient/LOAD_DETAIL_FAIL';
 
-const LOAD_DESC = 'bohe/case_patient/LOAD_DESC';
-const LOAD_DESC_SUCCESS = 'bohe/case_patient/LOAD_DESC_SUCCESS';
-const LOAD_DESC_FAIL = 'bohe/case_patient/LOAD_DESC_FAIL';
 
 const SET_CASE_TOSHOW = 'bohe/case_patient/SHOW'
 
@@ -25,29 +23,17 @@ export default function reducer(state = initialState, action = {}) {
         case LOAD:
             return state.merge({ loading: true })
         case LOAD_SUCCESS:
-            var allres;
-            if(Immutable.List.isList(state.get('cases'))){
-
-                allres = state.get('cases').pop().toJS().concat(action.result)
-            }
-            if(allres){
-              allres.push({flag:true})
-              return state.merge({ loading: false, loaded: true, cases: allres })
-            }
-            else{
-              action.result.push({ flag:true })
               return state.merge({ loading: false, loaded: true, cases: action.result })
-            }
         case LOAD_FAIL:
             return state.merge({ loading: false, loaded: false, error: action.error })
-        case LOAD_CONTENT:
+        case LOAD_DETAIL:
             return state.updateIn(['cases'], list => list.map(acase => {
                     if(acase.get('id') == action.id){
                     return acase.merge({loading: true})
                     }
                     return acase
             }))
-        case LOAD_CONTENT_SUCCESS:
+        case LOAD_DETAIL_SUCCESS:
             return state.updateIn(['cases'], list => list.map(acase => {
                     if(acase.get('id') == action.result.id){
                     return acase.merge({loading:false,loaded:true, ...action.result})
@@ -56,31 +42,10 @@ export default function reducer(state = initialState, action = {}) {
             }))
 
 
-        case LOAD_CONTENT_FAIL:
-            return state.updateIn(['cases'], list => list.map(acase => {
+        case LOAD_DETAIL_FAIL:
+            return state.merge({ error: action.error }).updateIn(['cases'], list => list.map(acase => {
                     if(acase.get('id') == action.result.id){
-                    return acase.merge({loading:false,loaded:false, error: action.error})
-                    }
-                    return acase
-            }))
-        case LOAD_DESC:
-            return state.updateIn(['cases'], list => list.map(acase => {
-                    if(acase.get('id') == action.id){
-                    return acase.merge({loading: true})
-                    }
-                    return acase
-            }))
-        case LOAD_DESC_SUCCESS:
-            return state.updateIn(['cases'], list => list.map(acase => {
-                    if(acase.get('id') == action.result.id){
-                    return acase.merge({loading:false,loaded:true, ...action.result})
-                    }
-                    return acase
-            }))
-        case LOAD_DESC_FAIL:
-            return state.updateIn(['cases'], list => list.map(acase => {
-                    if(acase.get('id') == action.result.id){
-                    return acase.merge({loading:false,loaded:false, error: action.error})
+                    return acase.merge({loading:false,loaded:false})
                     }
                     return acase
             }))
@@ -120,7 +85,7 @@ export function load({ user, num ,begin}) {
 
     return {
         types: [LOAD, LOAD_SUCCESS, LOAD_FAIL],
-        promise: (client) => client.GET('http://192.168.10.10/patient/cases/rest?', { params }, {
+        promise: (client) => client.GET('http://192.168.10.10/case_patient/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -130,32 +95,33 @@ export function load({ user, num ,begin}) {
             done: function(res) {
 
 
-                if (res.valid == 1) {
+                if (res.code == 0) {
 
                     return Promise.resolve(res.cases)
 
                 } else {
                     //var err = { info: 'auth' }
-                    return Promise.reject(res.err)
+                    error_table.case_patient.load.msg = 'notvalid';
+                    return Promise.reject({ pos: ['case_patient','load' ] })
                 }
             },
             error: function(err) {
-                return Promise.reject({ info: 'wire' })
+                error_table.case_patient.load.msg = 'wire';
+                return Promise.reject({ pos: ['case_patient','load' ] })
             }
         })
     };
 
 }
 
-export function loadContent({ id }) {
+export function load_detail({ id }) {
     var params = {}
     params.id = id
 
-    console.log('load_content!!!!!!!!!!!')
-    console.log(id)
+
     return {
-        types: [LOAD_CONTENT, LOAD_CONTENT_SUCCESS, LOAD_CONTENT_FAIL],
-        promise: (client) => client.GET('http://192.168.10.10/patient/caseContent/rest?', { params }, {
+        types: [LOAD_DETAIL, LOAD_DETAIL_SUCCESS, LOAD_DETAIL_FAIL],
+        promise: (client) => client.GET('http://192.168.10.10/case_patient/detail/rest?', { params }, {
             format: function(response) {
                 if (response.status >= 400) {
                     throw new Error("Bad response from server");
@@ -167,9 +133,9 @@ export function loadContent({ id }) {
 
                 console.log(res);
 
-                if (res.valid == 1) {
+                if (res.code == 0) {
 
-                    return Promise.resolve(res.casecontent)
+                    return Promise.resolve(res.acase)
 
                 } else {
                     //var err = { info: 'auth' }
@@ -186,42 +152,11 @@ export function loadContent({ id }) {
     };
 
 }
+export function create_case(){
 
-export function loadDesc({id}){
-    var params = {}
-    params.id = id
+}
 
-    console.log('load_content!!!!!!!!!!!')
-    console.log(id)
-    return {
-        types: [LOAD_DESC, LOAD_DESC_SUCCESS, LOAD_DESC_FAIL],
-        promise: (client) => client.GET('http://192.168.10.10/patient/caseDesc/rest?', { params }, {
-            format: function(response) {
-                if (response.status >= 400) {
-                    throw new Error("Bad response from server");
-                }
-                console.log('>>>>>>>>>>>>>>>>')
-                return response.json();
-            },
-            done: function(res) {
+export function update_case(){
 
-                console.log(res);
-
-                if (res.valid == 1) {
-
-                    return Promise.resolve(res.casedesc)
-
-                } else {
-                    //var err = { info: 'auth' }
-                    return Promise.reject(res.err)
-                }
-            },
-            error: function(err) {
-                console.log(err)
-                console.log('GGGGGGGGGGGGGG1')
-                return Promise.reject({ info: 'wire' })
-            }
-        }),
-        id
-    };
+    
 }

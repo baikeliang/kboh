@@ -4,15 +4,11 @@ export default function clientMiddleware(client) {
             if (typeof action === 'function') {
                   return action(dispatch, getState);
             }
-            console.log("ssssssssssssss")
-            console.log(action)
-            console.log("GGGGGGGGWWWWWW")
             const { promise, types, ...rest } = action; // eslint-disable-line no-redeclare
             if (!promise) {
                 return next(action);
             }
             if (!!types) {
-                console.log('JJJJJJJJJJJJGG  ' + types)
                 const [REQUEST, SUCCESS, FAILURE] = types;
                 next({...rest, type: REQUEST });
                 const actionPromise = promise(client);

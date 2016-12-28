@@ -1,17 +1,16 @@
 import Promise from 'bluebird';
 import React from 'react';
-import TestUtils from 'react/lib/ReactTestUtils';
 import {
   Provider,
   connect
 } from 'react-redux';
-import {
-  Router,
+import { Router,
   createMemoryHistory,
   match,
   Route,
   IndexRoute
 } from 'react-router';
+
 import {
   createStore,
   combineReducers
@@ -24,38 +23,27 @@ import {
 import { spy } from 'sinon';
 import { default as Immutable } from 'immutable';
 
-import routes from 'app/routes.js'
+import routes from 'backend/routes.js'
 
 import {
   configureStore,
   DevTools
-} from 'app/configure-store'
+} from 'backend/configure-store'
 
-import ApiClient from 'app/isomorphic-api/ApiClient'
-
-import {
-  orders_is_not_empty,
-  orders_is_empty,
-  orders_is_not_valid,
-  orders_response_error_500,
-  resetMock as resetMockOrder
-} from '../__mocks__/server_getorders_mocker.js'
-
-
-
-import {
-  orderinfo_is_valid,
-  orderinfo_is_not_valid,
-  orderinfo_response_error_500,
-  resetMock as resetMockInfo
-} from '../__mocks__/server_getorderinfo_mocker.js'
+import ApiClient from 'backend/isomorphic-api/ApiClient'
 
 import {
   auth_success,
   auth_is_not_valid,
   auth_response_error_500,
+  auth_success_serverrender_openid,
+  auth_failed_serverrender_openid,
   resetMock as resetMockAuth
-} from '../__mocks__/server_auth_mocker.js'
+} from '../__mocks__/backend/server_auth_mocker.js'
+
+import {
+  load_users_success
+} from '../__mocks__/backend/server_user_patient_mocker.js'
 
 import {
   endGlobalLoad,
@@ -68,8 +56,16 @@ import {
   renderToJson
 } from 'enzyme-to-json';
 
+import { loadOnServer } from 'redux-connect'
 
-describe('top', function suite() {
+import { renderToString } from 'react-dom/server'
+
+import UserAdmin  from 'backend/index.js'
+
+import { load as loadUsers } from 'backend/redux/reducers/user_patient.js'
+
+describe('behavior', function suite() {
+
   const endGlobalLoadSpy = spy(endGlobalLoad);
   const beginGlobalLoadSpy = spy(beginGlobalLoad);
 
@@ -78,7 +74,7 @@ describe('top', function suite() {
     endGlobalLoad: endGlobalLoadSpy,
   })(AsyncConnect);
 
-    pit("info is not valid",function test(){
+  pit('auth success to index', function test(){
 
     window.__SERVER__ = false;
 
@@ -92,19 +88,20 @@ describe('top', function suite() {
 
     const proto = ReduxAsyncConnect.WrappedComponent.prototype;
 
+
+
     spy(proto, 'loadAsyncData');
     spy(proto, 'componentDidMount');
+
     var reloadOnPropsChange = (props, nextProps) => {
         // reload only when path/route has changed
         return props.location.pathname !== nextProps.location.pathname;
     };
-    var location = history.createLocation('/usercenter');
+    var location = history.createLocation('/useradmin');
 
-    history.push('/usercenter/myOrders');
+    history.push('/useradmin');
 
     auth_success();
-    orders_is_not_empty();
-    orderinfo_is_not_valid(0);
 
     var wrapper = mount(
                   <Provider store={store} key="provider">
@@ -115,8 +112,11 @@ describe('top', function suite() {
                   </Provider>
                  );
 
+
     expect(proto.loadAsyncData.calledOnce).toBe(true);
     expect(proto.componentDidMount.calledOnce).toBe(true);
+
+
 
     expect(beginGlobalLoadSpy.called).toBe(true);
     beginGlobalLoadSpy.reset();
@@ -125,24 +125,15 @@ describe('top', function suite() {
       expect(endGlobalLoadSpy.called).toBe(true);
       var state = store.getState().toJS();
       expect(!!state.auth.user).toBe(true)
-      //expect(mountToJson(wrapper.find('MyOrder div'))).toMatchSnapshot();
-      var p = wrapper.find('MyOrder div').first();
-      p.simulate('click');
-      return proto.loadAsyncData.returnValues[1];
-    }).then(()=>{
-      expect(endGlobalLoadSpy.called).toBe(true);
-      var state = store.getState().toJS();
-      expect(!!state.auth.user).toBe(true)
+      expect(mountToJson(wrapper.find('.container-left'))).toMatchSnapshot();
       endGlobalLoadSpy.reset();
       proto.loadAsyncData.restore();
       proto.componentDidMount.restore();
-      console.log(wrapper.html())
-    });
+      resetMockAuth();
+    })
+
+  });
 
 
-
-
-
-  })
 
 })

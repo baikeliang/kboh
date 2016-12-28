@@ -43,9 +43,8 @@ import { table as historytable } from 'backend/useradmin/userinfo/config/history
 
 var __asyncEvent = function({ dispatch, getState }) {
     let state = getState();
-    let id = state.getIn(['user_patient', 'frontuserinfo','id']);
-    console.log(id);
-    return dispatch(load_detail_history({ id }))
+    let userid = state.getIn(['user_patient', 'frontuserinfo','id']);
+    return dispatch(load_detail_history({ userid }))
 }
 export const asyncEvent =  [{
     promise: ({ store: { dispatch, getState }, params }) => {

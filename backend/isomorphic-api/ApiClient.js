@@ -25,10 +25,7 @@ export default class ApiClient {
                       u.append(key, params[key])
                     }
                 } else if (((method == 'POST')||(method == 'PUT')) && data) {
-                    console.log(data)
-                    console.log("pppppppp")
                     req.body = JSON.stringify(data)
-                    console.log(req.body)
                     req.headers = {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'

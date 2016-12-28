@@ -19,7 +19,7 @@ export const UserData = ({
     rowidx,
     toUserInfo
 }) => {
-      return ( <tr>
+      return ( <tr key={id}>
                   <td><span className="radio-span">
                   <input type="radio" className="radio" name="radio" id={'userlist_row_'+rowidx}/>
                   <label htmlFor={'userlist_row_'+rowidx}></label></span></td>

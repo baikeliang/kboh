@@ -62,6 +62,18 @@ export const error_table = {
         update:{
             name:'更新'
         }
+    },
+    case_patient:{
+        name:'病例',
+        load:{
+            name: '列表加载',
+        },
+        create:{
+            name:'创建',
+        },
+        update:{
+            name:'更新'，
+        }
     }
 
 

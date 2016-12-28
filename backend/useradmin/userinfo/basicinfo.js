@@ -97,7 +97,6 @@ export const asyncEvent =  [{
 @connect(
     state => {
         var idx = state.getIn(['user_patient', 'frontuserinfo','idx']);
-        console.log(idx);
         return {
         	  auth : state.get('auth'),
             user:  (idx=='add')?state.getIn(['user_patient','newuser']):state.getIn(['user_patient','users',idx]),
@@ -119,17 +118,15 @@ export default  class BasicInfo extends Component{
    toSave() {
        var baseinfoedit = this.props.user.get('baseinfoedit').toJS();
        if(this.props.idx=='add'){
-          this.props.create_user({ post_success:(::this.toCheck), baseinfoedit});
+          return this.props.create_user({ post_success:(::this.toCheck), baseinfoedit});
        }else{
-          this.props.update_baseinfo({ post_success:(::this.toCheck),baseinfoedit});
+          return this.props.update_baseinfo({ post_success:(::this.toCheck),baseinfoedit});
        }
    }
    onChangeInfo(ev,key) {
        this.props.basicInfoEdit([{key,val:ev.target.value}])
    }
    onClickInfo(key,val) {
-      console.log(key)
-      console.log(val)
       this.props.basicInfoEdit([{key,val}])
    }
    showDateModal(){
@@ -139,7 +136,6 @@ export default  class BasicInfo extends Component{
       this.state.dateModal.display = 'none';
       var dated = new Date();
       var nowYear = dated.getFullYear();
-      console.log('yyyYYYYYYYWWWEErrthgdrgfd')
       var age = nowYear-date.year();
       this.props.basicInfoEdit([{key:'birthdate',val:date.format('YYYY-MM-DD')},{key:'age',val:age}])
    }
@@ -213,10 +209,8 @@ export default  class BasicInfo extends Component{
    }
    render(){
    	  if(this.props.auth.get('user')){
-        console.log(this.props.user);
         var baseinfo= this.props.user.get('baseinfo').toJS();
         var baseinfoedit= this.props.user.get('baseinfoedit').toJS();
-        console.log(baseinfo);
         return  (
             <div>
               { BaseInfoHead({

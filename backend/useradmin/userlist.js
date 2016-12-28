@@ -37,6 +37,7 @@ import {
 
 import  UserInfoCom from './userinfo/container.js'
 
+var assign = require('object.assign').getPolyfill();
 
 export const asyncEvent = [{
     promise: ({ store: { dispatch, getState }, params }) => {
@@ -68,15 +69,15 @@ export const asyncEvent = [{
         	auth : state.get('auth'),
             userRepo: state.get('user_patient')
         }
-    }, { pushState: push, load: loadUsers, toDetail:toShowUserInfo,nextGroupUsers })
+    }, { pushState: push, load: loadUsers, toDetail:toShowUserInfo,nextGroupUsers },(stateProps, dispatchProps, ownProps) =>{return  assign({}, ownProps, stateProps, dispatchProps) },{ withRef: true ,pure : true})
 export default class UserListCom extends Component {
 	// methods
 	static propTypes = {
 		userRepo:React.PropTypes.object.isRequired,
 	}
     static contextTypes = {
-      showRight: PropTypes.func.isRequired
-    };
+      showRight: React.PropTypes.func.isRequired,
+    }
 	handlePan(ev) {
 
 	}
@@ -118,8 +119,6 @@ export default class UserListCom extends Component {
 
     }
     toUserInfo(ev,idx,id){
-        console.log(idx);
-        console.log(this.context)
 
         this.props.toDetail({ idx,id })
 
@@ -132,32 +131,24 @@ export default class UserListCom extends Component {
     }
     handlePageClick(data){
        let selected = data.selected;
-
-       this.props.load( { num: 10, begin: (selected*10), showbegin:(selected*10)  })
+       return this.props.load( { num: 10, begin: (selected*10), showbegin:(selected*10)  })
     }
     componentDidMount() {
 
     }
 	render() {
-        console.log(this.props.userRepo.toJS())
         if(this.props.auth.has('user')){
-         console.log("PPPPPPPPPPPPPPPPPPPPPPPPPP")
 		 var size = this.props.userRepo.get('users').size;
          var showbegin = this.props.userRepo.get('showbegin');
-         console.log("PPPPPPPPPPPPPPPPPPPPPPPPPP1")
 	     var nodata = (size == 0) ? true : false;
 	     var options = {
 	        touchAction: 'pan-y'
 	     };
         var height = window.innerHeight || document.documentElement.clientHeight
         var data = [];
-        console.log("LLLLLRRRRRRRR")
         for(let i=0;(i<10)&&((showbegin+i)<size);i++){
              data.push(this.props.userRepo.getIn(['users',showbegin+i]).toJS())
         }
-
-        console.log("ffffggg")
-        console.log(data)
         return UserList({ handlePageClick:(::this.handlePageClick), toUserInfo:(::this.toUserInfo), toSearch:(::this.toSearch),toAddUser:(::this.toAddUser), toDeleteUser:(::this.toDeleteUser), toEditUser:(::this.toEditUser), data, nodata, options, length: size, handlePan: (::this.handlePan),handleRefresh:(::this.handleRefresh) })
 	    }else{
 	    return <div/>;

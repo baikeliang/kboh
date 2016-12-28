@@ -19,7 +19,7 @@ export const UserList = ({
      handlePageClick,
      pageNum
      }) => {
-	  var  rowidx=0;
+	    var  rowidx=0;
       return (<div>
                  <div className="rtop rtop2">
                    <div className="but-box">

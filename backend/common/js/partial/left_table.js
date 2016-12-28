@@ -11,7 +11,7 @@ export const LeftList = ({
         var itemid_lv1 = item.id;
 
         if(item.children){
-          return (<li>
+          return (<li key={itemid_lv1}>
                      <label className={(table.choose&&(table.choose==item.id))?styles['cur']:''} onClick={ (ev) =>{ onClickToExpand(ev,itemid_lv1); }}>
                      <a className={styles[item.classname]} href="#">
                      <b>{item.name}</b>
@@ -20,7 +20,7 @@ export const LeftList = ({
                      </label>
                      {item.showchild?item.children.map((child)=>{
                         var itemid_lv2 = child.id;
-                        return (<li className={(table.choose&&(table.choose==itemid_lv2))?styles['cur']:''} onClick={ (ev) =>{onClick(ev,itemid_lv2);}}>
+                        return (<li key={ itemid_lv2 } className={(table.choose&&(table.choose==itemid_lv2))?styles['cur']:''} onClick={ (ev) =>{onClick(ev,itemid_lv2);}}>
                                   <a href="#" style={{paddingLeft:"22px"}}>
                                   <b>{child.name}</b>
                                   </a>
@@ -30,7 +30,7 @@ export const LeftList = ({
 
                 )
         }else{
-          return (<li>
+          return (<li key={itemid_lv1}>
                     <label className={(table.choose&&(table.choose==item.id))?styles['cur']:''} onClick={ (ev) =>{onClick(ev,itemid_lv1);}}>
                      <a className={styles[item.classname]} href="#">
                      <b>{item.name}</b>
